@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f63d0898-4160-4176-8e4c-f4fadfb1831f" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_astro_model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deeplenstronomy/SkySurveyModel/lenstronomy_skysurvey.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/deeplenstronomy/AstroModel/lenstronomy_astro_model.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_popmodel.py" beforeDir="false" afterPath="$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_popmodel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -48,11 +48,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_astro_model.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_popmodel.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="21" selection-start-line="7" selection-start-column="21" selection-end-line="7" selection-end-column="21" />
+            <state relative-caret-position="750">
+              <caret line="50" selection-start-line="50" selection-end-line="50" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/deeplenstronomy/SkySurveyModel/lenstronomy_skysurvey.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="270">
+              <caret line="18" column="35" selection-start-line="18" selection-start-column="35" selection-end-line="18" selection-end-column="35" />
             </state>
           </provider>
         </entry>
@@ -110,6 +119,8 @@
         <option value="$PROJECT_DIR$/deeplenstronomy/Features/lenstronomy_astro_model.py" />
         <option value="$PROJECT_DIR$/deeplenstronomy/AstroModel/lenstronomy_astro_model.py" />
         <option value="$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_astro_model.py" />
+        <option value="$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_popmodel.py" />
+        <option value="$PROJECT_DIR$/deeplenstronomy/SkySurveyModel/lenstronomy_skysurvey.py" />
       </list>
     </option>
   </component>
@@ -149,6 +160,12 @@
               <item name="deeplenstronomy" type="462c0819:PsiDirectoryNode" />
               <item name="deeplenstronomy" type="462c0819:PsiDirectoryNode" />
               <item name="PopulationModel" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="deeplenstronomy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="deeplenstronomy" type="462c0819:PsiDirectoryNode" />
+              <item name="deeplenstronomy" type="462c0819:PsiDirectoryNode" />
+              <item name="SkySurveyModel" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="deeplenstronomy" type="b2602c69:ProjectViewProjectNode" />
@@ -288,10 +305,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_astro_model.py">
+    <entry file="file://$PROJECT_DIR$/deeplenstronomy/PopulationModel/lenstronomy_popmodel.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="21" selection-start-line="7" selection-start-column="21" selection-end-line="7" selection-end-column="21" />
+        <state relative-caret-position="750">
+          <caret line="50" selection-start-line="50" selection-end-line="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/deeplenstronomy/SkySurveyModel/lenstronomy_skysurvey.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="18" column="35" selection-start-line="18" selection-start-column="35" selection-end-line="18" selection-end-column="35" />
         </state>
       </provider>
     </entry>

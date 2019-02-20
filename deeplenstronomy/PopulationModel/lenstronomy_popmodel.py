@@ -8,6 +8,7 @@ class PopulationModel(object):
     def __init__(self):
 
 
+    # Lens
 
     def DrawHaloMass(self):
         """
@@ -15,6 +16,9 @@ class PopulationModel(object):
         :return:
         """
         return halo_mass
+
+
+    # Light
 
     def DrawApparentMagnitude(self):
         """
@@ -37,12 +41,6 @@ class PopulationModel(object):
         """
         return position_angle
 
-    def DrawRedshift(selfs):
-        """
-        Draws position angle from a distribution
-        :return:
-        """
-        return redshift
 
     def DrawEinsteinRadius(self):
         """
@@ -72,3 +70,13 @@ class PopulationModel(object):
         :return:
         """
         return cross_section
+
+
+    # Distance
+
+    def DrawRedshift(selfs):
+        """
+        Draws position angle from a distribution
+        :return:
+        """
+        return redshift
