@@ -20,7 +20,6 @@ class PopulationModel(object):
         :return:
         """
         return random.normal(loc=mean, scale=sigma)
-        return redshift
 
 
     def DrawVelocityDispersion(self, mean=300, sigma=50):
@@ -30,7 +29,7 @@ class PopulationModel(object):
         :param sigma:
         :return:
         """
-
+        return random.normal(loc=mean, scale=sigma)
 
     def DrawSourcePosition(self, ra_min, ra_max, dec_min, dec_max):
         """
