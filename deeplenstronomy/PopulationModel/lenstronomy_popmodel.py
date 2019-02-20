@@ -1,3 +1,4 @@
+from numpy import random
 
 
 class PopulationModel(object):
@@ -5,78 +6,45 @@ class PopulationModel(object):
     This class defines the population draws needed to produce a large set of lensing systems
     """
 
-    def __init__(self):
-
-
-    # Lens
-
-    def DrawHaloMass(self):
+    def DrawHaloMass(self, mean, sigma):
         """
         Defines mass function for galaxy-scale lenses
         :return:
         """
-        return halo_mass
+        return random.normal(loc=mean, scale=sigma)
 
 
-    # Light
-
-    def DrawApparentMagnitude(self):
-        """
-        Draws apparent magnitude from a distribution
-        :return:
-        """
-        return apparent_magnitude
-
-    def DrawAbsoluteMagnitude(self):
-        """
-        Draws absolute magnitude from a distribution
-        :return:
-        """
-        return absolute_magnitude
-
-    def DrawPositionAngle(self):
+    def DrawRedshift(self, mean=0.5, sigma=0.1):
         """
         Draws position angle from a distribution
         :return:
         """
-        return position_angle
+        return random.normal(loc=mean, scale=sigma)
+        return redshift
 
 
-    def DrawEinsteinRadius(self):
-        """
-        Draw Einstein radius from a distribution
-        :return:
-        """
-        return einstein_radius
-
-    def DrawVelocityDispersion(self):
+    def DrawVelocityDispersion(self, mean=300, sigma=50):
         """
         Draw Velocity Dispersion from a distribution
+        :param mean:
+        :param sigma:
         :return:
         """
-        return velocity_dispersion
 
-    def DrawMagnification(self):
+
+    def DrawSourcePosition(self, ra_min, ra_max, dec_min, dec_max):
         """
-        Draw magnification of source from a distribution
+        Draw source position from a distribution
+        :param dec_max:
         :return:
         """
-        return magnification
+        ra = random.uniform(low=ra_min, high=ra_max)
+        dec = random.uniform(low=dec_min, high=dec_max)
+        return ra, dec
 
 
-    def DrawCrosssection(self):
-        """
-        Draw magnification of source from a distribution
-        :return:
-        """
-        return cross_section
 
 
-    # Distance
 
-    def DrawRedshift(selfs):
-        """
-        Draws position angle from a distribution
-        :return:
-        """
-        return redshift
+
+
