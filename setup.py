@@ -22,23 +22,23 @@ The full documentation is at http://Simulations.rtfd.org."""
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
-    name='Simulations',
+    name='deeplenstronomy',
     version='0.1.0',
     description='deep lens astronomy',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
     author='Brian Nord',
     author_email='nord@fnal.gov',
-    url='https://github.com/bnord/Simulations',
+    url='https://github.com/bnord/deeplenstronomy',
     packages=[
-        'Simulations',
+        'deeplenstronomy',
     ],
-    package_dir={'Simulations': 'Simulations'},
+    package_dir={'deeplenstronomy': 'deeplenstronomy'},
     include_package_data=True,
     install_requires=[
     ],
     license='MIT',
     zip_safe=False,
-    keywords='Simulations',
+    keywords='deeplenstronomy',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
