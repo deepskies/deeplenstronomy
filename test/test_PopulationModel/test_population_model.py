@@ -60,6 +60,6 @@ class TestPopulationModel(object):
         population_model = PopulationModel()
         ra_min, ra_max = 0, 10
         dec_min, dec_max = 0, 10
-        ra, dec = PopulationModel.DrawSourcePosition(ra_min, ra_max, dec_min, dec_max)
+        ra, dec = population_model.DrawSourcePosition(ra_min, ra_max, dec_min, dec_max)
         assert ra_min < ra < ra_max, "ra out of bounds"
         assert dec_min < dec < dec_max, "dec out of bounds"
