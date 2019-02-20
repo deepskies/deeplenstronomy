@@ -6,6 +6,7 @@ Development Lead
 ----------------
 
 * Brian Nord <nord@fnal.gov>
+* Simon Birrer <sibirrer@gmail.com>
 
 Contributors
 ------------
