@@ -1,5 +1,5 @@
 """
-Tests for `Simulations` module.
+Tests for `ImSim` module.
 """
 import pytest
 from deeplenstronomy import deeplenstronomy

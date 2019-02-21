@@ -21,9 +21,10 @@ class TestSimPhys2Image(object):
         data_instance.exposure_time = 900
         from astropy.cosmology import FlatLambdaCDM
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
-        self.sim = LenstronomyAPI(data_instance=data_instance, numpix=76, cosmo=cosmo)
+        self.sim = LenstronomyAPI(skySurvey=data_instance, cosmo=cosmo)
 
     def test_sim_image(self):
+        numpix = 76
         z_lens, z_source = 0.5, 2.
         velocity_dispersion = 250
         axis_ratio_lens, inclination_angle_lens = 0.8, 0.3
@@ -34,7 +35,7 @@ class TestSimPhys2Image(object):
         magnitude_source, halflight_radius_source, n_sersic_source = 17, 0.2, 1
         axis_ratio_source, inclination_angle_source = 0.7, -0.3
         source_center_ra, source_center_dec = 0.1, 0.
-        model = self.sim.sim_image(z_lens, z_source, velocity_dispersion, axis_ratio_lens, inclination_angle_lens, lens_center_ra,
+        model = self.sim.sim_image(numpix, z_lens, z_source, velocity_dispersion, axis_ratio_lens, inclination_angle_lens, lens_center_ra,
                   lens_center_dec, magnitude_lens_light, halflight_radius_lens_light, n_sersic_lens_light,
                   axis_ratio_lens_light, inclination_angle_lens_light, lens_light_center_ra, lens_light_center_dec,
                   magnitude_source, halflight_radius_source, n_sersic_source, axis_ratio_source,
