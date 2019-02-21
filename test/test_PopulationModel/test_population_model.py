@@ -1,11 +1,11 @@
-from deeplenstronomy.PopulationModel.population_model import PopulationModel
+from deeplenstronomy.PopSim.population_model import PopulationModel
 import numpy as np
 import numpy.testing as npt
 
 
 class TestPopulationModel(object):
     """
-    tests the class PopulationModel
+    tests the class PopSim
     """
 
 
