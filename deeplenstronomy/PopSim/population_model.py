@@ -108,7 +108,7 @@ class PopulationModel(object):
                          'n_sersic': n_sersic_lens_light, 'axis_ratio': axis_ratio_lens_light,
                          'inclination_angle': inclination_angle_lens_light, 'center_ra': ra_lens_light_center,
                          'center_dec': dec_lens_light_center}
-        kwargs_ps = {}
+        kwargs_ps = None
         return z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light, kwargs_ps
 
     def DrawAxisRatio(self, mean, sigma):
