@@ -47,8 +47,8 @@ class TestLenstronomyWrapper(object):
                              'n_sersic': n_sersic_lens_light, 'axis_ratio': axis_ratio_lens_light,
                              'inclination_angle': inclination_angle_lens_light, 'center_ra': lens_light_center_dec,
                              'center_dec': lens_light_center_dec}
-
-        model = self.sim.sim_image(numpix, z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light)
+        kwargs_ps = {}
+        model = self.sim.sim_image(numpix, z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light, kwargs_ps)
         npt.assert_almost_equal(np.sum(model), 477.81985038336063, decimal=-3)
 
 

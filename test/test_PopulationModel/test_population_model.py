@@ -132,7 +132,7 @@ class TestPopulationModel(object):
         """
 
         population_model = PopulationModel()
-        z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light = population_model.draw_lens_system()
+        z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light, kwaergs_ps = population_model.draw_lens_system()
 
         #npt.assert_almost_equal(kwargs['mass'], 10.096290999771787, decimal=3)
         npt.assert_almost_equal(z_lens, 0.4551340730445048, decimal=3)

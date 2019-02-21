@@ -35,32 +35,33 @@ class LenstronomyAPI(object):
         self._sigma_bkg = skySurvey.sigma_bkg
         self._exposure_time = skySurvey.exposure_time
 
-    def sim_image(self, numpix, z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light):
+    def sim_image(self, numpix, z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light, kwargs_ps):
         lensModel, kwargs_lens = self._lensPop2lenstronomy_lens(z_lens, z_source, **kwargs_lens)
-        lensLightModel, kwargs_lens_light = self._lensPop2lenstronomy_light(z_lens, magnitude_zero_point=self._magnitude_zero_point,
+        lensLightModel, kwargs_lens_light = self._lensPop2lenstronomy_light(z_lens,
                                                                             pixelsize=self._pixelsize,
                                                                             **kwargs_lens_light)
-        sourceLightModel, kwargs_source = self._lensPop2lenstronomy_light(z_source, magnitude_zero_point=self._magnitude_zero_point,
+        sourceLightModel, kwargs_source = self._lensPop2lenstronomy_light(z_source,
                                                                             pixelsize=self._pixelsize, **kwargs_source)
 
         model = self._lenstronomy_sim(numpix, lensModel, sourceLightModel, lensLightModel, kwargs_lens, kwargs_source,
                                       kwargs_lens_light)
         return model
 
-    @staticmethod
-    def configure_image(image, pixelsize, relative_brightness, relative_rotation, center_ra, center_dec):
+    def _configure_image(self, image, pixelsize, magnitude, relative_rotation, center_ra, center_dec):
         """
 
         :param image: a pixelized image
         :param pixelsize: pixel size (in angular units) to be used in the simulated image
-        :param relative_brightness: relative surface brightness scaling of input image to simulated image
+        :param magnitude: apparent magnitude to simulated image
         :param relative_rotation: relative rotation angle (radian)
         :param center_ra: center of simulated image
         :param center_dec: center of simulated image
         :return: lightModel instance and keyword arguments of the model
         """
         lightModel = LightModel(light_model_list=['INTERPOL'])
-        kwargs = [{'image': image, 'amp': relative_brightness, 'center_x': center_ra, 'center_y': center_dec,
+        cps = self._mag2cps(magnitude, self._magnitude_zero_point)
+        image_normed = image / np.sum(image)
+        kwargs = [{'image': image_normed, 'amp': cps, 'center_x': center_ra, 'center_y': center_dec,
                    'phi_G': relative_rotation, 'scale': pixelsize}]
         return lightModel, kwargs
 
@@ -145,8 +146,8 @@ class LenstronomyAPI(object):
         return lensModel, kwargs
 
     def _lensPop2lenstronomy_light(self, z_object, magnitude, halflight_radius, n_sersic, axis_ratio=1,
-                                   inclination_angle=0, center_ra=0, center_dec=0, magnitude_zero_point=1,
-                                   pixelsize=1, apparent_magnitude=True, arcsecond_scales=True):
+                                   inclination_angle=0, center_ra=0, center_dec=0, pixelsize=1,
+                                   apparent_magnitude=True, arcsecond_scales=True):
         """
         computes lenstronomy conventions for the light profile
 
@@ -170,7 +171,7 @@ class LenstronomyAPI(object):
         else:
             apparent_magnitude = magnitude
         # convert magnitude in counts per second
-        cps = self._mag2cps(apparent_magnitude, magnitude_zero_point)
+        cps = self._mag2cps(apparent_magnitude, self._magnitude_zero_point)
         # convert total counts per second into counts per second of a pixel at the half light radius
         amp = self._cps2lenstronomy_amp(cps, Rh_angle, n_sersic, pixelsize)
         e1, e2 = param_util.phi_q2_ellipticity(inclination_angle, axis_ratio)
