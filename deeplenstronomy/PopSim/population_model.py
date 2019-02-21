@@ -67,8 +67,8 @@ class PopulationModel(object):
         :return:
         """
         mass = self.DrawHaloMass(self.mass_mean, self.mass_sigma)
-        redshift_lens = self.DrawRedshift(self.redshift_lens_mean, self.redshift_lens_sigma)
-        redshift_source = self.DrawRedshift(self.redshift_source_mean, self.redshift_source_sigma)
+        z_lens = self.DrawRedshift(self.redshift_lens_mean, self.redshift_lens_sigma)
+        z_source = self.DrawRedshift(self.redshift_source_mean, self.redshift_source_sigma)
         velocity_dispersion = self.DrawVelocityDispersion(self.velocity_dispersion_mean, self.velocity_dispersion_sigma)
 
         axis_ratio_lens_light = self.DrawAxisRatio(self.axis_ratio_lens_light_mean, self.axis_ratio_lens_light_sigma)
@@ -98,22 +98,17 @@ class PopulationModel(object):
 
         n_sersic_lens_light = self.DrawNSersic(self.n_sersic_lens_light_mean, self.n_sersic_lens_light_sigma)
         n_sersic_source = self.DrawNSersic(self.n_sersic_source_mean, self.n_sersic_source_sigma)
-        kwargs = {'mass': mass, 'z_lens': redshift_lens, 'z_source': redshift_source,
-                  'velocity_dispersion': velocity_dispersion, 'axis_ratio_lens': axis_ratio_lens,
-                  'axis_ratio_lens_light': axis_ratio_lens_light, 'axis_ratio_source': axis_ratio_source,
-                  'inclination_angle_lens': inclination_angle_lens,
-                  'inclination_angle_lens_light': inclination_angle_lens_light,
-                  'inclination_angle_source': inclination_angle_source,
-               'lens_light_center_ra': ra_lens_light_center, 'lens_light_center_dec': dec_lens_light_center,
-                  'source_center_ra': ra_source_center, 'source_center_dec': dec_source_center,
-               'magnitude_lens_light': magnitude_lens_light, 'magnitude_source': magnitude_source,
-               'halflight_radius_lens_light': halflight_radius_lens_light,
-                  'halflight_radius_source': halflight_radius_source,
-               'n_sersic_lens_light': n_sersic_lens_light, 'n_sersic_source': n_sersic_source,
-                  'lens_center_ra': 0, 'lens_center_dec': 0}
-        return kwargs
-
-
+        kwargs_lens = {'velocity_dispersion': velocity_dispersion, 'axis_ratio': axis_ratio_lens,
+                       'inclination_angle': inclination_angle_lens, 'center_ra': 0, 'center_dec': 0}
+        kwargs_source = {'magnitude': magnitude_source, 'halflight_radius': halflight_radius_source,
+                         'n_sersic': n_sersic_source, 'axis_ratio': axis_ratio_source,
+                         'inclination_angle': inclination_angle_source, 'center_ra': ra_source_center,
+                         'center_dec': dec_source_center}
+        kwargs_lens_light = {'magnitude': magnitude_lens_light, 'halflight_radius': halflight_radius_lens_light,
+                         'n_sersic': n_sersic_lens_light, 'axis_ratio': axis_ratio_lens_light,
+                         'inclination_angle': inclination_angle_lens_light, 'center_ra': ra_lens_light_center,
+                         'center_dec': dec_lens_light_center}
+        return z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light
 
     def DrawAxisRatio(self, mean, sigma):
         """

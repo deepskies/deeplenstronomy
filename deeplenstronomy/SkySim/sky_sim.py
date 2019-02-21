@@ -41,7 +41,8 @@ class SkySim(object):
         np.random.seed(seed)
         image_list = []
         for i in range(num):
-            lensprop = self._lensPop.draw_lens_system()
-            image = self._imSim.sim_image(numpix=cutout_size, **lensprop)
+            z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light = self._lensPop.draw_lens_system()
+            image = self._imSim.sim_image(numpix=cutout_size, z_lens=z_lens, z_source=z_source, kwargs_lens=kwargs_lens,
+                                          kwargs_source=kwargs_source, kwargs_lens_light=kwargs_lens_light)
             image_list.append(image)
         return image_list

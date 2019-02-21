@@ -132,11 +132,11 @@ class TestPopulationModel(object):
         """
 
         population_model = PopulationModel()
-        kwargs = population_model.draw_lens_system()
+        z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light = population_model.draw_lens_system()
 
-        npt.assert_almost_equal(kwargs['mass'], 10.096290999771787, decimal=3)
-        #npt.assert_almost_equal(redshift_lens, 0.4551340730445048, decimal=3)
-        #npt.assert_almost_equal(redshift_source, 0.40647048740880787, decimal=3)
+        #npt.assert_almost_equal(kwargs['mass'], 10.096290999771787, decimal=3)
+        npt.assert_almost_equal(z_lens, 0.4551340730445048, decimal=3)
+        npt.assert_almost_equal(z_source, 0.40647048740880787, decimal=3)
         #npt.assert_almost_equal(velocity_dispersion, 323.3514562472069, decimal=3)
         #npt.assert_almost_equal(axis_ratio_lens, 0.8936058849251, decimal=3)
         #npt.assert_almost_equal(axis_ratio_lens_light, 0.8660626001523951, decimal=3)

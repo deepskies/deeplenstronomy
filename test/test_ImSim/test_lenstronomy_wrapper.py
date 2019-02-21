@@ -3,7 +3,7 @@ import numpy.testing as npt
 import numpy as np
 
 
-class TestSimPhys2Image(object):
+class TestLenstronomyWrapper(object):
     """
     tests the class lenstronomySim
     """
@@ -36,11 +36,19 @@ class TestSimPhys2Image(object):
         magnitude_source, halflight_radius_source, n_sersic_source = 17, 0.2, 1
         axis_ratio_source, inclination_angle_source = 0.7, -0.3
         source_center_ra, source_center_dec = 0.1, 0.
-        model = self.sim.sim_image(numpix, z_lens, z_source, mass, velocity_dispersion, axis_ratio_lens, inclination_angle_lens, lens_center_ra,
-                  lens_center_dec, magnitude_lens_light, halflight_radius_lens_light, n_sersic_lens_light,
-                  axis_ratio_lens_light, inclination_angle_lens_light, lens_light_center_ra, lens_light_center_dec,
-                  magnitude_source, halflight_radius_source, n_sersic_source, axis_ratio_source,
-                  inclination_angle_source, source_center_ra, source_center_dec)
+
+        kwargs_lens = {'velocity_dispersion': velocity_dispersion, 'axis_ratio': axis_ratio_lens,
+                       'inclination_angle': inclination_angle_lens, 'center_ra': 0, 'center_dec': 0}
+        kwargs_source = {'magnitude': magnitude_source, 'halflight_radius': halflight_radius_source,
+                         'n_sersic': n_sersic_source, 'axis_ratio': axis_ratio_source,
+                         'inclination_angle': inclination_angle_source, 'center_ra': source_center_ra,
+                         'center_dec': source_center_dec}
+        kwargs_lens_light = {'magnitude': magnitude_lens_light, 'halflight_radius': halflight_radius_lens_light,
+                             'n_sersic': n_sersic_lens_light, 'axis_ratio': axis_ratio_lens_light,
+                             'inclination_angle': inclination_angle_lens_light, 'center_ra': lens_light_center_dec,
+                             'center_dec': lens_light_center_dec}
+
+        model = self.sim.sim_image(numpix, z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light)
         npt.assert_almost_equal(np.sum(model), 477.81985038336063, decimal=-3)
 
 
