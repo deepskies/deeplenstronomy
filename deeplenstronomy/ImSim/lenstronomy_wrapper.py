@@ -27,15 +27,15 @@ class LenstronomyAPI(object):
             from astropy.cosmology import default_cosmology
             cosmo = default_cosmology.get()
         self._cosmo = cosmo
-        self._pixelscale = skySurvey.pixelscale
+        self._pixelsize = skySurvey.pixelsize
         self._magnitude_zero_point = skySurvey.magnitude_zero_point
         self._psf_type = skySurvey.psf_type
-        self._psf_fwhm = skySurvey.psf_fwhm
+        self._psf_fwhm = skySurvey.seeing
         self._psf_model = skySurvey.psf_model
         self._sigma_bkg = skySurvey.sigma_bkg
         self._exposure_time = skySurvey.exposure_time
 
-    def sim_image(self, numpix, z_lens, z_source, velocity_dispersion, axis_ratio_lens, inclination_angle_lens, lens_center_ra,
+    def sim_image(self, numpix, z_lens, z_source, mass, velocity_dispersion, axis_ratio_lens, inclination_angle_lens, lens_center_ra,
                   lens_center_dec, magnitude_lens_light, halflight_radius_lens_light, n_sersic_lens_light,
                   axis_ratio_lens_light, inclination_angle_lens_light, lens_light_center_ra, lens_light_center_dec,
                   magnitude_source, halflight_radius_source, n_sersic_source, axis_ratio_source,
@@ -45,14 +45,14 @@ class LenstronomyAPI(object):
         lensLightModel, kwargs_lens_light = self._lensPop2lenstronomy_light(z_lens, magnitude_lens_light,
                                                                             halflight_radius_lens_light,
                                                                             n_sersic_lens_light, axis_ratio_lens_light,
-                                   inclination_angle_lens_light, lens_light_center_ra, lens_light_center_dec,
-                                                                            self._magnitude_zero_point, self._pixelscale)
+                                                                            inclination_angle_lens_light, lens_light_center_ra, lens_light_center_dec,
+                                                                            self._magnitude_zero_point, self._pixelsize)
         sourceLightModel, kwargs_source = self._lensPop2lenstronomy_light(z_lens, magnitude_source,
-                                                                            halflight_radius_source,
-                                                                            n_sersic_source, axis_ratio_source,
-                                                                            inclination_angle_source,
+                                                                          halflight_radius_source,
+                                                                          n_sersic_source, axis_ratio_source,
+                                                                          inclination_angle_source,
                                                                           source_center_ra, source_center_dec,
-                                                                            self._magnitude_zero_point, self._pixelscale)
+                                                                          self._magnitude_zero_point, self._pixelsize)
 
         data_class, psf_class = self.data_configure(numpix=numpix)
         imageModel = ImageModel(data_class=data_class, psf_class=psf_class, lens_model_class=lensModel,
@@ -70,7 +70,7 @@ class LenstronomyAPI(object):
         :return: data_class, psf_class
         """
         x_grid, y_grid, ra_at_xy_0, dec_at_xy_0, x_at_radec_0, y_at_radec_0, Mpix2coord, Mcoord2pix = util.make_grid_with_coordtransform(
-            numPix=numpix, deltapix=self._pixelscale, subgrid_res=1, left_lower=False, inverse=False)
+            numPix=numpix, deltapix=self._pixelsize, subgrid_res=1, left_lower=False, inverse=False)
         kwargs_data = {'numPix': numpix, 'ra_at_xy_0': ra_at_xy_0, 'dec_at_xy_0': dec_at_xy_0,
                        'transform_pix2angle': Mpix2coord}
         data_class = Data(kwargs_data)
@@ -203,5 +203,5 @@ class LenstronomyAPI(object):
         # convert to number measured (with I_eff in arcseconds)
         I_eff_measured = cps / flux_norm
         # convert in surface brightness per pixel
-        amp = I_eff_measured * pixelsize**2
+        amp = I_eff_measured
         return amp

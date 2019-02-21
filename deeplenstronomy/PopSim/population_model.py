@@ -61,10 +61,7 @@ class PopulationModel(object):
         self.n_sersic_source_mean = 4.
         self.n_sersic_source_sigma = 0.2
 
-
-
-
-    def DrawAll(self):
+    def draw_lens_system(self):
         """
         Draw all of the relevant variables
         :return:
@@ -101,14 +98,20 @@ class PopulationModel(object):
 
         n_sersic_lens_light = self.DrawNSersic(self.n_sersic_lens_light_mean, self.n_sersic_lens_light_sigma)
         n_sersic_source = self.DrawNSersic(self.n_sersic_source_mean, self.n_sersic_source_sigma)
-
-        return mass, redshift_lens, redshift_source, velocity_dispersion, \
-               axis_ratio_lens, axis_ratio_lens_light, axis_ratio_source, \
-               inclination_angle_lens, inclination_angle_lens_light, inclination_angle_source, \
-               ra_lens_light_center, dec_lens_light_center, ra_source_center, dec_source_center, \
-               magnitude_lens_light, magnitude_source, \
-               halflight_radius_lens_light, halflight_radius_source, \
-               n_sersic_lens_light, n_sersic_source
+        kwargs = {'mass': mass, 'z_lens': redshift_lens, 'z_source': redshift_source,
+                  'velocity_dispersion': velocity_dispersion, 'axis_ratio_lens': axis_ratio_lens,
+                  'axis_ratio_lens_light': axis_ratio_lens_light, 'axis_ratio_source': axis_ratio_source,
+                  'inclination_angle_lens': inclination_angle_lens,
+                  'inclination_angle_lens_light': inclination_angle_lens_light,
+                  'inclination_angle_source': inclination_angle_source,
+               'lens_light_center_ra': ra_lens_light_center, 'lens_light_center_dec': dec_lens_light_center,
+                  'source_center_ra': ra_source_center, 'source_center_dec': dec_source_center,
+               'magnitude_lens_light': magnitude_lens_light, 'magnitude_source': magnitude_source,
+               'halflight_radius_lens_light': halflight_radius_lens_light,
+                  'halflight_radius_source': halflight_radius_source,
+               'n_sersic_lens_light': n_sersic_lens_light, 'n_sersic_source': n_sersic_source,
+                  'lens_center_ra': 0, 'lens_center_dec': 0}
+        return kwargs
 
 
 

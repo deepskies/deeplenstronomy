@@ -1,4 +1,5 @@
 from deeplenstronomy.ImSim.lenstronomy_wrapper import LenstronomyAPI
+import numpy as np
 
 
 class SkySim(object):
@@ -29,7 +30,7 @@ class SkySim(object):
         """
         return self._lensPop.lens_cat(area=self._skySurvey.area, seed=seed)
 
-    def draw_lens_system(self, num=1, cutout_size=52, seed=41):
+    def draw_lens_systems(self, num=1, cutout_size=52, seed=41):
         """
         draws a fixed number of lenses
 
@@ -37,6 +38,7 @@ class SkySim(object):
         :param seed:
         :return: simulated images
         """
+        np.random.seed(seed)
         image_list = []
         for i in range(num):
             lensprop = self._lensPop.draw_lens_system()
