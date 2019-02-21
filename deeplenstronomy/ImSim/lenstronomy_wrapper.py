@@ -302,7 +302,7 @@ class LenstronomyAPI(object):
         """
         lightModel = LightModel(light_model_list=['INTERPOL'])
         cps = self._mag2cps(magnitude, self._magnitude_zero_point)
-        image_normed = image / np.sum(image)
+        image_normed = image / np.sum(image) / pixelsize**2
         kwargs = [{'image': image_normed, 'amp': cps, 'center_x': center_ra, 'center_y': center_dec,
                    'phi_G': relative_rotation, 'scale': pixelsize}]
         return lightModel, kwargs
