@@ -1,4 +1,4 @@
-from deeplenstronomy.Simulations.sim_phys2image import SimPhys2Image
+from deeplenstronomy.ImSim.lenstronomy_wrapper import LenstronomyAPI
 import numpy.testing as npt
 import numpy as np
 
@@ -21,7 +21,7 @@ class TestSimPhys2Image(object):
         data_instance.exposure_time = 900
         from astropy.cosmology import FlatLambdaCDM
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
-        self.sim = SimPhys2Image(data_instance=data_instance, numpix=76, cosmo=cosmo)
+        self.sim = LenstronomyAPI(data_instance=data_instance, numpix=76, cosmo=cosmo)
 
     def test_sim_image(self):
         z_lens, z_source = 0.5, 2.

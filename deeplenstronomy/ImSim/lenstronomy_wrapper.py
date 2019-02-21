@@ -17,7 +17,7 @@ class SimPhys2Image(object):
     This class takes as an input physical lensing properties (e.g. by LensPop), in addition to an image data
     configuration from the data module and turns it into an image
     """
-    def __init__(self, data_instance, numpix, cosmo=None):
+    def __init__(self, data_instance, cosmo=None):
         """
 
         :param cosmo: astropy.cosmology class
@@ -27,7 +27,6 @@ class SimPhys2Image(object):
             from astropy.cosmology import default_cosmology
             cosmo = default_cosmology.get()
         self._cosmo = cosmo
-        self._numpix = numpix
         self._pixelscale = data_instance.pixelscale
         self._magnitude_zero_point = data_instance.magnitude_zero_point
         self._psf_type = data_instance.psf_type
@@ -36,7 +35,7 @@ class SimPhys2Image(object):
         self._sigma_bkg = data_instance.sigma_bkg
         self._exposure_time = data_instance.exposure_time
 
-    def sim_image(self, z_lens, z_source, velocity_dispersion, axis_ratio_lens, inclination_angle_lens, lens_center_ra,
+    def sim_image(self, numpix, z_lens, z_source, velocity_dispersion, axis_ratio_lens, inclination_angle_lens, lens_center_ra,
                   lens_center_dec, magnitude_lens_light, halflight_radius_lens_light, n_sersic_lens_light,
                   axis_ratio_lens_light, inclination_angle_lens_light, lens_light_center_ra, lens_light_center_dec,
                   magnitude_source, halflight_radius_source, n_sersic_source, axis_ratio_source,
@@ -56,8 +55,8 @@ class SimPhys2Image(object):
                                                                             self._magnitude_zero_point, self._pixelscale)
 
         x_grid, y_grid, ra_at_xy_0, dec_at_xy_0, x_at_radec_0, y_at_radec_0, Mpix2coord, Mcoord2pix = util.make_grid_with_coordtransform(
-            numPix=self._numpix, deltapix=self._pixelscale, subgrid_res=1, left_lower=False, inverse=False)
-        kwargs_data = {'numPix': self._numpix, 'ra_at_xy_0': ra_at_xy_0, 'dec_at_xy_0': dec_at_xy_0,
+            numPix=numpix, deltapix=self._pixelscale, subgrid_res=1, left_lower=False, inverse=False)
+        kwargs_data = {'numPix': numpix, 'ra_at_xy_0': ra_at_xy_0, 'dec_at_xy_0': dec_at_xy_0,
                        'transform_pix2angle': Mpix2coord}
         data_class = Data(kwargs_data)
 
