@@ -1,4 +1,4 @@
-from deeplenstronomy.PopulationModel.lenstronomy_popmodel import PopulationModel
+from deeplenstronomy.PopulationModel.population_model import PopulationModel
 import numpy as np
 import numpy.testing as npt
 
