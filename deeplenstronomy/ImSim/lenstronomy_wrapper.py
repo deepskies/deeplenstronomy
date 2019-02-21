@@ -96,13 +96,11 @@ class LenstronomyAPI(object):
         if kwargs_lens_light is None:
             lensLightModel, kwargs_lens_light_ = None, None
         else:
-            lensLightModel, kwargs_lens_light_ = self._lensPop2lenstronomy_sersic(z_lens, pixelsize=self._pixelsize,
-                                                                                  **kwargs_lens_light)
+            lensLightModel, kwargs_lens_light_ = self._lensPop2lenstronomy_light(z_lens, kwargs_lens_light)
         if kwargs_source is None:
             sourceLightModel, kwargs_source_ = None, None
         else:
-            sourceLightModel, kwargs_source_ = self._lensPop2lenstronomy_sersic(z_source, pixelsize=self._pixelsize,
-                                                                                **kwargs_source)
+            sourceLightModel, kwargs_source_ = self._lensPop2lenstronomy_light(z_source, kwargs_source)
         if kwargs_ps is None:
             pointSourceModel, kwargs_ps_ = None, None
         else:
@@ -190,7 +188,7 @@ class LenstronomyAPI(object):
         return lightModel, kwargs_light_
 
     def _lensPop2lenstronomy_sersic(self, z_object, magnitude, halflight_radius, n_sersic, axis_ratio=1,
-                                    inclination_angle=0, center_ra=0, center_dec=0, pixelsize=1,
+                                    inclination_angle=0, center_ra=0, center_dec=0,
                                     apparent_magnitude=True, arcsecond_scales=True):
         """
         computes lenstronomy conventions for the light profile
@@ -199,7 +197,6 @@ class LenstronomyAPI(object):
         :param magnitude: magnitude of object
         :param halflight_radius: half light radius in physical kpc
         :param magnitude_zero_point: magnitude zero point of the observations
-        :param pixelsize: pixel size of data
         :return: half light radius in angles, flux amplitude at half light radius
         """
 
@@ -219,7 +216,7 @@ class LenstronomyAPI(object):
             Rh_angle = halflight_radius
 
         # convert total counts per second into counts per second of a pixel at the half light radius
-        amp = self._cps2lenstronomy_amp(cps, Rh_angle, n_sersic, pixelsize)
+        amp = self._cps2lenstronomy_amp(cps, Rh_angle, n_sersic, self._pixelsize)
         e1, e2 = param_util.phi_q2_ellipticity(inclination_angle, axis_ratio)
         lightModel = LightModel(light_model_list=['SERSIC_ELLIPSE'])
         kwargs = [{'amp': amp, 'R_sersic': Rh_angle, 'n_sersic': n_sersic, 'e1': e1, 'e2': e2,
