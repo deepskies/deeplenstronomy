@@ -168,7 +168,7 @@ class LenstronomyAPI(object):
 
         e1, e2 = param_util.phi_q2_ellipticity(inclination_angle, axis_ratio)
 
-        lensModel = LensModel(lens_model_list=['SIE'])
+        lensModel = LensModel(lens_model_list=['SIE'], multi_plane=True)
         kwargs = [{'theta_E': theta_E, 'e1': e1, 'e2': e2, 'center_x': center_ra, 'center_y': center_dec}]
         return lensModel, kwargs
 
@@ -312,3 +312,23 @@ class LenstronomyAPI(object):
         kwargs = [{'image': image_normed, 'amp': cps, 'center_x': center_ra, 'center_y': center_dec,
                    'phi_G': relative_rotation, 'scale': pixelsize}]
         return lightModel, kwargs
+
+    def multi_source_multi_lens(self, numpix, lens_redshift_list, source_redshift_list, lens_model_list, source_model_list,
+                                kwargs_lens, kwargs_source):
+        """
+
+        :param les_redshift_list:
+        :param source_redshift_list:
+        :param lens_model_list:
+        :param source_model_list:
+        :param kwargs_lens:
+        :param kwargs_source:
+        :return:
+        """
+        lensModel = LensModel(lens_model_list=lens_model_list, lens_redshift_list=lens_redshift_list, multi_plane=True)
+        sourceModel = LightModel(light_model_list=source_model_list, source_redshift_list=source_redshift_list)
+        data_class, psf_class = self.data_configure(numpix=numpix)
+        imageModel = ImageModel(data_class=data_class, psf_class=psf_class, lens_model_class=lensModel,
+                                source_model_class=sourceModel)
+        image = imageModel.image(kwargs_lens=kwargs_lens, kwargs_source=kwargs_source)
+        return image
