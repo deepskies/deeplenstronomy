@@ -111,6 +111,22 @@ class PopulationModel(object):
         kwargs_ps = None
         return z_lens, z_source, kwargs_lens, kwargs_source, kwargs_lens_light, kwargs_ps
 
+    def inject_source(self, image, pixelsize, magnitude, relative_angular_size):
+        """
+        this function takes a (real) image and injects it in the population module
+
+        :param image: 2d numpy array containing pixel data
+        :param pixelsize: scale of pixel of the data (same units as simulations, e.g. arcseconds)
+        :param magnitude: total magnitude of the object
+        :param relative_angular_size: scaling of angular sice of image to the injected object d_image/d_injected
+        :return: kwargs_source as defined by population module
+        """
+        scale_factor = 1./relative_angular_size
+        mag_injected = magnitude * scale_factor**2
+        kwargs_source = {'image': image, 'pixelsize': pixelsize * scale_factor, 'magnitude': mag_injected,
+                         'relative_rotation': 0, 'center_ra': 0, 'center_dec': 0}
+        return kwargs_source
+
     def DrawAxisRatio(self, mean, sigma):
         """
         Draw axis ratio
