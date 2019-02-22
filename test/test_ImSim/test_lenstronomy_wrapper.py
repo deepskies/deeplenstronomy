@@ -127,12 +127,11 @@ class TestLenstronomyWrapper(object):
         model_interp = self.sim.sim_image(numpix, z_lens, z_source, kwargs_lens_light=kwargs_lens_light)
         npt.assert_almost_equal(np.sum(model_interp), np.sum(model), decimal=-4)
 
-
     def test_point_source(self):
-        kwargs_ps = {'magnitude': 10, 'center_ra': 0.1, 'center_dec': 0.1}
+        kwargs_ps = {'magnitude': 20, 'center_ra': 0.1, 'center_dec': 0.1}
         velocity_dispersion = 250.
-        axis_ratio_lens = 1.
-        inclination_angle_lens=1.
+        axis_ratio_lens = .9
+        inclination_angle_lens=.0
         z_lens = 0.5
         z_source = 1.4
         numpix = 64
@@ -141,8 +140,4 @@ class TestLenstronomyWrapper(object):
         kwargs_lens = {'velocity_dispersion': velocity_dispersion, 'axis_ratio': axis_ratio_lens,
                        'inclination_angle': inclination_angle_lens, 'center_ra': 0, 'center_dec': 0}
         model = self.sim.sim_image(numpix, z_lens, z_source, kwargs_lens=kwargs_lens, kwargs_ps=kwargs_ps)
-
-        import matplotlib.pyplot as plt
-        plt.matshow(model)
-        plt.show()
-        assert 1 == 0
+        npt.assert_almost_equal(np.sum(model), 10, decimal=-1)

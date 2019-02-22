@@ -237,8 +237,8 @@ class LenstronomyAPI(object):
         else:
             apparent_magnitude = magnitude
         cps = self._mag2cps(apparent_magnitude, self._magnitude_zero_point)
-        pointSource = PointSource(point_source_type_list=['SOURCE_POSITION'])
-        kwargs = [{'point_amp': cps, 'ra_source': center_ra, 'dec_source': center_dec}]
+        pointSource = PointSource(point_source_type_list=['SOURCE_POSITION'], fixed_magnification_list=[True])
+        kwargs = [{'source_amp': cps, 'ra_source': center_ra, 'dec_source': center_dec}]
         return pointSource, kwargs
 
     def _abs2apparent_magnitude(self, absolute_magnitude, z_object):
