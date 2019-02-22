@@ -1,4 +1,4 @@
-from deeplenstronomy.ImSim.lenstronomy_wrapper import LenstronomyAPI
+from deeplenstronomy.ImSim.lenstronomy_wrapper import LenstronomyWrapper
 import numpy as np
 
 
@@ -20,7 +20,7 @@ class SkySim(object):
             cosmo = default_cosmology.get()
         self._lensPop = lensPop
         self._skySurvey = skySurvey
-        self._imSim = LenstronomyAPI(self._skySurvey, cosmo=cosmo)
+        self._imSim = LenstronomyWrapper(self._skySurvey, cosmo=cosmo)
 
     def lens_cat(self, seed=41):
         """

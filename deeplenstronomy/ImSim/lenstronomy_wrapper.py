@@ -13,7 +13,7 @@ from lenstronomy.LightModel.Profiles.sersic import Sersic
 import numpy as np
 
 
-class LenstronomyAPI(object):
+class LenstronomyWrapper(object):
     """
     This class takes as an input physical lensing properties (e.g. by LensPop), in addition to an image data
     configuration from the data module and turns it into an image
@@ -168,7 +168,7 @@ class LenstronomyAPI(object):
 
         e1, e2 = param_util.phi_q2_ellipticity(inclination_angle, axis_ratio)
 
-        lensModel = LensModel(lens_model_list=['SIE'], multi_plane=True)
+        lensModel = LensModel(lens_model_list=['SIE'], multi_plane=False)
         kwargs = [{'theta_E': theta_E, 'e1': e1, 'e2': e2, 'center_x': center_ra, 'center_y': center_dec}]
         return lensModel, kwargs
 
@@ -313,8 +313,8 @@ class LenstronomyAPI(object):
                    'phi_G': relative_rotation, 'scale': pixelsize}]
         return lightModel, kwargs
 
-    def multi_source_multi_lens(self, numpix, lens_redshift_list, source_redshift_list, lens_model_list, source_model_list,
-                                kwargs_lens, kwargs_source):
+    def multi_source_multi_lens(self, numpix, lens_redshift_list, source_redshift_list, lens_model_list,
+                                source_model_list, lens_light_model_list, kwargs_lens, kwargs_source, kwargs_lens_light):
         """
 
         :param les_redshift_list:
@@ -327,8 +327,10 @@ class LenstronomyAPI(object):
         """
         lensModel = LensModel(lens_model_list=lens_model_list, lens_redshift_list=lens_redshift_list, multi_plane=True)
         sourceModel = LightModel(light_model_list=source_model_list, source_redshift_list=source_redshift_list)
+        lensLightModel = LightModel(light_model_list=lens_light_model_list)
         data_class, psf_class = self.data_configure(numpix=numpix)
         imageModel = ImageModel(data_class=data_class, psf_class=psf_class, lens_model_class=lensModel,
-                                source_model_class=sourceModel)
-        image = imageModel.image(kwargs_lens=kwargs_lens, kwargs_source=kwargs_source)
+                                source_model_class=sourceModel, lens_light_model_class=lensLightModel)
+        image = imageModel.image(kwargs_lens=kwargs_lens, kwargs_source=kwargs_source,
+                                 kwargs_lens_light=kwargs_lens_light)
         return image

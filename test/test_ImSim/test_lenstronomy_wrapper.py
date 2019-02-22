@@ -1,4 +1,4 @@
-from deeplenstronomy.ImSim.lenstronomy_wrapper import LenstronomyAPI
+from deeplenstronomy.ImSim.lenstronomy_wrapper import LenstronomyWrapper
 import numpy.testing as npt
 import numpy as np
 
@@ -21,7 +21,7 @@ class TestLenstronomyWrapper(object):
         data_instance.exposure_time = 900
         from astropy.cosmology import FlatLambdaCDM
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
-        self.sim = LenstronomyAPI(skySurvey=data_instance, cosmo=cosmo)
+        self.sim = LenstronomyWrapper(skySurvey=data_instance, cosmo=cosmo)
 
     def test_sim_image(self):
         numpix = 76
@@ -98,7 +98,7 @@ class TestLenstronomyWrapper(object):
         data_instance.exposure_time = 90000
         from astropy.cosmology import FlatLambdaCDM
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
-        self.sim = LenstronomyAPI(skySurvey=data_instance, cosmo=cosmo)
+        self.sim = LenstronomyWrapper(skySurvey=data_instance, cosmo=cosmo)
 
 
         kwargs_lens_light = {'magnitude': mag_zero_point, 'halflight_radius': 2, 'n_sersic': 3,
