@@ -127,8 +127,8 @@ class TestLenstronomyWrapper(object):
         model_interp = self.sim.sim_image(numpix, z_lens, z_source, kwargs_lens_light=kwargs_lens_light)
         npt.assert_almost_equal(np.sum(model_interp), np.sum(model), decimal=-4)
 
-    def test_point_source(self):
-        kwargs_ps = {'magnitude': 15, 'center_ra': 0.0, 'center_dec': 0.0}
+    def test_lensed_point_source(self):
+        kwargs_ps = {'magnitude': 15, 'center_ra': 0.0, 'center_dec': 0.0, 'type': 'SOURCE_POSITION'}
         velocity_dispersion = 350.
         axis_ratio_lens = .7
         inclination_angle_lens=.0
@@ -140,10 +140,14 @@ class TestLenstronomyWrapper(object):
         kwargs_lens = {'velocity_dispersion': velocity_dispersion, 'axis_ratio': axis_ratio_lens,
                        'inclination_angle': inclination_angle_lens, 'center_ra': 0, 'center_dec': 0}
         model = self.sim.sim_image(numpix, z_lens, z_source, kwargs_lens=kwargs_lens, kwargs_ps=kwargs_ps)
-        #npt.assert_almost_equal(np.sum(model), 10, decimal=-1)
+        npt.assert_almost_equal(np.sum(model), 1694.6, decimal=-1)
 
-        import matplotlib.pyplot as plt
-        plt.matshow(model)
-        plt.show()
-        assert 1==0
+    def test_unlensed_point_source(self):
+        kwargs_ps = {'magnitude': 15, 'center_ra': 0.0, 'center_dec': 0.0, 'type': 'UNLENSED'}
 
+        z_lens = 0.5
+        z_source = 1.4
+        numpix = 64
+
+        model = self.sim.sim_image(numpix, z_lens, z_source, kwargs_ps=kwargs_ps)
+        npt.assert_almost_equal(np.sum(model), 100.1, decimal=-1)

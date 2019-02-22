@@ -223,7 +223,7 @@ class LenstronomyAPI(object):
                    'center_x': center_ra, 'center_y': center_dec}]
         return lightModel, kwargs
 
-    def _lensPop2lenstronomy_point_source(self, z_object, magnitude, center_ra, center_dec, apparent_magnitude=True):
+    def _lensPop2lenstronomy_point_source(self, z_object, type, magnitude, center_ra, center_dec, apparent_magnitude=True):
         """
 
         :param z_source: redshift of point source
@@ -237,8 +237,14 @@ class LenstronomyAPI(object):
         else:
             apparent_magnitude = magnitude
         cps = self._mag2cps(apparent_magnitude, self._magnitude_zero_point)
-        pointSource = PointSource(point_source_type_list=['SOURCE_POSITION'], fixed_magnification_list=[True])
-        kwargs = [{'source_amp': cps, 'ra_source': center_ra, 'dec_source': center_dec}]
+        if type == 'SOURCE_POSITION':
+            pointSource = PointSource(point_source_type_list=['SOURCE_POSITION'], fixed_magnification_list=[True])
+            kwargs = [{'source_amp': cps, 'ra_source': center_ra, 'dec_source': center_dec}]
+        elif type == 'UNLENSED':
+            pointSource = PointSource(point_source_type_list=['UNLENSED'])
+            kwargs = [{'point_amp': [cps], 'ra_image': [center_ra], 'dec_image': [center_dec]}]
+        else:
+            raise ValueError("point source type %s not supported." % type)
         return pointSource, kwargs
 
     def _abs2apparent_magnitude(self, absolute_magnitude, z_object):
