@@ -216,7 +216,7 @@ class LenstronomyWrapper(object):
             Rh_angle = halflight_radius
 
         # convert total counts per second into counts per second of a pixel at the half light radius
-        amp = self._cps2lenstronomy_amp(cps, Rh_angle, n_sersic, self._pixelsize)
+        amp = self._cps2lenstronomy_amp(cps, Rh_angle, n_sersic)
         e1, e2 = param_util.phi_q2_ellipticity(inclination_angle, axis_ratio)
         lightModel = LightModel(light_model_list=['SERSIC_ELLIPSE'])
         kwargs = [{'amp': amp, 'R_sersic': Rh_angle, 'n_sersic': n_sersic, 'e1': e1, 'e2': e2,
@@ -278,7 +278,7 @@ class LenstronomyWrapper(object):
         counts = 10**(-delta_M/2.5)
         return counts
 
-    def _cps2lenstronomy_amp(self, cps, Rh_angle, n_sersic, pixelsize):
+    def _cps2lenstronomy_amp(self, cps, Rh_angle, n_sersic):
         """
 
         :param cps: total counts per second of object
