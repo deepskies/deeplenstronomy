@@ -3,7 +3,7 @@ from lenstronomy.LensModel.lens_model import LensModel
 from lenstronomy.LightModel.light_model import LightModel
 from lenstronomy.PointSource.point_source import PointSource
 from lenstronomy.Data.psf import PSF
-from lenstronomy.Data.imaging_data import Data
+from lenstronomy.Data.imaging_data import ImageData
 from lenstronomy.ImSim.image_model import ImageModel
 import lenstronomy.Util.param_util as param_util
 import lenstronomy.Util.image_util as image_util
@@ -120,9 +120,12 @@ class LenstronomyWrapper(object):
         """
         x_grid, y_grid, ra_at_xy_0, dec_at_xy_0, x_at_radec_0, y_at_radec_0, Mpix2coord, Mcoord2pix = util.make_grid_with_coordtransform(
             numPix=numpix, deltapix=self._pixelsize, subgrid_res=1, left_lower=False, inverse=False)
-        kwargs_data = {'numPix': numpix, 'ra_at_xy_0': ra_at_xy_0, 'dec_at_xy_0': dec_at_xy_0,
+
+        kwargs_data = {'image_data': np.zeros((numpix, numpix)), 'ra_at_xy_0': ra_at_xy_0,
+                       'dec_at_xy_0': dec_at_xy_0,
                        'transform_pix2angle': Mpix2coord}
-        data_class = Data(kwargs_data)
+
+        data_class = ImageData(**kwargs_data)
 
         # make instance of lenstronomy PSF class
         if self._psf_type == 'GAUSSIAN':
@@ -288,7 +291,7 @@ class LenstronomyWrapper(object):
         """
         # compute norm flux of Sersic profile
         sersic_util = Sersic()
-        flux_norm = sersic_util.total_flux(r_eff=Rh_angle, I_eff=1, n_sersic=n_sersic)
+        flux_norm = sersic_util.total_flux(R_sersic=Rh_angle, amp=1, n_sersic=n_sersic)
         # convert to number measured (with I_eff in arcseconds)
         I_eff_measured = cps / flux_norm
         # convert in surface brightness per pixel
