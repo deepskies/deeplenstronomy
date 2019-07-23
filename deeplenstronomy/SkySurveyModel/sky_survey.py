@@ -44,8 +44,7 @@ def DES_noise(nobs,band=None,directory='2dpdfs'):
         twodi = pickle.load(open("%s/2di_DES.pkl" %directory,'rb'))
         DES_stochastic_noise = StochasticNoise(nobs,twodi)
     else:
-        print('specify band!')
-        exit()
+        raise ValueError('band secified as %s is not supported.' % band)
 
     # twodg[:,0]) seeing
     # twodg[:,1]) sky brightness
