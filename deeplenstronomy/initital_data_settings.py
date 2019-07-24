@@ -13,15 +13,13 @@ import lenstronomy.Plots.plot_util as plot_util
 
 
 
-def import_image(file_path):
+def import_image(file_path, band=1, **kwargs):
     '''
     import fits file images and return numpy array
+    return: 2d numpy array
     '''
     hdul = fits.open(cutouts_fits_path + file)
-    lens_gal = hdul['COADD'].data
-    lens_gal_g = hdul['COADD'].data[1]
-    lens_gal_r = hdul['COADD'].data[2]
-    lens_gal_i = hdul['COADD'].data[3]
+    lens_gal = hdul['COADD'].data[band]
 
     return lens_gal
 
@@ -30,7 +28,7 @@ if __name__ == '__main__':
     file = os.listdir(cutouts_fits_path)[0]
     lens_gal = import_image(cutouts_fits_path + file)
     print(lens_gal.shape)
-    plt.imshow(lens_gal[0, :, :])
+    plt.imshow(lens_gal[:, :])
     plt.show()
 
 
