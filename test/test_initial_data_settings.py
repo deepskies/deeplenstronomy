@@ -11,7 +11,7 @@ class TestImportData(object):
 
     def test_import_image(self):
 
-        cutouts_fits_path = "test_ImSim/test_files/balrog_cutouts_00102.fits"
+        cutouts_fits_path = "/test_ImSim/test_files/balrog_cutouts_00102.fits"
         #file = os.listdir(cutouts_fits_path)
         lens_gal = import_image(cutouts_fits_path)
         assert lens_gal.shape == (128, 128)
