@@ -98,8 +98,7 @@ def LSST_noise(nobs,band=None,directory='2dpdfs'):
         LSST_stochastic_noise = StochasticNoise(nobs,twodi)
 
     else:
-        print('specify band!')
-        exit()
+        raise ValueError('band secified as %s is not supported.' % band)
 
     # twodg[:,0]) seeing
     # twodg[:,1]) sky brightness
@@ -149,8 +148,7 @@ def CFHT_noise(nobs=1,band=None,directory='2dpdfs'):
         CFHT_stochastic_noise = StochasticNoise(nobs,twodi)
 
     else:
-        print('specify band!')
-        exit()
+        raise ValueError('band secified as %s is not supported.' % band)
 
     # twodg[:,0]) seeing
     # twodg[:,1]) sky brightness
@@ -169,6 +167,7 @@ def CFHT_noise(nobs=1,band=None,directory='2dpdfs'):
 
     return CFHT_noise_array
 
+
 def SurveyNoise(Name, band, nobs, directory='2dpdfs'):
     if Name == 'DES':
          Noise = DES_noise(nobs,band,directory)
@@ -176,4 +175,6 @@ def SurveyNoise(Name, band, nobs, directory='2dpdfs'):
          Noise = LSST_noise(nobs,band,directory)
     elif Name == 'CFHT':
          Noise = CFHT_noise(nobs,band,directory)
+    else:
+        raise ValueError('band secified as %s is not supported.' % band)
     return Noise
