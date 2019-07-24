@@ -29,5 +29,4 @@ def _arc_model(numpix, kwargs_band, kwargs_model, kwargs_lens, kwargs_source_mag
                                                                              kwargs_lens_light_mag=kwargs_lens_light_mag,
                                                                              kwargs_ps_mag=kwargs_ps_mag)
     image = imSim.image(kwargs_lens, kwargs_source=kwargs_source, kwargs_lens_light=kwargs_lens_light, kwargs_ps=kwargs_ps)
-    noisy_image = image + simAPI.noise_for_model(model=image, background_noise=False, poisson_noise=True)
-    return noisy_image
+    return image
