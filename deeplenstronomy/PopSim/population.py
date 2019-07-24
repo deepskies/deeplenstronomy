@@ -53,6 +53,7 @@ class Population():
 
     def draw_model(self, with_lens_light=False, with_quasar=False, **kwargs):
         """
+        returns all keyword arguments of the model
 
         :param kwargs:
         :return: kwargs_params, kwargs_model
@@ -61,14 +62,14 @@ class Population():
         kwargs_params = {'kwargs_lens': kwargs_lens}
         kwargs_model = {'lens_model_list': lens_model_list}
         kwargs_source, source_model_list = self.draw_source_model()
-        kwargs_params['kwargs_source'] = kwargs_source
+        kwargs_params['kwargs_source_mag'] = kwargs_source
         kwargs_model['source_model_list'] = source_model_list
         if with_lens_light:
             kwargs_lens_light, lens_light_model_list = self.draw_lens_light()
-            kwargs_params['kwargs_lens_light'] = kwargs_lens_light
+            kwargs_params['kwargs_lens_light_mag'] = kwargs_lens_light
             kwargs_model['lens_light_model_list'] = lens_light_model_list
         if with_quasar:
             kwargs_ps, point_source_model_list = self.draw_point_source(center_x=kwargs_source[0]['center_x'], center_y=kwargs_source[0]['center_y'])
-            kwargs_params['kwargs_ps'] = kwargs_ps
+            kwargs_params['kwargs_ps_mag'] = kwargs_ps
             kwargs_model['point_source_model_list'] = point_source_model_list
         return kwargs_params, kwargs_model
