@@ -29,6 +29,5 @@ class TestPopulation(object):
         assert np.sum(added_image) > 0
 
 
-
 if __name__ == '__main__':
     pytest.main()

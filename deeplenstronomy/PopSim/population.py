@@ -51,12 +51,13 @@ class Population():
         kwargs_ps = [{'magnitude': 21, 'ra_source': center_x, 'dec_source': center_y}]
         return kwargs_ps, point_source_model_list
 
-    def draw_model(self, with_lens_light=False, with_quasar=False, **kwargs):
+    def _simple_draw(self, with_lens_light=False, with_quasar=False,  **kwargs):
         """
-        returns all keyword arguments of the model
 
+        :param with_lens_light:
+        :param with_quasar:
         :param kwargs:
-        :return: kwargs_params, kwargs_model
+        :return:
         """
         kwargs_lens, lens_model_list = self.draw_lens_model()
         kwargs_params = {'kwargs_lens': kwargs_lens}
@@ -69,7 +70,20 @@ class Population():
             kwargs_params['kwargs_lens_light_mag'] = kwargs_lens_light
             kwargs_model['lens_light_model_list'] = lens_light_model_list
         if with_quasar:
-            kwargs_ps, point_source_model_list = self.draw_point_source(center_x=kwargs_source[0]['center_x'], center_y=kwargs_source[0]['center_y'])
+            kwargs_ps, point_source_model_list = self.draw_point_source(center_x=kwargs_source[0]['center_x'],
+                                                                        center_y=kwargs_source[0]['center_y'])
             kwargs_params['kwargs_ps_mag'] = kwargs_ps
             kwargs_model['point_source_model_list'] = point_source_model_list
         return kwargs_params, kwargs_model
+
+    def draw_model(self, with_lens_light=False, with_quasar=False, mode='simple', **kwargs):
+        """
+        returns all keyword arguments of the model
+
+        :param kwargs:
+        :return: kwargs_params, kwargs_model
+        """
+        if mode == 'simple':
+            return self._simple_draw(with_lens_light, with_quasar, **kwargs)
+        else:
+            raise ValueError('mode %s is not supported!' % mode)
