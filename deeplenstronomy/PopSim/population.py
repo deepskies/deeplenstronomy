@@ -1,4 +1,6 @@
 import numpy as np
+from lenstronomy.SimulationAPI.sim_api import SimAPI
+
 
 
 class Population():
@@ -37,18 +39,37 @@ class Population():
         :return: return lens model keyword argument list, lens model list
         """
 
+        from astropy.cosmology import FlatLambdaCDM
+
+
+        # redshift
         lens_redshift = np.random.uniform(0.1, 10.)
         source_redshift = np.random.uniform(0.1, 10.)
-
-        omega_m = np.random(1e-9, 1)
-        omega_de = 1. - omega_m
         z_source_convention = 3.
         z_source = source_redshift
 
+        # cosmology
+        omega_m = np.random(1e-9, 1)
+        H0 = 70.
+        omega_de = 1. - omega_m
+        omega_bar = 0.0
+        cosmo = FlatLambdaCDM(H0=H0, Om0=omega_m, Ob0=omega_bar)
+
+        # Lens physical parameters: Alternative A
+        sigma_v = np.random(10., 1000.)
+        lens_e1 = (np.random.rand() - 0.5) * 0.8
+        lens_e2 = (np.random.rand() - 0.5) * 0.8
+
+        # Lens physical parameters: Alternative B
+        M200 = np.random(1., 100) * 1e13
+        concentration = np.random(1, 7)
+
+        # Models
         lens_model = ['SIE']
         lens_light_model = ['SERSIC_ELLIPSE']
         source_light_model = ['SERSIC_ELLIPSE']
 
+        # kwargs
         kwargs_model_physical = {'lens_model_list': lens_model,  # list of lens models to be used
                                 'lens_redshift_list': lens_redshift,  # list of redshift of the deflections
                                 'lens_light_model_list': lens_light_model,  # list of unlensed light models to be used
@@ -56,17 +77,19 @@ class Population():
                                 'source_redshift_list': source_redshift,  # list of redshfits of the sources in same order as source_light_model_list
                                 'cosmo': cosmo,  # astropy.cosmology instance
                                 'z_source_convention': z_source_convention,  # source redshfit to which the reduced deflections are computed, is the maximal redshift of the ray-tracing
-                                'z_source': z_source,  # redshift of the default source (if not further specified by 'source_redshift_list') and also serves as the redshift of lensed point sources
+                                'z_source': z_source  # redshift of the default source (if not further specified by 'source_redshift_list') and also serves as the redshift of lensed point sources
                                 }
 
-        sigma_v = np.random(10., 1000.)
-        lens_e1 = (np.random.rand() - 0.5) * 0.8
-        lens_e2 = (np.random.rand() - 0.5) * 0.8
-        M200 = np.random(1., 100)* 1e13
-        concentration = np.random(1,7)
-
         kwargs_mass = [{'sigma_v': sigma_v, 'center_x': 0, 'center_y': 0, 'e1': lens_e1, 'e2': lens_e2},
-                       {'M200': M200, 'concentration': concentration, 'center_x': 1, 'center_y': 0}]
+                       {'M200': M200, 'concentration': concentration, 'center_x': 0, 'center_y': 0}]
+
+        numpix = 6
+        sim = SimAPI(numpix=numpix, kwargs_single_band=kwargs_g_band, kwargs_model=kwargs_model_physical,
+                     kwargs_numerics=kwargs_numerics)
+
+        imSim = sim.image_model_class
+
+        kwargs_lens = sim.physical2lensing_conversion(kwargs_mass=kwargs_mass)
 
         return None
 
