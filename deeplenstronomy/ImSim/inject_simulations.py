@@ -7,7 +7,6 @@ def add_arc(image, kwargs_band, kwargs_params, kwargs_model, kwargs_numerics={})
     routine to add lensed arc to existing image
     :param image: 2d square numpy array of original image
     :param kwargs_band: keyword arguments of noise and exposure properties of the image (see SimAPI for possible settings)
-    :param sourcePop: instance of SourcePop class
     """
     numpix = len(image)
     arc = _arc_model(numpix, kwargs_band, kwargs_model, kwargs_numerics=kwargs_numerics, **kwargs_params)
