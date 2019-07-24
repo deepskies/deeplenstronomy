@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class SourcePop():
+class Population():
 
     def __int__(self):
         pass
