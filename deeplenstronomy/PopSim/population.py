@@ -101,8 +101,9 @@ class Population():
                      kwargs_numerics=kwargs_numerics)
 
         kwargs_lens = sim.physical2lensing_conversion(kwargs_mass=kwargs_mass)
+        kwargs_source_mag = [{'magnitude': 22, 'R_sersic': 0.3, 'n_sersic': 1, 'e1': -0.3, 'e2': -0.2, 'center_x': source_center_x, 'center_y': source_center_y}]
 
-        return kwargs_lens, lens_model_list
+        return kwargs_lens, lens_model_list, kwargs_source_mag, source_model_list
 
     def draw_lens_light(self):
         """
@@ -150,6 +151,15 @@ class Population():
         return kwargs_params, kwargs_model
 
 
+    def _complex_draw(self, **kwargs):
+        kwargs_lens, lens_model_list, kwargs_source, source_model_list = self.draw_physical_model()
+        kwargs_params = {'kwargs_lens': kwargs_lens,
+                         'kwargs_source_mag': kwargs_source}
+        kwargs_model = {'lens_model_list': lens_model_list,
+                        'source_light_model_list': source_model_list}
+        return kwargs_params, kwargs_model
+
+
     def draw_model(self, with_lens_light=False, with_quasar=False, mode='simple', **kwargs):
         """
         returns all keyword arguments of the model
@@ -159,5 +169,7 @@ class Population():
         """
         if mode == 'simple':
             return self._simple_draw(with_lens_light, with_quasar, **kwargs)
+        if mode == 'complex':
+            return self._complex_draw(**kwargs)
         else:
             raise ValueError('mode %s is not supported!' % mode)
