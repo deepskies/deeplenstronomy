@@ -1,10 +1,5 @@
 import numpy as np
-import pickle
-import lenstronomy.Util.data_util as data_util
-import lenstronomy.Util.util as util
-import lenstronomy.Plots.plot_util as plot_util
-import pandas as pd
-import os.path
+import os
 
 file_dir = os.path.join( os.path.dirname( __file__ ), '../../2dpdfs' )
 
@@ -140,9 +135,8 @@ def noise_lsst(band,directory=file_dir):
 
     else:
         raise ValueError('%s band is not supported.' % band)
-        exit()
-
     return LSST_survey_noise
+
 
 def noise_cfht(band,directory=file_dir):
     # Generates nobs simulated noise profiles.
@@ -209,6 +203,7 @@ def noise_cfht(band,directory=file_dir):
         raise ValueError('%s band is not supported.' % band)
 
     return CFHT_survey_noise
+
 
 def survey_noise(survey_name, band, directory=file_dir):
     "Specify survey name and band"
