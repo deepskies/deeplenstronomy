@@ -1,7 +1,5 @@
-from lenstronomy.SimlualationAPI.sim_api import simAPI
-from lenstronomy.SimlualationAPI.observation_api import SingleBand
-from deeplenstronomy.PopSim.galaxy_prop import GalaxyProp
-
+from lenstronomy.SimulationAPI.sim_api import SimAPI
+from lenstronomy.SimulationAPI.observation_api import SingleBand
 
 
 def add_arc(image, kwargs_band, kwargs_source_mag, kwargs_lens, kwargs_model, kwargs_numerics=None):
@@ -17,7 +15,7 @@ def add_arc(image, kwargs_band, kwargs_source_mag, kwargs_lens, kwargs_model, kw
     return image + noisy_arc
 
 
-def _arc_model(kwargs_band, kwargs_source_mag, kwargs_lens, kwargs_model, kwargs_numerics=None):
+def _arc_model(numpix, kwargs_band, kwargs_source_mag, kwargs_lens, kwargs_model, kwargs_numerics=None):
     """
     routine to simulate a lensing arc
     TODO describe all parameters
