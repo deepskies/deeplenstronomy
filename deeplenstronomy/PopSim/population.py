@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class SourcePop():
+class Population():
 
     def __int__(self):
         pass
@@ -13,7 +13,7 @@ class SourcePop():
         source_center_x = (np.random.rand() - 0.5) * 2
         source_center_y = (np.random.rand() - 0.5) * 2
         kwargs_source_mag = [{'magnitude': 22, 'R_sersic': 0.3, 'n_sersic': 1, 'e1': -0.3, 'e2': -0.2, 'center_x': source_center_x, 'center_y': source_center_y}]
-        source_model_list = ['SERSIC_ELLPISE']
+        source_model_list = ['SERSIC_ELLIPSE']
         return kwargs_source_mag, source_model_list
 
     def draw_lens_model(self):
@@ -36,7 +36,7 @@ class SourcePop():
 
         :return:
         """
-        lens_light_model_list = ['SERSIC)_ELLIPSE']
+        lens_light_model_list = ['SERSIC_ELLIPSE']
         kwargs_lens_light = [{'magnitude': 22, 'R_sersic': 0.3, 'n_sersic': 1, 'e1': -0.3, 'e2': -0.2, 'center_x': 0, 'center_y': 0}]
         return kwargs_lens_light, lens_light_model_list
 
@@ -53,6 +53,7 @@ class SourcePop():
 
     def draw_model(self, with_lens_light=False, with_quasar=False, **kwargs):
         """
+        returns all keyword arguments of the model
 
         :param kwargs:
         :return: kwargs_params, kwargs_model
@@ -61,14 +62,14 @@ class SourcePop():
         kwargs_params = {'kwargs_lens': kwargs_lens}
         kwargs_model = {'lens_model_list': lens_model_list}
         kwargs_source, source_model_list = self.draw_source_model()
-        kwargs_params['kwargs_source'] = kwargs_source
-        kwargs_model['source_model_list'] = source_model_list
+        kwargs_params['kwargs_source_mag'] = kwargs_source
+        kwargs_model['source_light_model_list'] = source_model_list
         if with_lens_light:
             kwargs_lens_light, lens_light_model_list = self.draw_lens_light()
-            kwargs_params['kwargs_lens_light'] = kwargs_lens_light
+            kwargs_params['kwargs_lens_light_mag'] = kwargs_lens_light
             kwargs_model['lens_light_model_list'] = lens_light_model_list
         if with_quasar:
             kwargs_ps, point_source_model_list = self.draw_point_source(center_x=kwargs_source[0]['center_x'], center_y=kwargs_source[0]['center_y'])
-            kwargs_params['kwargs_ps'] = kwargs_ps
+            kwargs_params['kwargs_ps_mag'] = kwargs_ps
             kwargs_model['point_source_model_list'] = point_source_model_list
         return kwargs_params, kwargs_model
