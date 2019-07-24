@@ -2,7 +2,6 @@ import numpy as np
 from lenstronomy.SimulationAPI.sim_api import SimAPI
 
 
-
 class Population():
 
     def __int__(self):
@@ -95,7 +94,6 @@ class Population():
                            # 2d numpy array, model of PSF centered with odd number of pixels per axis (optional when psf_type='PIXEL' is chosen)
                            }
 
-
         sim = SimAPI(numpix=numpix, kwargs_single_band=LSST_g_band_obs,
                      kwargs_model=kwargs_model_physical,
                      kwargs_numerics=kwargs_numerics)
@@ -103,7 +101,7 @@ class Population():
         kwargs_lens = sim.physical2lensing_conversion(kwargs_mass=kwargs_mass)
         kwargs_source_mag = [{'magnitude': 22, 'R_sersic': 0.3, 'n_sersic': 1, 'e1': -0.3, 'e2': -0.2, 'center_x': source_center_x, 'center_y': source_center_y}]
 
-        return kwargs_lens, lens_model_list, kwargs_source_mag, source_model_list
+        return kwargs_lens, lens_model_list, kwargs_source_mag, source_light_model_list
 
     def draw_lens_light(self):
         """
