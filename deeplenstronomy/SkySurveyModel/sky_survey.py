@@ -36,8 +36,13 @@ def noise_from_yaml(survey, band, pdfs_dir=pdfs_dir,
         survey_noise['seeing'] = seeing
         survey_noise['sky_brightness'] = sky_brightness
     except FileNotFoundError:
-        raise ValueError('%s band in survey %s is not supported.' %
-                         (band, survey))
+        print('%s band in survey %s is not supported.' % (band, survey))
+        print('Please make sure the appropriate config file exists.')
+        raise
+    except OSError:
+        print('%s band in survey %s is not supported.' % (band, survey))
+        print('Please make sure the appropriate 2d pdf exists.')
+        raise
 
     return survey_noise
 
