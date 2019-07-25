@@ -1,0 +1,7 @@
+read_noise: 10.
+pixel_scale: 0.263
+ccd_gain: 4.5
+exposure_time: 90.
+magnitude_zero_point: 30.
+num_exposures: 10
+psf_type: GAUSSIAN
