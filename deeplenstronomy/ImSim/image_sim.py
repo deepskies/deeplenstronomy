@@ -1,7 +1,8 @@
 from lenstronomy.SimulationAPI.sim_api import SimAPI
+from lenstronomy.SimulationAPI.observation_api import SingleBand
 
 
-def sim_image(numpix, kwargs_band, kwargs_model, kwargs_params, kwargs_numerics={}):
+def sim_image(numpix, kwargs_band, kwargs_model, kwargs_params, kwargs_numerics={}, with_noise=True):
     """
     simulates an image based on chosen model and data settings, effectively makes use of lenstronomy.SimulationAPI
 
@@ -22,5 +23,19 @@ def sim_image(numpix, kwargs_band, kwargs_model, kwargs_params, kwargs_numerics=
     kwargs_lens_light, kwargs_source, kwargs_ps = sim.magnitude2amplitude(kwargs_lens_light_mag, kwargs_source_mag, kwargs_ps_mag)
     imSim = sim.image_model_class
     image = imSim.image(kwargs_params['kwargs_lens'], kwargs_source, kwargs_lens_light, kwargs_ps)
-    image += sim.noise_for_model(model=image)
+    if with_noise is True:
+        image += sim.noise_for_model(model=image)
     return image
+
+
+def add_noise(image, kwargs_band):
+    """
+
+    :param image: 2d numpy array of a simlulated image without noise
+    :param kwargs_band: keyword arguments containing the noise estimates
+    :return: noisy image
+    """
+    single_band = SingleBand(**kwargs_band)
+    noise = single_band.noise_for_model(model=image)
+    return image + noise
+
