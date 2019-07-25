@@ -115,7 +115,7 @@ class Population:
 
         :return:
         """
-        lens_light_model_list = ['SERSIC_ELLIPSE']
+        lens_light_model_list = ['SERSIC']
         kwargs_lens_light = [{'magnitude': 22, 'R_sersic': 0.3, 'n_sersic': 1, 'e1': -0.3, 'e2': -0.2, 'center_x': 0, 'center_y': 0}]
         return kwargs_lens_light, lens_light_model_list
 
