@@ -21,14 +21,19 @@ class Population:
         draws source model from population
         """
         source_config = self.load_yaml_file('source.yaml')
-        source_center_x = np.random.uniform(source_config['center']['x_min'],
-                                            source_config['center']['x_max'])
-        source_center_y = np.random.uniform(source_config['center']['y_min'],
-                                            source_config['center']['y_max'])
-        kwargs_source_mag = source_config['mag']
-        kwargs_source_mag[0]['center_x'] = source_center_x
-        kwargs_source_mag[0]['center_y'] = source_center_y
         source_model_list = source_config['model_list']
+        kwargs_source_mag = []
+
+        for _ in source_model_list:
+            source_center_x = np.random.uniform(source_config['center']['x_min'],
+                                                source_config['center']['x_max'])
+            source_center_y = np.random.uniform(source_config['center']['y_min'],
+                                                source_config['center']['y_max'])
+            source_properties = source_config['properties']
+            source_properties['center_x'] = source_center_x
+            source_properties['center_y'] = source_center_y
+            kwargs_source_mag.append(source_properties)
+
         return kwargs_source_mag, source_model_list
 
     def draw_lens_model(self):
@@ -36,14 +41,21 @@ class Population:
         draw lens model parameters
         return: lens model keyword argument list, lens model list
         """
-        theta_E = np.random.uniform(0.9, 2.2)
-        lens_e1 = (np.random.rand() - 0.5) * 0.8
-        lens_e2 = (np.random.rand() - 0.5) * 0.8
-        kwargs_lens = [
-        {'theta_E': theta_E, 'e1': lens_e1, 'e2': lens_e2, 'center_x': 0, 'center_y': 0},  # SIE model
-        {'e1': 0.03, 'e2': 0.01}  # SHEAR model
-        ]
-        lens_model_list = ['SIE', 'SHEAR']
+        lens_config = self.load_yaml_file('lens.yaml')
+        lens_model_list = lens_config['model_list']
+        kwargs_lens = []
+        
+        for _ in lens_model_list:
+            theta_E = np.random.uniform(lens_config['theta_E']['min'],
+                                        lens_config['theta_E']['max'])
+            lens_e1 = np.random.uniform(lens_config['lens_e1']['min'],
+                                        lens_config['lens_e1']['max'])
+            lens_e2 = np.random.uniform(lens_config['lens_e2']['min'],
+                                        lens_config['lens_e2']['max'])
+            lens_properties = {'theta_E': theta_E, 'e1': lens_e1, 'e2': lens_e2,
+                               'center_x': 0, 'center_y': 0}
+            kwargs_lens.append(lens_properties)
+
         return kwargs_lens, lens_model_list
 
     def draw_physical_model(self):
@@ -178,8 +190,6 @@ class Population:
                                                                         center_y=kwargs_source[0]['center_y'])
             kwargs_params['kwargs_ps_mag'] = kwargs_ps
             kwargs_model['point_source_model_list'] = point_source_model_list
-        return kwargs_params, kwargs_model
-
         return kwargs_params, kwargs_model
 
     def draw_model(self, with_lens_light=False, with_quasar=False, mode='simple', **kwargs):
