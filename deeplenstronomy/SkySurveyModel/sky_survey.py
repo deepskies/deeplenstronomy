@@ -63,5 +63,4 @@ def calculate_background_noise(image):
     pos_val_array = -neg_val_array
     combined_array = np.append(neg_val_array, pos_val_array)
     mean, std = norm.fit(combined_array)
-    background_noise = {'background_noise': std}
-    return background_noise
+    return std
