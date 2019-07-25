@@ -1,16 +1,24 @@
 import numpy as np
 import os
+import yaml
 
-file_dir = os.path.join( os.path.dirname( __file__ ), '../../2dpdfs' )
+pdfs_dir = os.path.join(os.path.dirname(__file__), '../../2dpdfs')
+characteristics_dir = os.path.join(os.path.dirname(__file__),
+                                   '../../survey_characteristics')
+
 
 class StochasticNoise(object):
-  "Returns an array of specified size of randomly selected values of stochastic seeing and sky-brightness from a list."
-  def __init__(self, size, pdf):
-    rand_idx = np.random.randint(len(pdf),size=size)
-    self.seeing = pdf[rand_idx,0]
-    self.sky_brightness = pdf[rand_idx,1]
+    """
+    Returns an array of specified size of randomly selected values of stochastic
+    seeing and sky-brightness from a list.
+    """
+    def __init__(self, size, pdf):
+        rand_idx = np.random.randint(len(pdf), size=size)
+        self.seeing = pdf[rand_idx, 0]
+        self.sky_brightness = pdf[rand_idx, 1]
 
-def noise_des(band,directory=file_dir):
+
+def noise_des(band, directory=pdfs_dir):
     """
     Simulated noise profile for a given DES band.
     Output: dict containing survey characteristics:
@@ -25,7 +33,7 @@ def noise_des(band,directory=file_dir):
                         'sky_brightness': float}
     """
     if band == 'g':
-        pdf = np.loadtxt("%s/2dg_DES.txt" %directory)
+        pdf = np.loadtxt("%s/2dg_DES.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -40,10 +48,10 @@ def noise_des(band,directory=file_dir):
                             'sky_brightness': sky_brightness}
 
     elif band == 'r':
-        pdf = np.loadtxt("%s/2dr_DES.txt" %directory)
+        pdf = np.loadtxt("%s/2dr_DES.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
-        seeing = pdf[rand_idx,0]
-        sky_brightness = pdf[rand_idx,1]
+        seeing = pdf[rand_idx, 0]
+        sky_brightness = pdf[rand_idx, 1]
         DES_survey_noise = {'read_noise': 10.,
                             'pixel_scale': 0.263,
                             'ccd_gain': 4.5,
@@ -55,10 +63,10 @@ def noise_des(band,directory=file_dir):
                             'sky_brightness': sky_brightness}
 
     elif band == 'i':
-        pdf = np.loadtxt("%s/2di_DES.txt" %directory)
+        pdf = np.loadtxt("%s/2di_DES.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
-        seeing = pdf[rand_idx,0]
-        sky_brightness = pdf[rand_idx,1]
+        seeing = pdf[rand_idx, 0]
+        sky_brightness = pdf[rand_idx, 1]
         DES_survey_noise = {'read_noise': 10.,
                             'pixel_scale': 0.263,
                             'ccd_gain': 4.5,
@@ -73,7 +81,7 @@ def noise_des(band,directory=file_dir):
 
     return DES_survey_noise
 
-def noise_lsst(band,directory=file_dir):
+def noise_lsst(band, directory=pdfs_dir):
     # Generates nobs simulated noise profiles.
     """
     Simulated noise profile for a given LSST band.
@@ -138,7 +146,7 @@ def noise_lsst(band,directory=file_dir):
     return LSST_survey_noise
 
 
-def noise_cfht(band,directory=file_dir):
+def noise_cfht(band, directory=pdfs_dir):
     # Generates nobs simulated noise profiles.
     """
     Simulated noise profile for a given CFHT band.
@@ -205,7 +213,30 @@ def noise_cfht(band,directory=file_dir):
     return CFHT_survey_noise
 
 
-def survey_noise(survey_name, band, directory=file_dir):
+def noise_from_yaml(band, survey, pdfs_dir=pdfs_dir,
+                    yaml_dir=characteristics_dir):
+    # Generates nobs simulated noise profiles.
+    """
+    Loads noise configuration from yaml file and 2d pdf file
+    """
+    try:
+        pdf = np.loadtxt("%s/2d%s_%s.txt" % (pdfs_dir, band, survey))
+        rand_idx = np.random.randint(len(pdf))
+        seeing = pdf[rand_idx, 0]
+        sky_brightness = pdf[rand_idx, 1]
+        yaml_file = '%s/%s_%s.yaml' % (yaml_dir, band, survey)
+        with open(yaml_file, 'r') as config_file:
+            survey_noise = yaml.safe_load(config_file)
+        survey_noise['seeing'] = seeing
+        survey_noise['sky_brightness'] = sky_brightness
+    except FileNotFoundError:
+        raise ValueError('%s band in survey %s is not supported.' %
+                         (band, survey))
+
+    return survey_noise
+
+
+def survey_noise(survey_name, band, directory=pdfs_dir):
     "Specify survey name and band"
     if survey_name == 'DES':
          survey_noise = noise_des(band,directory)
