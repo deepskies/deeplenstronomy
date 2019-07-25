@@ -2,10 +2,10 @@ SIE:
     theta_E:
         min: 0.9
         max: 2.2
-    lens_e1:
+    e1:
         min: -0.4
         max: 0.4
-    lens_e2:
+    e2:
         min: -0.4
         max: 0.4
     center_x: 0
