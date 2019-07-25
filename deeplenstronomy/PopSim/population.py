@@ -16,29 +16,34 @@ class Population:
             config_dict = yaml.safe_load(config_file_obj)
         return config_dict
 
-    def draw_source_model(self, source_model_list=['SERSIC_ELLIPSE']):
-        """
-        draws source model from population
-        """
-        source_config = self.load_yaml_file('source.yaml')
-        kwargs_source = []
-
-        for model in source_model_list:
+    def draw_properties_from_models(self, model_list, config):
+        kwargs = []
+        for model in model_list:
             try:
-                model_config = source_config[model]
+                model_config = config[model]
             except KeyError:
                 print('Model %s configurations not specified.' % model)
                 raise
-            source_properties = {}
+            properties = {}
             for property in model_config:
                 try:
                     draw = np.random.uniform(model_config[property]['min'],
                                              model_config[property]['max'])
                 except TypeError:
                     draw = model_config[property]
-                source_properties[property] = draw
+                properties[property] = draw
 
-            kwargs_source.append(source_properties)
+            kwargs.append(properties)
+
+        return kwargs
+
+    def draw_source_model(self, source_model_list=['SERSIC_ELLIPSE']):
+        """
+        draws source model from population
+        """
+        source_config = self.load_yaml_file('source.yaml')
+        kwargs_source = self.draw_properties_from_models(source_model_list,
+                                                         source_config)
 
         return kwargs_source, source_model_list
 
@@ -48,24 +53,8 @@ class Population:
         return: lens model keyword argument list, lens model list
         """
         lens_config = self.load_yaml_file('lens.yaml')
-        kwargs_lens = []
-        
-        for model in lens_model_list:
-            try:
-                model_config = lens_config[model]
-            except KeyError:
-                print('Model %s configurations not specified.' % model)
-                raise
-            lens_properties = {}
-            for property in model_config:
-                try:
-                    draw = np.random.uniform(model_config[property]['min'],
-                                             model_config[property]['max'])
-                except TypeError:
-                    draw = model_config[property]
-                lens_properties[property] = draw
-
-            kwargs_lens.append(lens_properties)
+        kwargs_lens = self.draw_properties_from_models(lens_model_list,
+                                                       lens_config)
 
         return kwargs_lens, lens_model_list
 
