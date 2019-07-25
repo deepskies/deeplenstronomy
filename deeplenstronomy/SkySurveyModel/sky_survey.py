@@ -54,10 +54,16 @@ def survey_noise(survey_name, band, directory=pdfs_dir):
 
 
 def calculate_background_noise(image):
-    """
-    Input: Takes in array of pixel values of an image, fits a gaussian profile to the negative tail of the histogram,
+    """Takes in array of pixel values of an image, fits a gaussian profile to the negative tail of the histogram,
     returns a dictionary containing the 'background_noise' parameter containing the standard deviation of the scatter.
+
+    Parameters:
+        file_loc (ndarray): Array of image pixel values
+
+    Returns:
+        float: background noise - standard deviation.
     """
+
     idx = np.ravel(image) < 0
     neg_val_array = np.ravel(image)[idx]
     pos_val_array = -neg_val_array
