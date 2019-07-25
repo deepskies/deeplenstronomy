@@ -31,11 +31,3 @@ def _arc_model(numpix, kwargs_band, kwargs_model, kwargs_lens, kwargs_source_mag
     image = imSim.image(kwargs_lens, kwargs_source=kwargs_source, kwargs_lens_light=kwargs_lens_light, kwargs_ps=kwargs_ps)
     return image
 
-def import_image(file_path, band=1, **kwargs):
-    '''
-    import fits file images and return numpy array
-    return: 2d numpy array
-    '''
-    hdul = fits.open(file_path)
-    lens_gal = hdul['COADD'].data[band]
-    return lens_gal
