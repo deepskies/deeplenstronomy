@@ -28,7 +28,7 @@ def sim_image(numpix, kwargs_band, kwargs_model, kwargs_params, kwargs_numerics=
     return image
 
 
-def add_noise(image, kwargs_band):
+def add_noise(image, kwargs_band, background_noise=True, poisson_noise=True):
     """
 
     :param image: 2d numpy array of a simlulated image without noise
@@ -36,6 +36,6 @@ def add_noise(image, kwargs_band):
     :return: noisy image
     """
     single_band = SingleBand(**kwargs_band)
-    noise = single_band.noise_for_model(model=image)
+    noise = single_band.noise_for_model(model=image, background_noise=background_noise, poisson_noise=poisson_noise)
     return image + noise
 
