@@ -16,25 +16,31 @@ class Population:
             config_dict = yaml.safe_load(config_file_obj)
         return config_dict
 
-    def draw_source_model(self):
+    def draw_source_model(self, source_model_list=['SERSIC_ELLIPSE']):
         """
         draws source model from population
         """
         source_config = self.load_yaml_file('source.yaml')
-        source_model_list = source_config['model_list']
-        kwargs_source_mag = []
+        kwargs_source = []
 
-        for _ in source_model_list:
-            source_center_x = np.random.uniform(source_config['center']['x_min'],
-                                                source_config['center']['x_max'])
-            source_center_y = np.random.uniform(source_config['center']['y_min'],
-                                                source_config['center']['y_max'])
-            source_properties = source_config['properties']
-            source_properties['center_x'] = source_center_x
-            source_properties['center_y'] = source_center_y
-            kwargs_source_mag.append(source_properties)
+        for model in source_model_list:
+            try:
+                model_config = source_config[model]
+            except KeyError:
+                print('Model %s configurations not specified.' % model)
+                raise
+            source_properties = {}
+            for property in model_config:
+                try:
+                    draw = np.random.uniform(model_config[property]['min'],
+                                             model_config[property]['max'])
+                except TypeError:
+                    draw = model_config[property]
+                source_properties[property] = draw
 
-        return kwargs_source_mag, source_model_list
+            kwargs_source.append(source_properties)
+
+        return kwargs_source, source_model_list
 
     def draw_lens_model(self, lens_model_list=['SIE', 'SHEAR']):
         """
@@ -48,7 +54,7 @@ class Population:
             try:
                 model_config = lens_config[model]
             except KeyError:
-                print('Model configurations not specified.')
+                print('Model %s configurations not specified.' % model)
                 raise
             lens_properties = {}
             for property in model_config:
