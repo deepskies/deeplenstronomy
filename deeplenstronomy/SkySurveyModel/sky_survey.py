@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import yaml
+from scipy.stats import norm
 
 pdfs_dir = os.path.join(os.path.dirname(__file__), '../../2dpdfs')
 characteristics_dir = os.path.join(os.path.dirname(__file__),
@@ -45,3 +46,17 @@ def survey_noise(survey_name, band, directory=pdfs_dir):
     """Specify survey name and band"""
     survey_noise = noise_from_yaml(survey_name, band, directory)
     return survey_noise
+
+
+def calculate_background_noise(image):
+    """
+    Input: Takes in array of pixel values of an image, fits a gaussian profile to the negative tail of the histogram,
+    returns a dictionary containing the 'background_noise' parameter containing the standard deviation of the scatter.
+    """
+    idx = np.ravel(image) < 0
+    neg_val_array = np.ravel(image)[idx]
+    pos_val_array = -neg_val_array
+    combined_array = np.append(neg_val_array, pos_val_array)
+    mean, std = norm.fit(combined_array)
+    background_noise = {'background_noise': std}
+    return background_noise
