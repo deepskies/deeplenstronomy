@@ -4,7 +4,7 @@ import yaml
 
 pdfs_dir = os.path.join(os.path.dirname(__file__), '../../2dpdfs')
 characteristics_dir = os.path.join(os.path.dirname(__file__),
-                                   '../../survey_characteristics')
+                                   '../../config_files/survey_characteristics')
 
 
 class StochasticNoise(object):
