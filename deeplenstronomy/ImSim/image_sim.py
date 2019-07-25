@@ -3,15 +3,17 @@ from lenstronomy.SimulationAPI.sim_api import SimAPI
 
 def sim_image(numpix, kwargs_band, kwargs_model, kwargs_params, kwargs_numerics={}):
     """
+    simulates an image based on chosen model and data settings, effectively makes use of lenstronomy.SimulationAPI
 
-    :param numpix:
-    :param kwargs_band:
-    :param kwargs_model:
-    :param kwargs_params:
-    :param kwargs_numerics:
-    :return:
+    :param numpix: number of pixels per axis
+    :param kwargs_band: keyword arguments specifying the observation to be simulated according to lenstronomy.SimulationAPI
+    :param kwargs_model: keyword arguments of model configurations. All possibilities available at lenstronom.Util.class_creator
+    :param kwargs_params: keyword arguments of the different model components. Supports 'kwargs_lens', 'kwargs_source_mag',
+    'kwargs_lens_light_mag', 'kwargs_ps_mag'
+    :param kwargs_numerics: keyword arguments describing the numerical setting of lenstronomy as outlined in lenstronomy.ImSim.Numerics
+    :return: 2d numpy array
     """
-    #TODO documentation
+
     sim = SimAPI(numpix=numpix, kwargs_single_band=kwargs_band, kwargs_model=kwargs_model,
                  kwargs_numerics=kwargs_numerics)
     kwargs_lens_light_mag = kwargs_params.get('kwargs_lens_light_mag', None)
