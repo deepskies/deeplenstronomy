@@ -36,24 +36,29 @@ class Population:
 
         return kwargs_source_mag, source_model_list
 
-    def draw_lens_model(self):
+    def draw_lens_model(self, lens_model_list=['SIE', 'SHEAR']):
         """
         draw lens model parameters
         return: lens model keyword argument list, lens model list
         """
         lens_config = self.load_yaml_file('lens.yaml')
-        lens_model_list = lens_config['model_list']
         kwargs_lens = []
         
-        for _ in lens_model_list:
-            theta_E = np.random.uniform(lens_config['theta_E']['min'],
-                                        lens_config['theta_E']['max'])
-            lens_e1 = np.random.uniform(lens_config['lens_e1']['min'],
-                                        lens_config['lens_e1']['max'])
-            lens_e2 = np.random.uniform(lens_config['lens_e2']['min'],
-                                        lens_config['lens_e2']['max'])
-            lens_properties = {'theta_E': theta_E, 'e1': lens_e1, 'e2': lens_e2,
-                               'center_x': 0, 'center_y': 0}
+        for model in lens_model_list:
+            try:
+                model_config = lens_config[model]
+            except KeyError:
+                print('Model configurations not specified.')
+                raise
+            lens_properties = {}
+            for property in model_config:
+                try:
+                    draw = np.random.uniform(model_config[property]['min'],
+                                             model_config[property]['max'])
+                except TypeError:
+                    draw = model_config[property]
+                lens_properties[property] = draw
+
             kwargs_lens.append(lens_properties)
 
         return kwargs_lens, lens_model_list
