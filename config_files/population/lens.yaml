@@ -1,6 +1,6 @@
 model_list:
     - SIE
-    - SERSIC_ELLIPSE
+    - SHEAR
 theta_E:
     min: 0.9
     max: 2.2
