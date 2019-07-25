@@ -1,19 +1,34 @@
 import numpy as np
 import yaml
+import os
+
+config_dir = os.path.join(os.path.dirname(__file__),
+                           '../../config_files/population/')
 
 
 class Population:
     def __int__(self):
         pass
 
+    def load_yaml_file(self, file_name):
+        config_file = os.path.join(config_dir, file_name)
+        with open(config_file, 'r') as config_file_obj:
+            config_dict = yaml.safe_load(config_file_obj)
+        return config_dict
+
     def draw_source_model(self):
         """
         draws source model from population
         """
-        source_center_x = (np.random.rand() - 0.5) * 2
-        source_center_y = (np.random.rand() - 0.5) * 2
-        kwargs_source_mag = [{'magnitude': 22, 'R_sersic': 0.3, 'n_sersic': 1, 'e1': -0.3, 'e2': -0.2, 'center_x': source_center_x, 'center_y': source_center_y}]
-        source_model_list = ['SERSIC_ELLIPSE']
+        source_config = self.load_yaml_file('source.yaml')
+        source_center_x = np.random.uniform(source_config['center']['x_min'],
+                                            source_config['center']['x_max'])
+        source_center_y = np.random.uniform(source_config['center']['y_min'],
+                                            source_config['center']['y_max'])
+        kwargs_source_mag = source_config['mag']
+        kwargs_source_mag[0]['center_x'] = source_center_x
+        kwargs_source_mag[0]['center_y'] = source_center_y
+        source_model_list = source_config['model_list']
         return kwargs_source_mag, source_model_list
 
     def draw_lens_model(self):
