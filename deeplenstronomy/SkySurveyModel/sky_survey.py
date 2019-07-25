@@ -1,16 +1,19 @@
 import numpy as np
 import os
 
-file_dir = os.path.join( os.path.dirname( __file__ ), '../../2dpdfs' )
+file_dir = os.path.join(os.path.dirname( __file__ ), '../../2dpdfs' )
+
 
 class StochasticNoise(object):
-  "Returns an array of specified size of randomly selected values of stochastic seeing and sky-brightness from a list."
-  def __init__(self, size, pdf):
-    rand_idx = np.random.randint(len(pdf),size=size)
-    self.seeing = pdf[rand_idx,0]
-    self.sky_brightness = pdf[rand_idx,1]
+    "Returns an array of specified size of randomly selected values of stochastic seeing and sky-brightness from a list."
 
-def noise_des(band,directory=file_dir):
+    def __init__(self, size, pdf):
+        rand_idx = np.random.randint(len(pdf), size=size)
+        self.seeing = pdf[rand_idx, 0]
+        self.sky_brightness = pdf[rand_idx, 1]
+
+
+def noise_des(band, directory=file_dir):
     """
     Simulated noise profile for a given DES band.
     Output: dict containing survey characteristics:
@@ -25,7 +28,7 @@ def noise_des(band,directory=file_dir):
                         'sky_brightness': float}
     """
     if band == 'g':
-        pdf = np.loadtxt("%s/2dg_DES.txt" %directory)
+        pdf = np.loadtxt("%s/2dg_DES.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -40,7 +43,7 @@ def noise_des(band,directory=file_dir):
                             'sky_brightness': sky_brightness}
 
     elif band == 'r':
-        pdf = np.loadtxt("%s/2dr_DES.txt" %directory)
+        pdf = np.loadtxt("%s/2dr_DES.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -55,7 +58,7 @@ def noise_des(band,directory=file_dir):
                             'sky_brightness': sky_brightness}
 
     elif band == 'i':
-        pdf = np.loadtxt("%s/2di_DES.txt" %directory)
+        pdf = np.loadtxt("%s/2di_DES.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -73,7 +76,8 @@ def noise_des(band,directory=file_dir):
 
     return DES_survey_noise
 
-def noise_lsst(band,directory=file_dir):
+
+def noise_lsst(band, directory=file_dir):
     # Generates nobs simulated noise profiles.
     """
     Simulated noise profile for a given LSST band.
@@ -89,7 +93,7 @@ def noise_lsst(band,directory=file_dir):
                         'sky_brightness': float}
     """
     if band == 'g':
-        pdf = np.loadtxt("%s/2dg_LSST.txt" %directory)
+        pdf = np.loadtxt("%s/2dg_LSST.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -104,7 +108,7 @@ def noise_lsst(band,directory=file_dir):
                             'sky_brightness': sky_brightness}
 
     elif band == 'r':
-        pdf = np.loadtxt("%s/2dr_LSST.txt" %directory)
+        pdf = np.loadtxt("%s/2dr_LSST.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -119,7 +123,7 @@ def noise_lsst(band,directory=file_dir):
                             'sky_brightness': sky_brightness}
 
     elif band == 'i':
-        pdf = np.loadtxt("%s/2di_LSST.txt" %directory)
+        pdf = np.loadtxt("%s/2di_LSST.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -138,7 +142,7 @@ def noise_lsst(band,directory=file_dir):
     return LSST_survey_noise
 
 
-def noise_cfht(band,directory=file_dir):
+def noise_cfht(band, directory=file_dir):
     # Generates nobs simulated noise profiles.
     """
     Simulated noise profile for a given CFHT band.
@@ -153,7 +157,7 @@ def noise_cfht(band,directory=file_dir):
                         'seeing': float
                         'sky_brightness': float}
     """
-    if band =='g':
+    if band == 'g':
         pdf = np.loadtxt("%s/2dg_CFHT.txt" %directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
@@ -168,9 +172,8 @@ def noise_cfht(band,directory=file_dir):
                             'seeing': seeing,
                             'sky_brightness': sky_brightness}
 
-
     elif band == 'r':
-        pdf = np.loadtxt("%s/2dr_CFHT.txt" %directory)
+        pdf = np.loadtxt("%s/2dr_CFHT.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
@@ -185,7 +188,7 @@ def noise_cfht(band,directory=file_dir):
                             'sky_brightness': sky_brightness}
 
     elif band == 'i':
-        pdf = np.loadtxt("%s/2di_CFHT.txt" %directory)
+        pdf = np.loadtxt("%s/2di_CFHT.txt" % directory)
         rand_idx = np.random.randint(len(pdf))
         seeing = pdf[rand_idx,0]
         sky_brightness = pdf[rand_idx,1]
