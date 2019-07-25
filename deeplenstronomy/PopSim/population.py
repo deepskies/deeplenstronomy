@@ -1,9 +1,8 @@
 import numpy as np
-from lenstronomy.SimulationAPI.sim_api import SimAPI
+import yaml
 
 
-class Population():
-
+class Population:
     def __int__(self):
         pass
 
@@ -82,7 +81,6 @@ class Population():
         # convert from physical values to reduced lensing values
         kwargs_lens = sim.physical2lensing_conversion(kwargs_mass=kwargs_mass)
 
-
         return kwargs_lens, lens_model_list
 
     def draw_lens_light(self):
@@ -138,8 +136,7 @@ class Population():
 
         return kwargs_params, kwargs_model
 
-
-    def _complex_draw(self, **kwargs):
+    def _complex_draw(self, with_lens_light=False, with_quasar=False, **kwargs):
         """
 
         :param with_lens_light:
@@ -148,7 +145,8 @@ class Population():
         :return:
         """
 
-        kwargs_lens, lens_model_list, kwargs_source, source_model_list = self.draw_physical_model()
+        kwargs_lens, lens_model_list = self.draw_physical_model()
+        kwargs_source, source_model_list = self.draw_source_model()
         kwargs_params = {'kwargs_lens': kwargs_lens,
                          'kwargs_source_mag': kwargs_source}
         kwargs_model = {'lens_model_list': lens_model_list,
@@ -169,7 +167,6 @@ class Population():
 
         return kwargs_params, kwargs_model
 
-
     def draw_model(self, with_lens_light=False, with_quasar=False, mode='simple', **kwargs):
         """
         returns all keyword arguments of the model
@@ -180,6 +177,6 @@ class Population():
         if mode == 'simple':
             return self._simple_draw(with_lens_light, with_quasar, **kwargs)
         if mode == 'complex':
-            return self._complex_draw(**kwargs)
+            return self._complex_draw(with_lens_light, with_quasar, **kwargs)
         else:
             raise ValueError('mode %s is not supported!' % mode)
