@@ -3,7 +3,7 @@ import yaml
 import os
 
 config_dir = os.path.join(os.path.dirname(__file__),
-                           '../../config_files/population/')
+                          '../../config_files/population/')
 
 
 class Population:
@@ -11,12 +11,17 @@ class Population:
         pass
 
     def load_yaml_file(self, file_name):
+        """Loads configuration dictionary from yaml file"""
         config_file = os.path.join(config_dir, file_name)
         with open(config_file, 'r') as config_file_obj:
             config_dict = yaml.safe_load(config_file_obj)
         return config_dict
 
     def draw_properties_from_models(self, model_list, config):
+        """
+        Given a config dictionary for a list of models,
+        draws the needed properties
+        """
         kwargs = []
         for model in model_list:
             try:
@@ -25,33 +30,38 @@ class Population:
                 print('Model %s configurations not specified.' % model)
                 raise
             properties = {}
-            for property in model_config:
+            for prop in model_config:
                 try:
-                    draw = np.random.uniform(model_config[property]['min'],
-                                             model_config[property]['max'])
+                    draw = np.random.uniform(model_config[prop]['min'],
+                                             model_config[prop]['max'])
                 except TypeError:
-                    draw = model_config[property]
-                properties[property] = draw
+                    # if not a dict with min and max, should be a number
+                    draw = model_config[prop]
+                properties[prop] = draw
 
             kwargs.append(properties)
 
         return kwargs
 
-    def draw_source_model(self, source_model_list=['SERSIC_ELLIPSE']):
+    def draw_source_model(self, source_model_list=None):
         """
         draws source model from population
         """
+        if source_model_list is None:
+            source_model_list = ['SERSIC_ELLIPSE']
         source_config = self.load_yaml_file('source.yaml')
         kwargs_source = self.draw_properties_from_models(source_model_list,
                                                          source_config)
 
         return kwargs_source, source_model_list
 
-    def draw_lens_model(self, lens_model_list=['SIE', 'SHEAR']):
+    def draw_lens_model(self, lens_model_list=None):
         """
         draw lens model parameters
         return: lens model keyword argument list, lens model list
         """
+        if lens_model_list is None:
+            lens_model_list = ['SIE', 'SHEAR']
         lens_config = self.load_yaml_file('lens.yaml')
         kwargs_lens = self.draw_properties_from_models(lens_model_list,
                                                        lens_config)
