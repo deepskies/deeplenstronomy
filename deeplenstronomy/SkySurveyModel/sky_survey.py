@@ -3,7 +3,7 @@ import os
 import yaml
 from scipy.stats import norm
 
-pdfs_dir = os.path.join(os.path.dirname(__file__), '../../2dpdfs')
+pdfs_dir = os.path.join(os.path.dirname(__file__), '../../config_files/2dpdfs')
 characteristics_dir = os.path.join(os.path.dirname(__file__),
                                    '../../config_files/survey_characteristics')
 
