@@ -1,3 +1,3 @@
-__author__ = 'Brian Nord'
-__email__ = 'nord@fnal.gov'
-__version__ = '0.1.0'
+__author__ = 'Robert Morgan'
+__email__ = 'robert.morgan@wisc.edu'
+__version__ = '0.0.1'
