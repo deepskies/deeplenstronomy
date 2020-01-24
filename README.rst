@@ -1,6 +1,5 @@
-=============================
-deeplenstronomy
-=============================
+#DeepLenStronomy
+
 
 > Welcome to DeepLenstronomy, a wrapper that enables pipelining of the lenstronomy package for efficient and fast simulations of strong gravitational lensing systems. 
 
