@@ -6,9 +6,8 @@ import numpy as np
 import os
 import pandas as pd
 
-from image_generator import ImageGenerator
-from input_reader import Organizer, Parser
-
+from deeplenstronomy.input_reader import Organizer, Parser
+from deeplenstronomy.image_generator import ImageGenerator
 
 class Dataset():
     def __init__(self, config_file=None, save=False, store=True):

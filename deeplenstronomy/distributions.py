@@ -4,7 +4,10 @@ import numpy as np
 import random
 from scipy.stats import poisson
 
-import des_private
+try:
+    import des_private
+except:
+    pass
 
 ## Single parameter sampling distributions
 
@@ -37,11 +40,16 @@ def galaxy_color(bands=''):
 # des_mag and _des_mag_color are based on currently undistributed DES data
 # If you are a DES member, contact the authors to receive the des_private.py file
 def des_mag(bands=''):
-    return des_private.des_mag(bands)
+    try:
+        return des_private.des_mag(bands)
+    except:
+        return galaxy_color(bands=bands)
     
 def _des_mag_color(pair):
-    return des_private._des_mag_color(pair)
-    
+    try:
+        return des_private._des_mag_color(pair)
+    except:
+        return 0.0
 
     
 def des_sky_brightness(bands=''):

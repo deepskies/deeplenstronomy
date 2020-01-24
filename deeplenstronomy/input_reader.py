@@ -4,9 +4,9 @@ from benedict import benedict
 import numpy as np
 import yaml
 
-from image_generator import dict_select
-import distributions
-import special
+from deeplenstronomy.utils import dict_select
+import deeplenstronomy.distributions as distributions
+import deeplenstronomy.special as special
 
 class Parser():
     """ 

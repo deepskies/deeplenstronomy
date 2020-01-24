@@ -1,6 +1,6 @@
 # Special functions, useful for implementing correlations in sampled parameters
 
-import distributions
+import deeplenstronomy.distributions as distributions
 
 def fundamental_plane(output_dict, profiles, bands):
     """
