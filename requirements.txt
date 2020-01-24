@@ -1,2 +1,2 @@
 wheel>=0.22
-lenstronomy>=0.9.1
+lenstronomy>=1.3.0
