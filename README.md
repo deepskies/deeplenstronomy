@@ -1,7 +1,7 @@
 #DeepLenStronomy
 
 
-![](bad_logo.png)
+![](bad_logo_small.png)
 
 > Welcome to DeepLenstronomy, a wrapper that enables pipelining of the lenstronomy package for efficient and fast simulations of strong gravitational lensing systems. 
 
@@ -85,11 +85,12 @@ Aside from those, the most important thing you can do is **try to break the alph
 
 
 
+<!---
 .. image:: https://badge.fury.io/py/deeplenstronomy.png
     :target: http://badge.fury.io/py/deeplenstronomy
 
 .. image:: https://travis-ci.org/bnord/deeplenstronomy.png?branch=master
     :target: https://travis-ci.org/bnord/deeplenstronomy
-
+--->
 
 
