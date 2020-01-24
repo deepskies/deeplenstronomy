@@ -23,7 +23,7 @@
 ## Requirement
 
 1. python 3.x
-2. lenstronomy 1.3.0
+2. lenstronomy 1.3.0 (https://github.com/sibirrer/lenstronomy)
 
 
 ---
