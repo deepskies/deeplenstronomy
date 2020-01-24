@@ -81,11 +81,11 @@ Aside from those, the most important thing you can do is **try to break the alph
 
 # Team
 
-* Simon Birrer (r)
-* Joshua Yao-Yu Lin (r)
-* Rob Morgan (w)
-* Brian Nord (w)
-* Jason Poh (r)
+* Simon Birrer 
+* Joshua Yao-Yu Lin 
+* Rob Morgan
+* Brian Nord
+* Jason Poh 
 
 
 
