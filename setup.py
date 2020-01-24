@@ -13,21 +13,20 @@ if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
     sys.exit()
 
-readme = open('README.MD').read()
-doclink =   """
-            Documentation
-            -------------
-
-            The full documentation is at http://ImSim.rtfd.org.
-            """
-
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
+
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+
 
 setup(
     name='deeplenstronomy',
     version='0.0.0.1',
     description='wrap lenstronomy for efficient simulation generation',
-    long_description=readme + '\n\n' + doclink + '\n\n' + history,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='DeepSkiesLab',
     author_email='deepskieslab@gmail.com',
     url='https://github.com/deepskies/deeplenstronomy',
