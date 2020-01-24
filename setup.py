@@ -3,6 +3,8 @@
 import os
 import sys
 
+from os import path
+
 try:
     from setuptools import setup
 except ImportError:
@@ -15,6 +17,7 @@ if sys.argv[-1] == 'publish':
 
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
+
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -23,7 +26,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='deeplenstronomy',
-    version='0.0.0.1',
+    version='0.0.0.2',
     description='wrap lenstronomy for efficient simulation generation',
     long_description=long_description,
     long_description_content_type='text/markdown',
