@@ -14,21 +14,23 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 readme = open('README.rst').read()
-doclink = """
-Documentation
--------------
+doclink =   """
+            Documentation
+            -------------
 
-The full documentation is at http://ImSim.rtfd.org."""
+            The full documentation is at http://ImSim.rtfd.org.
+            """
+
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='deeplenstronomy',
-    version='0.1.0',
-    description='deep lens astronomy',
+    version='0.0.0.1',
+    description='wrap lenstronomy for efficient simulation generation',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
-    author='Brian Nord',
-    author_email='nord@fnal.gov',
-    url='https://github.com/bnord/deeplenstronomy',
+    author='DeepSkiesLab',
+    author_email='deepskieslab@gmail.com',
+    url='https://github.com/deepskies/deeplenstronomy',
     packages=[
         'deeplenstronomy',
     ],
@@ -44,9 +46,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: Implementation :: PyPy',
