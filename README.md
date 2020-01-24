@@ -16,8 +16,14 @@
 
 # Installation
 
+
 - you can use pip to install the code
 - you will need to install lenstronomy, which has requirements: link to requirments
+
+## Requirement
+
+1. python 3.x
+2. lenstronomy 1.3.0
 
 
 ---
