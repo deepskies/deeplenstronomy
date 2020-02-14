@@ -1,12 +1,16 @@
 # Classes to parse input yaml files and organize user settings
 
 from benedict import benedict
+import copy
+import random
 import numpy as np
 import yaml
 
-from deeplenstronomy.utils import dict_select
-import deeplenstronomy.distributions as distributions
-import deeplenstronomy.special as special
+import timeseries
+from _utils import dict_select
+import distributions
+import special
+import check as big_check
 
 class Parser():
     """ 
@@ -62,8 +66,9 @@ class Parser():
         :param config: Name of config file.
         :return: config_dict: Dictionary containing config information.
         """
+
         with open(config, 'r') as config_file_obj:
-                config_dict = yaml.safe_load(config_file_obj)
+            config_dict = yaml.safe_load(config_file_obj)
                         
         return config_dict
 
@@ -72,6 +77,7 @@ class Parser():
         """
         Check configurations for possible user errors.
         """
+        big_check.run_checks(self.full_dict, self.config_dict)
         
         #BIG TODO
         
@@ -83,6 +89,8 @@ class Parser():
         #sigma_bkg versus background_rms depends on lenstronomy version
         
         #require point sources to be listed after the host
+
+        # if timeseries, and num exposures > 1 issue a warning
         
         return
     
@@ -149,6 +157,19 @@ class Organizer():
         chosen_dec = np.sin(angle) * sep + dec_host
         return chosen_ra, chosen_dec
 
+    def _find_obj_string(self, obj_name, configuration):
+        """
+        Return the location of an object in the flattened dictionary
+        
+        :param obj_name: the name of the object
+        :param configuration: 'CONFIGURATION_1', 'CONFIGURATION_2', etc.
+        :return: obj_string: the location of the object in the flattened dictionary
+        """
+
+        d = benedict(self.main_dict['GEOMETRY'][configuration].copy(), keypath_separator='.')
+        return [x.replace('.', '-') for x in d.keypaths() if d[x] == obj_name][0]
+
+    
     def _flatten_and_fill(self, config_dict):
         """
         Flatten input dictionary, and sample from any specified distributions
@@ -254,7 +275,7 @@ class Organizer():
                                 draws = self._draw(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep']['DISTRIBUTION'], bands)
                                 sep = draws[0]
                             else:
-                                sep = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']
+                                sep = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep']
 
                             ##convert image separation into ra and dec
                             ra, dec = self._choose_position(ra_host, dec_host, sep)
@@ -340,6 +361,82 @@ class Organizer():
                 
         return output_dict
 
+
+    def _flatten_and_fill_time_series(self, config_dict, configuration, obj_strings):
+        """
+        Generate an image info dictionary for each step in the time series
+
+        :param config_dict: dictionary built up by self.breakup()
+        :param configuration: CONFIGURATION_1, CONFIGURATION_2, etc.
+        :param obj_string: list of the strings targetting the object in the flattened dictionary (e.g. ['PLANE_2-OBJECT_2'])
+        :return: flattened_and_filled dictionary: dict ready for individual image sim  
+        """
+        output_dicts = []
+        bands = self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
+        # Get flattened and filled dictionary
+        base_output_dict = self._flatten_and_fill(config_dict)
+
+        closest_redshift_lcs = []
+        for obj_name, obj_string in zip(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['OBJECTS'], obj_strings):
+            # determine closest lc in library to redshift
+            redshift = base_output_dict[bands[0]][obj_string + '-REDSHIFT']
+            lcs = eval('self.{0}_{1}_lightcurves'.format(configuration, obj_name))
+            closest_redshift_lcs.append(lcs['library'][np.argmin(np.abs(redshift - lcs['redshifts']))])
+
+        # overwrite the image sim dictionary
+        fake_noise = np.random.normal(scale=0.15, loc=0, size=len(obj_strings) * len(bands) * len(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['NITES']))
+        noise_idx = 0
+        for nite in self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['NITES']:
+            output_dict = base_output_dict.copy()
+            for band in bands:
+                for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
+                    
+                    output_dict[band][obj_string + '-magnitude'] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
+                    output_dict[band][obj_string + '-id'] = closest_redshift_lc['sed']
+                    output_dict[band][obj_string + '-type'] = closest_redshift_lc['obj_type']
+
+                    noise_idx += 1
+                    
+            output_dicts.append(copy.deepcopy(output_dict))
+            del output_dict
+                    
+        return output_dicts
+
+    def generate_time_series(self, configuration, nites, objects, redshift_dicts):
+        """
+        Generate a light curve bank for each configuration with timeseries info
+
+        :param nites: a list of nites to get a photometric measurement
+        :param objects: a list of object names
+        :param redshift_dicts: a list of redshift information about the objects
+        """
+
+        # instantiate an LCGen object
+        lc_gen = timeseries.LCGen(bands=self.main_dict['SURVEY']['PARAMETERS']['BANDS'])
+
+        for obj, redshift_dict in zip(objects, redshift_dicts):
+            lc_library = []
+
+            # get redshifts to simulate light curves at
+            if isinstance(redshift_dict, dict):
+                drawn_redshifts = [self._draw(redshift_dict['DISTRIBUTION'], bands='g') for _ in range(100)]
+                redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
+            else:
+                redshifts = np.array([redshift_dict])
+
+            # get model to simulate
+            model_info = self.main_dict['SPECIES'][self._species_map[obj]]['MODEL'].split('_')
+            if model_info[-1].lower() == 'random':
+                for redshift in redshifts:
+                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites)'.format(model_info[0])))
+            else:
+                for redshift in redshifts:
+                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, sed_filename={1})'.format(model_info[0], model_info[1])))
+            
+            setattr(self, configuration + '_' + obj + '_' + 'lightcurves', {'library': lc_library, 'redshifts': redshifts})
+        
+        return
+    
     def breakup(self):
         """
         Based on configurations and dataset size, build list of simulation dicts.
@@ -403,16 +500,47 @@ class Organizer():
                 noise_source_num = noise_source_idx + 1
                 noise_dict['NOISE_SOURCE_{0}-NAME'.format(noise_source_num)] = self.main_dict['GEOMETRY'][k]['NOISE_SOURCE_{0}'.format(noise_source_num)]
             configurations[k]['NOISE_DICT'] = noise_dict
-        
+
+        # Check for timeseries metadata
+        for k in configurations.keys():
+            setattr(self, k + '_time_series', False)
+            if 'TIMESERIES' in self.main_dict['GEOMETRY'][k].keys():
+                # Find the plane of the ojects and save the redshift sub-dict
+                redshift_dicts = []
+                for obj_name in self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS']:
+                    for sub_k in self.main_dict['GEOMETRY'][k].keys():
+                        if sub_k[0:5] == 'PLANE':
+                            for sub_sub_k in self.main_dict['GEOMETRY'][k][sub_k].keys():
+                                if sub_sub_k[0:6] == 'OBJECT':
+                                    if self.main_dict['GEOMETRY'][k][sub_k][sub_sub_k] == obj_name:
+                                        redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'].copy())
+                
+                self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts)
+                setattr(self, k + '_time_series', True)
+            
         # For each configuration, generate full sim info for as many objects as user specified
         configuration_sim_dicts = {}
         for k, v in configurations.items():
             configuration_sim_dicts[k] = []
+
+            time_series = eval('self.{0}_time_series'.format(k))
+            if time_series:
+                # Get string referencing the varaible object
+                obj_strings = [self._find_obj_string(x, k) for x in self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS']]
             
             for _ in range(v['SIZE']):
-                configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy()))
+
+                if time_series:
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), k, obj_strings)
+                    for flattened_image_info in flattened_image_infos:
+                        configuration_sim_dicts[k].append(flattened_image_info)
+                else:
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy()))    
+
+                break
                 
         self.configuration_sim_dicts = configuration_sim_dicts
+
 
 
         

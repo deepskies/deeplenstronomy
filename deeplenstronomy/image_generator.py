@@ -4,9 +4,9 @@ from astropy.cosmology import FlatLambdaCDM
 from lenstronomy.SimulationAPI.sim_api import SimAPI
 import numpy as np
 
-import deeplenstronomy.distributions as distributions
+import distributions
 
-from deeplenstronomy.utils import dict_select, dict_select_choose, select_params
+from utils import dict_select, dict_select_choose, select_params
 
 
 class ImageGenerator():
