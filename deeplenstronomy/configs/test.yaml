@@ -1,0 +1,79 @@
+DATASET:
+    NAME: Tester
+    PARAMETERS:
+        SIZE: 1
+        OUTDIR: Tester
+
+IMAGE:
+    PARAMETERS:
+        exposure_time: 90
+        numPix: 64
+        pixel_scale: 0.263
+        psf_type: 'GAUSSIAN'
+        read_noise: 7
+        ccd_gain: 4
+
+SURVEY:
+    PARAMETERS:
+        BANDS: 'g,r,i,z'
+        seeing: 1.0
+        magnitude_zero_point: 30.0
+        sky_brightness: 29.0
+        num_exposures: 1
+
+COSMOLOGY:
+    PARAMETERS:
+        H0: 70
+        Om0: 0.3
+
+SPECIES:
+    GALAXY_1:
+        NAME: LENS
+        LIGHT_PROFILE_1:
+            NAME: SERSIC_ELLIPSE
+            PARAMETERS:
+                center_x: 0.0
+                center_y: 0.0
+                R_sersic: 6
+                n_sersic: 5
+                e1: 0.2
+                e2: -0.1
+                magnitude: 17.0
+        MASS_PROFILE_1:
+            NAME: SIE
+            PARAMETERS:
+                theta_E: 3.0
+                e1: 0.1
+                e2: -0.1
+                center_x: 0.0
+                center_y: 0.0
+    GALAXY_2:
+        NAME: SOURCE
+        LIGHT_PROFILE_1:
+            NAME: SERSIC_ELLIPSE
+            PARAMETERS:
+                center_x: 0.0
+                center_y: 0.0
+                R_sersic: 6
+                n_sersic: 5
+                e1: 0.2
+                e2: -0.1
+                magnitude: 18.0
+    NOISE_1:
+        NAME: POISSON_NOISE
+        PARAMETERS:
+            mean: 2.0
+
+GEOMETRY:
+    CONFIGURATION_1:
+        NAME: TEST
+        FRACTION: 1.0
+        PLANE_1:
+            OBJECT_1: LENS
+            PARAMETERS:
+                REDSHIFT: 0.2
+        PLANE_2:
+            OBJECT_1: SOURCE
+            PARAMETERS:
+                REDSHIFT: 0.6
+        NOISE_SOURCE_1: POISSON_NOISE
