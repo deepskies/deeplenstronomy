@@ -1,16 +1,17 @@
-# Classes to parse input yaml files and organize user settings
+# Classes to parse input yaml files and organize user settingsOA
 
+from astropy.cosmology import FlatLambdaCDM
 from benedict import benedict
 import copy
 import random
 import numpy as np
 import yaml
 
-import timeseries
-from _utils import dict_select
-import distributions
-import special
-import check as big_check
+import deeplenstronomy.timeseries as timeseries
+from deeplenstronomy.utils import dict_select, dict_select_choose
+import deeplenstronomy.distributions as distributions
+import deeplenstronomy.special as special
+import deeplenstronomy.check as big_check
 
 class Parser():
     """ 
@@ -170,7 +171,7 @@ class Organizer():
         return [x.replace('.', '-') for x in d.keypaths() if d[x] == obj_name][0]
 
     
-    def _flatten_and_fill(self, config_dict):
+    def _flatten_and_fill(self, config_dict, objid=0):
         """
         Flatten input dictionary, and sample from any specified distributions
         
@@ -179,6 +180,10 @@ class Organizer():
         """
         bands = config_dict['SURVEY_DICT']['BANDS'].split(',')
         output_dict = {x: {} for x in bands}
+
+        #Object IDs
+        for band in bands:
+            output_dict[band]['OBJID'] = objid
         
         #COSMOLOGY
         for k, v in config_dict['COSMOLOGY_DICT'].items():
@@ -362,7 +367,7 @@ class Organizer():
         return output_dict
 
 
-    def _flatten_and_fill_time_series(self, config_dict, configuration, obj_strings):
+    def _flatten_and_fill_time_series(self, config_dict, configuration, obj_strings, objid):
         """
         Generate an image info dictionary for each step in the time series
 
@@ -374,7 +379,7 @@ class Organizer():
         output_dicts = []
         bands = self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
         # Get flattened and filled dictionary
-        base_output_dict = self._flatten_and_fill(config_dict)
+        base_output_dict = self._flatten_and_fill(config_dict, objid)
 
         closest_redshift_lcs = []
         for obj_name, obj_string in zip(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['OBJECTS'], obj_strings):
@@ -390,8 +395,17 @@ class Organizer():
             output_dict = base_output_dict.copy()
             for band in bands:
                 for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
-                    
-                    output_dict[band][obj_string + '-magnitude'] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
+
+                    try:
+                        #try using the exact night
+                        output_dict[band][obj_string + '-magnitude'] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
+                    except:
+                        #linearly interpolate between the closest two nights
+                        band_df = closest_redshift_lc['lc'][closest_redshift_lc['lc']['BAND'].values == band].copy().reset_index(drop=True)
+                        closest_nite_indices = np.abs(nite - band_df['NITE'].values).argsort()[:2]
+                        output_dict[band][obj_string + '-magnitude'] = (band_df['MAG'].values[closest_nite_indices[1]] - band_df['MAG'].values[closest_nite_indices[0]]) * (nite - band_df['NITE'].values[closest_nite_indices[1]]) / (band_df['NITE'].values[closest_nite_indices[1]] - band_df['NITE'].values[closest_nite_indices[0]]) + band_df['MAG'].values[closest_nite_indices[1]] + fake_noise[noise_idx]
+
+                    output_dict[band][obj_string + '-nite'] = nite
                     output_dict[band][obj_string + '-id'] = closest_redshift_lc['sed']
                     output_dict[band][obj_string + '-type'] = closest_redshift_lc['obj_type']
 
@@ -402,7 +416,7 @@ class Organizer():
                     
         return output_dicts
 
-    def generate_time_series(self, configuration, nites, objects, redshift_dicts):
+    def generate_time_series(self, configuration, nites, objects, redshift_dicts, cosmo):
         """
         Generate a light curve bank for each configuration with timeseries info
 
@@ -428,10 +442,10 @@ class Organizer():
             model_info = self.main_dict['SPECIES'][self._species_map[obj]]['MODEL'].split('_')
             if model_info[-1].lower() == 'random':
                 for redshift in redshifts:
-                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites)'.format(model_info[0])))
+                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)'.format(model_info[0])))
             else:
                 for redshift in redshifts:
-                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, sed_filename={1})'.format(model_info[0], model_info[1])))
+                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, sed_filename={1}, cosmo=cosmo)'.format(model_info[0], model_info[1])))
             
             setattr(self, configuration + '_' + obj + '_' + 'lightcurves', {'library': lc_library, 'redshifts': redshifts})
         
@@ -514,8 +528,12 @@ class Organizer():
                                 if sub_sub_k[0:6] == 'OBJECT':
                                     if self.main_dict['GEOMETRY'][k][sub_k][sub_sub_k] == obj_name:
                                         redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'].copy())
-                
-                self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts)
+
+                #set the cosmology for luminosity distance calculations
+                cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+                cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
+                                        
+                self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
                 setattr(self, k + '_time_series', True)
             
         # For each configuration, generate full sim info for as many objects as user specified
@@ -527,18 +545,16 @@ class Organizer():
             if time_series:
                 # Get string referencing the varaible object
                 obj_strings = [self._find_obj_string(x, k) for x in self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS']]
-            
-            for _ in range(v['SIZE']):
+
+            for objid in range(v['SIZE']):
 
                 if time_series:
-                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), k, obj_strings)
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), k, obj_strings, objid)
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
                     configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy()))    
 
-                break
-                
         self.configuration_sim_dicts = configuration_sim_dicts
 
 
