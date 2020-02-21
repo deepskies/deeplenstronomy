@@ -6,15 +6,123 @@ import numpy as np
 import os
 import pandas as pd
 
-from input_reader import Organizer, Parser
-from image_generator import ImageGenerator
+from deeplenstronomy.input_reader import Organizer, Parser
+from deeplenstronomy.image_generator import ImageGenerator
 
 class Dataset():
-    def __init__(self, config_file=None, save=False, store=True):
-        if config_file:
-            make_dataset(config_file, dataset=self, save=save, store=store)
+    def __init__(self, config=None, save=False, store=True):
+        """
+        Create a dataset. If config file or config dict is supplied, generate it.
+
+        :param config: yaml file specifying dataset characteristics 
+                       OR                                                                                                                                                                                                                                                                                                                                                                                                                                       pre-parsed yaml file as a dictionary 
+        :param store: If true, the generated data is stored as attributes of this object
+        :param save: If true, the generated data is written to disk
+        """
+        
+        if config:
+            make_dataset(config, dataset=self, save=save, store=store)
         return
 
+    def update_param(self, new_param_dict, configuration):
+        """
+        Update single parameters to new values
+
+        :param new_param_dict: {'param_1_name': new_value_1, 'param_2_name': new_value_2, ...}
+        :param configuration: like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...
+        """
+        # Put in the updated values
+        for new_param, new_value in new_param_dict.items():
+            exec("self.config_dict" + self._locate(new_param, configuration) + " = new_value")
+            
+        return
+
+    def update_param_dist(self, new_param_dist_dict, configuration):
+        """
+        Update the distribution from which a parameter is drawn
+
+        :param new_param_dist_dict: should look like this:
+            {'param_1_name': {'name': 'uniform', 
+                              'parameters': {'minimum': new_value_1, 
+                                             'maximum': new_value_2}},
+             'param_2_name': {'name': 'uniform', 
+                              'parameters': {'minimum': new_value_3, 
+                                             'maximum': new_value_4}}, ...}
+        :param configuration: like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...   
+        """
+        # Put in the updated distributions
+        for new_param, new_dist_info in new_param_dist_dict.items():
+            location = self._locate(new_param, configuration)
+            exec("self.config_dict" + location + " = {'DISTRIBUTION': {'NAME': '', 'PARAMETERS': {}}}")
+            exec("self.config_dict" + location + "['DISTRIBUTION']['NAME'] = new_dist_info['name']")
+            for new_dist_param, new_dist_param_value in new_dist_info['parameters'].items():
+                exec("self.config_dict" + location + "['DISTRIBUTION']['PARAMETERS'][new_dist_param] = new_dist_param_value")
+
+        return
+    
+    def _locate(self, param, configuration):
+        """
+        Find the path to the desired parameter in the main dictionary
+
+        :param param: the name of the parameter you want to find the path for
+        :param configuration: like 'CONFIGURATION_1', 'CONFIGURATION_2', etc... 
+        :return: the path to the parameter
+        """
+        if param[-1] in self.config_dict['SURVEY']['PARAMETERS']['BANDS'].split(','):
+            # Trim the band if the user left it in
+            param = param[:-2]
+
+        # COSMOLOGY
+        if param in ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']:
+            return "['COSMOLOGY']['PARAMETERS']['{0}']".format(param)
+        # IMAGE
+        elif param in ['exposure_time', 'numPix', 'pixel_scale', 'psf_type', 'read_noise', 'ccd_gain']:
+            return "['IMAGE']['PARAMETERS']['{0}']".format(param)
+        # SURVEY
+        elif param in ['BANDS', 'seeing', 'magnitude_zero_point', 'sky_brightness', 'num_exposures']:
+            return "['SURVEY']['PARAMETERS']['{0}']".format(param)
+        # NOISE
+        elif param[0:5] == 'NOISE':
+            # type of noise
+            if param[-4:] == 'NAME':
+                return "['GEOMETRY']['{0}']['{1}']".format(configuration, param.split('-')[0])
+            # noise properties
+            else:
+                noise_name = self.config_dict['GEOMETRY'][configuration][param.split('-')[0]]
+                for k, v in self.config_dict['SPECIES'].items():
+                    for v_key in v.keys():
+                        if v_key[0:5] == 'NOISE':
+                            if v['NAME'] == noise_name:
+                                return "['SPECIES']['{0}']['PARAMETERS']['{1}']".format(k, param.split('-')[-1])
+            
+        # GEOMETRY and SPECIES
+        elif param[0:5] == 'PLANE':
+            # redshift
+            if param[-8:] == 'REDSHIFT':
+                return "['GEOMETRY']['{0}']['{1}']['PARAMETERS']['REDSHIFT']".format(configuration, param.split('-')[0])
+            # timeseries - not available yet
+            
+            # species
+            else:
+                obj_name = self.config_dict['GEOMETRY'][configuration][param.split('-')[0]][param.split('-')[1]]
+                for k, v in self.config_dict['SPECIES'].items():
+                    if 'NAME' in v.keys():
+                        if obj_name == self.config_dict['SPECIES'][k]['NAME']:
+                            return "['SPECIES']['{0}']['{1}']['PARAMETERS']['{2}']".format(k, param.split('-')[2], param.split('-')[-1])
+                print("If you're seeing this message, you're trying to update something I wasn't prepared for.\nShoot me a message on Slack")
+        else:
+            print("If you're seeing this message, you're trying to update something I wasn't prepared for.\nShoot me a message on Slack")
+
+        
+    def regenerate(self, save=False, store=True):
+        """
+        Using the dictionary stored in self.config_dict, make a new dataset
+        
+        :param store: If true, the generated data is stored as attributes of this object
+        :param save: If true, the generated data is written to disk
+        """
+        make_dataset(config=self.config_dict, dataset=self, save=save, store=store)
+        return
 
 def flatten_image_info(sim_dict):
     """
@@ -34,28 +142,33 @@ def flatten_image_info(sim_dict):
     return out_dict
     
 
-def make_dataset(config_file, dataset=None, save=False, store=True):
+def make_dataset(config, dataset=None, save=False, store=True):
     """
     Generate a dataset from a config file
 
-    :param config_file: yaml file specifying dataset characteristics
+    :param config: yaml file specifying dataset characteristics
+                   OR
+                   pre-parsed yaml file as a dictionary
     :return: dataset: instance of dataset class
     """
 
     if not dataset:
         dataset = Dataset()
 
-    # Store config file
-    dataset.config_file = config_file
-
-    # Parse the config file and store config dict
-    P = Parser(config_file)
-    dataset.config_dict = P.config_dict
+    if isinstance(config, dict):
+        dataset.config_dict = config
+    else:    
+        # Store config file
+        dataset.config_file = config
+        
+        # Parse the config file and store config dict
+        P = Parser(config)
+        dataset.config_dict = P.config_dict
 
     # Store top-level dataset info
-    dataset.name = P.config_dict['DATASET']['NAME']
-    dataset.size = P.config_dict['DATASET']['PARAMETERS']['SIZE']
-    dataset.outdir = P.config_dict['DATASET']['PARAMETERS']['OUTDIR']
+    dataset.name = dataset.config_dict['DATASET']['NAME']
+    dataset.size = dataset.config_dict['DATASET']['PARAMETERS']['SIZE']
+    dataset.outdir = dataset.config_dict['DATASET']['PARAMETERS']['OUTDIR']
 
     # Make the output directory if it doesn't exist already
     if save:
@@ -63,7 +176,7 @@ def make_dataset(config_file, dataset=None, save=False, store=True):
             os.mkdir(dataset.outdir)
     
     # Organize the configuration dict
-    O = Organizer(P.config_dict)
+    O = Organizer(dataset.config_dict)
 
     # Store species map
     dataset.species_map = O._species_map
@@ -151,5 +264,7 @@ def view_image_rgb(image, Q=2.0, stretch=4.0):
     plt.show(block=True)
     plt.close()
 
+    
 if __name__ == "__main__":
-    make_dataset('configs/fake_config.yaml', store=False, save=False)
+    #make_dataset('configs/fake_config.yaml', store=False, save=False)
+    pass
