@@ -1,0 +1,236 @@
+
+DATASET:
+    NAME: DeepLenstronomyData
+    PARAMETERS:
+        SIZE: 10
+        OUTDIR: temp
+
+IMAGE:
+    PARAMETERS:
+        exposure_time: 100.0
+        seeing: 
+            DISTRIBUTION:
+                NAME: uniform
+                PARAMETERS:
+                    minimum: 0.8
+                    maximum: 1.4
+        kernel_size: 91
+        deltaPix: 0.263
+        numPix: 101
+        pixel_scale: 0.263
+        magnitude_zero_point: 30.0
+        psf_type: 'GAUSSIAN'
+        sigma_bkg: 8.0
+        truncation: 3
+        supersampling_factor: 1
+        read_noise: 10
+        ccd_gain: 4
+        sky_brightness: 32.0
+        
+COSMOLOGY:
+    PARAMETERS:
+        H0: 70
+        Om0: 0.3
+
+SURVEY:
+    PARAMETERS:
+        pixel_size: 0.263
+        BANDS: g,r,i,z
+        SKY_BRIGHTNESS:
+            DISTRIBUTION:
+                NAME: normal
+                PARAMETERS:
+                    mean: 30.0
+                    std: 1.0
+
+SPECIES:
+    GALAXY_1:
+        NAME: LENS
+        LIGHT_PROFILE_1:
+            NAME: SERSIC_ELLIPSE
+            PARAMETERS:
+                magnitude:
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: 14
+                            maximum: 23
+                center_x:
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: -0.5
+                            maximum: 0.5
+                center_y:
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: -0.5
+                            maximum: 0.5
+
+                R_sersic:
+                    DISTRIBUTION:
+                        NAME: normal
+                        PARAMETERS:
+                            mean: 10
+                            std: 1
+
+                n_sersic:
+                    DISTRIBUTION:
+                        NAME: normal
+                        PARAMETERS:
+                            mean: 10
+                            std: 1
+                e1: 0.2
+                e2: -0.1
+
+                            
+        MASS_PROFILE_1:
+            NAME: SIE 
+            PARAMETERS:
+                theta_E: 2.0
+                e1: 0.1
+                e2: -0.1
+                center_x: 0.0
+                center_y: 0.0
+                
+        SHEAR_PROFILE_1:
+            NAME: SHEAR
+            PARAMETERS:
+                gamma1: 0.8
+                gamma2: 0.01
+                    
+        SPECIAL:
+#            FUNDAMENTAL_PLANE: ['LIGHT_PROFILE_1-MASS_PROFILE_1'] 
+            DES_COLOR: ['LIGHT_PROFILE_1']
+            
+    GALAXY_2:
+        NAME: SOURCE
+        INPUT: configs/sersic_light_defaults.yaml
+        
+    POINTSOURCE_1:
+        NAME: AGN
+        HOST: SOURCE
+        PARAMETERS:
+            magnitude:
+                DISTRIBUTION:
+                    NAME: uniform
+                    PARAMETERS:
+                        minimum: 14
+                        maximum: 23
+            
+    POINTSOURCE_2:
+        NAME: SUPERNOVA
+        HOST: LENS
+        PARAMETERS:
+            magnitude:
+                DISTRIBUTION:
+                    NAME: uniform
+                    PARAMETERS:
+                        minimum: 14
+                        maximum: 23
+            sep:
+                DISTRIBUTION:
+                    NAME: uniform
+                    PARAMETERS:
+                        minimum: 0.5
+                        maximum: 2.0
+        
+    POINTSOURCE_3:
+        NAME: STAR
+        HOST: Foreground
+        PARAMETERS:
+        
+    NOISE_1:
+        NAME: POISSON_NOISE
+        PARAMETERS:
+            mean:
+                DISTRIBUTION:
+                    NAME: uniform
+                    PARAMETERS:
+                        minimum: 1
+                        maximum: 2
+    NOISE_2:
+        NAME: DES_NOISE
+        PARAMETERS:
+        
+GEOMETRY:
+
+    CONFIGURATION_1:
+        NAME: GALAXY_AGN
+        FRACTION: 0.5
+        PLANE_1:
+            OBJECT_1: LENS
+            PARAMETERS:
+                REDSHIFT:
+                    DISTRIBUTION:
+                        NAME: delta_function
+                        PARAMETERS:
+                            value: 0.5
+                            
+        PLANE_2:
+            OBJECT_1: SOURCE
+            OBJECT_2: AGN
+            PARAMETERS:
+                REDSHIFT:
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: 1.0
+                            maximum: 1.2
+                            
+        NOISE_SOURCE_1: POISSON_NOISE
+                            
+    CONFIGURATION_2:
+        FRACTION: 0.3
+        NAME: GALAXY_AGN
+        PLANE_1: 
+            OBJECT_1: LENS
+            PARAMETERS:
+                REDSHIFT:
+                    DISTRIBUTION:
+                        NAME: delta_function
+                        PARAMETERS:
+                            value: 0.5
+        PLANE_2:
+            OBJECT_1: SOURCE
+            OBJECT_2: AGN
+            PARAMETERS:
+                REDSHIFT:
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: 1.0
+                            maximum: 1.2
+            
+            
+    CONFIGURATION_3:
+        NAME: DOUBLE_SOURCE_PLANE_AGN
+        FRACTION: 0.2
+        PLANE_1:
+            OBJECT_1: LENS
+            PARAMETERS: 
+                REDSHIFT:
+                    DISTRIBUTION:
+                        NAME: delta_function
+                        PARAMETERS:
+                            value: 0.2
+        PLANE_2:
+            OBJECT_1: LENS
+            PARAMETERS: 
+                REDSHIFT:
+                    DISTRIBUTION:
+                        NAME: delta_function
+                        PARAMETERS:
+                            value: 0.5
+        PLANE_3:
+            OBJECT_1: SOURCE
+            OBJECT_2: AGN
+            PARAMETERS:
+                REDSHIFT:
+                    DISTRIBUTION:
+                        NAME: delta_function
+                        PARAMETERS:
+                            value: 1.0
+            
+

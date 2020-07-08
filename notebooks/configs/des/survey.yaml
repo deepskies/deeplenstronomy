@@ -1,0 +1,15 @@
+PARAMETERS:
+    BANDS: g,r,i,z,Y
+    seeing:
+        DISTRIBUTION:
+            NAME: des_seeing
+            PARAMETERS: None
+    magnitude_zero_point: 30.0
+    sky_brightness:
+        DISTRIBUTION:
+            NAME: des_sky_brightness
+            PARAMETERS: None
+    num_exposures:
+        DISTRIBUTION:
+            NAME: des_num_exposures
+            PARAMETERS: None
