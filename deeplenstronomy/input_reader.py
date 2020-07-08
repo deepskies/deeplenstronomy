@@ -1,10 +1,12 @@
-# Classes to parse input yaml files and organize user settingsOA
+# Classes to parse inpAut yaml files and organize user settings
 
 from astropy.cosmology import FlatLambdaCDM
 from benedict import benedict
 import copy
 import random
 import numpy as np
+import os
+import sys
 import yaml
 
 import deeplenstronomy.timeseries as timeseries
@@ -22,6 +24,9 @@ class Parser():
     """
 
     def __init__(self, config):
+
+        # Check for annoying tabs - there's probably a better way to do this
+        self.parse_for_tabs(config)
         
         # Read main configuration file
         self.full_dict = self.read(config)
@@ -32,7 +37,7 @@ class Parser():
         
         # Check for user errors in inputs
         self.check()
-        
+
         return
     
     def include_inputs(self):
@@ -73,6 +78,26 @@ class Parser():
                         
         return config_dict
 
+
+    def parse_for_tabs(self, config):
+        """
+        Check for the existence of tab characters that might break yaml
+        """
+        stream = open(config, 'r')
+        lines = stream.readlines()
+        stream.close()
+
+        bad_line_numbers = []
+        for index, line in enumerate(lines):
+            if line.find('\t') != -1:
+                bad_line_numbers.append(str(index + 1))
+
+        if len(bad_line_numbers) != 0:
+            print("Tab characters detected on the following lines:")
+            print("    " + ', '.join(bad_line_numbers))
+            print("Please correct the tabs and restart")
+            sys.exit()
+        return
     
     def check(self):
         """
@@ -97,17 +122,18 @@ class Parser():
     
 
 class Organizer():
-    def __init__(self, config_dict):
+    def __init__(self, config_dict, verbose=False):
         """
         Break up config dict into individual simulation dicts.
         
         :param config_dict: Parser.config_dict
+        :param verbose: if true, status updates are printed
         """
         self.main_dict = config_dict.copy()
         
         self.__track_species_keys()
         
-        self.breakup()
+        self.breakup(verbose=verbose)
         
         return
 
@@ -288,15 +314,29 @@ class Organizer():
                         else:
                             #set ra and dec to host center
                             ra, dec = ra_host, dec_host
+                            sep = 0.0
 
                         for band in bands:
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-HOST'.format(plane_num, obj_num)] = self.main_dict['SPECIES'][self._species_map[obj_name]]['HOST']
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-NAME'.format(plane_num, obj_num)] = obj_name
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-ra'.format(plane_num, obj_num)] = ra
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-dec'.format(plane_num, obj_num)] = dec
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-sep'.format(plane_num, obj_num)] = sep
                     else:
-                        #foreground - no host or sep to worry about
-                        pass
+                        #foreground, choose position randomly
+                        im_size = self.main_dict['IMAGE']['PARAMETERS']['numPix'] * self.main_dict['IMAGE']['PARAMETERS']['pixel_scale'] / 2
+                        ra, dec = random.uniform(-1 * im_size, im_size), random.uniform(-1 * im_size, im_size)
+                        if isinstance(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['magnitude'], dict):
+                            draws = self._draw(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['magnitude']['DISTRIBUTION'], bands)
+                        else:
+                            draws = [self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['magnitude']] * len(bands)
+                        for band, magnitude in zip(bands, draws):
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-HOST'.format(plane_num, obj_num)] = 'Foreground'
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-NAME'.format(plane_num, obj_num)] = obj_name
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-ra_image'.format(plane_num, obj_num)] = ra
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-dec_image'.format(plane_num, obj_num)] = dec
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-magnitude'.format(plane_num, obj_num)] = magnitude
+                        
                         
                 else:
                      for band in bands:
@@ -387,7 +427,7 @@ class Organizer():
             redshift = base_output_dict[bands[0]][obj_string + '-REDSHIFT']
             lcs = eval('self.{0}_{1}_lightcurves'.format(configuration, obj_name))
             closest_redshift_lcs.append(lcs['library'][np.argmin(np.abs(redshift - lcs['redshifts']))])
-
+            
         # overwrite the image sim dictionary
         fake_noise = np.random.normal(scale=0.15, loc=0, size=len(obj_strings) * len(bands) * len(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['NITES']))
         noise_idx = 0
@@ -440,7 +480,7 @@ class Organizer():
 
             # get model to simulate
             model_info = self.main_dict['SPECIES'][self._species_map[obj]]['MODEL'].split('_')
-            if model_info[-1].lower() == 'random':
+            if model_info[-1].lower() == 'random' or len(model_info) == 1:
                 for redshift in redshifts:
                     lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)'.format(model_info[0])))
             else:
@@ -451,9 +491,11 @@ class Organizer():
         
         return
     
-    def breakup(self):
+    def breakup(self, verbose=False):
         """
         Based on configurations and dataset size, build list of simulation dicts.
+
+        :param verbose: if true, print status update
         """
         # Determine number of images to simulate for each configuration
         global_size = self.main_dict['DATASET']['PARAMETERS']['SIZE']
@@ -519,6 +561,10 @@ class Organizer():
         for k in configurations.keys():
             setattr(self, k + '_time_series', False)
             if 'TIMESERIES' in self.main_dict['GEOMETRY'][k].keys():
+                
+                # Make a directory to store light curve data
+                if not os.path.exists('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])): os.mkdir('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']))
+                
                 # Find the plane of the ojects and save the redshift sub-dict
                 redshift_dicts = []
                 for obj_name in self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS']:
@@ -527,18 +573,32 @@ class Organizer():
                             for sub_sub_k in self.main_dict['GEOMETRY'][k][sub_k].keys():
                                 if sub_sub_k[0:6] == 'OBJECT':
                                     if self.main_dict['GEOMETRY'][k][sub_k][sub_sub_k] == obj_name:
-                                        redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'].copy())
+                                        if isinstance(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'], dict):
+                                            redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'].copy())
+                                        else:
+                                            redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'] + 0.0)
 
                 #set the cosmology for luminosity distance calculations
                 cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
                 cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
-                                        
-                self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
+
+                if verbose: print("Generating time series data for {0}".format(k))
+
+                # If light curves already exist, skip generation
+                if os.path.exists('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])):
+                    setattr(self, k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), np.load('lightcurves/{0}_{1}.npy'.format(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])).item()) 
+                else:
+                    self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
+                    np.save('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), eval('self.' + k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])))
+
                 setattr(self, k + '_time_series', True)
-            
+
+                
         # For each configuration, generate full sim info for as many objects as user specified
         configuration_sim_dicts = {}
+        if verbose: print("Entering main organization loop")
         for k, v in configurations.items():
+            if verbose: print("Organizing {0}".format(k))
             configuration_sim_dicts[k] = []
 
             time_series = eval('self.{0}_time_series'.format(k))

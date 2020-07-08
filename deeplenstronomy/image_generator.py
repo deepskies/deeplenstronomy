@@ -71,7 +71,8 @@ class ImageGenerator():
                         if sim_dict[prefix + 'HOST'] == 'Foreground':
                             kwargs_model['point_source_model_list'].append('UNLENSED')
                             ps_info = ['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, x) for x in ['ra_image', 'dec_image', 'magnitude']]
-                            kwargs_point_source_list.append(dict_select(sim_dict, ps_info))
+                            ps_dict_info = dict_select(sim_dict, ps_info)
+                            kwargs_point_source_list.append({'ra_image': [ps_dict_info[prefix + 'ra_image']], 'dec_image': [ps_dict_info[prefix + 'dec_image']], 'magnitude': [ps_dict_info[prefix + 'magnitude']]})
                         # Real point sources
                         else:
                             if plane_num < sim_dict['NUMBER_OF_PLANES']:

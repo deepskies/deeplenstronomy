@@ -86,3 +86,4 @@ def make_redder(output_dict, light_profile_mag, bands):
                 output_dict[band][k] = output_dict[band][k] - mag_correction[band]
 
     return output_dict
+

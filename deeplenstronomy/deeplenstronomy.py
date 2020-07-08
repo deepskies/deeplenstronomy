@@ -1,6 +1,7 @@
 # Outer shell to do everything for you
 
 from astropy.visualization import make_lupton_rgb
+import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -142,13 +143,18 @@ def flatten_image_info(sim_dict):
     return out_dict
     
 
-def make_dataset(config, dataset=None, save=False, store=True):
+def make_dataset(config, dataset=None, save=False, store=True, verbose=False, store_sample=False, image_file_format='npy'):
     """
     Generate a dataset from a config file
 
     :param config: yaml file specifying dataset characteristics
                    OR
                    pre-parsed yaml file as a dictionary
+    :param verbose: if true, print status updates
+    :param store: save images and metadata as attributes
+    :param save: save images and metadata to disk
+    :param store_sample: save five images and metadata as attribute
+    :param image_file_format: outfile format type (npy, h5)
     :return: dataset: instance of dataset class
     """
 
@@ -176,7 +182,7 @@ def make_dataset(config, dataset=None, save=False, store=True):
             os.mkdir(dataset.outdir)
     
     # Organize the configuration dict
-    O = Organizer(dataset.config_dict)
+    O = Organizer(dataset.config_dict, verbose=verbose)
 
     # Store species map
     dataset.species_map = O._species_map
@@ -190,7 +196,7 @@ def make_dataset(config, dataset=None, save=False, store=True):
     # Simulate images
     for configuration, sim_inputs in O.configuration_sim_dicts.items():
 
-        #print(configuration)
+        if verbose: print("Generating images for {0}".format(configuration))
         
         metadata, images = [], []
 
@@ -210,14 +216,27 @@ def make_dataset(config, dataset=None, save=False, store=True):
 
         # Save the images and metadata to the outdir if desired (ideal for large simulation production)
         if save:
-            np.save('{0}/{1}_images.npy'.format(dataset.outdir, configuration), configuration_images)
+            #Images
+            if image_file_format == 'npy':
+                np.save('{0}/{1}_images.npy'.format(dataset.outdir, configuration), configuration_images)
+            elif image_file_format == 'h5':
+                hf = h5py.File('{0}/{1}_images.h5'.format(dataset.outdir, configuration), 'w')
+                hf.create_dataset(dataset.name, data=configuration_images)
+                hf.close()
+            else:
+                print("ERROR: {0} is not a supported argument for image_file_format".format(image_file_format))
+            #Metadata
             metadata_df.to_csv('{0}/{1}_metadata.csv'.format(dataset.outdir, configuration))
 
         # Store the images and metadata to the Dataset object (ideal for small scale testing)
         if store:
             setattr(dataset, '{0}_images'.format(configuration), configuration_images)
             setattr(dataset, '{0}_metadata'.format(configuration), metadata_df)
-                                           
+        elif store_sample:
+            setattr(dataset, '{0}_images'.format(configuration), configuration_images[0:5].copy())
+            setattr(dataset, '{0}_metadata'.format(configuration), metadata_df.iloc[0:5].copy())
+            del configuration_images
+            del metadata_df                
         else:
             # Clean up things that are done to save space
             del configuration_images

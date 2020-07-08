@@ -178,7 +178,98 @@ class LCGen():
         :return: closest_nite: the closest nite in the sed to the given nite
         """
         return unique_nites[np.argmin(np.abs(nite - unique_nites))]
+
+    def gen_variable(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        """
+        Generate a random variable light curve
+
+        :param redshift (ignored)  
+        :param nites: a list of night relative to peak you want to obtain a magnitude for 
+        :param sed_filename: (ignored)  
+        :param cosmo: (ignored)   
+        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+            - 'lc' contains a dataframe of the light from the object     
+            - 'obj_type' contains a string for the type of object. Will always be 'Variable' here
+            - 'sed' contains the filename of the sed used. Will always be 'Variable' here  
+        """
+        output_data_cols = ['NITE', 'BAND', 'MAG']
+        output_data = []
+        central_mag = random.uniform(12.0, 23.0)
+        colors = {band: mag for band, mag in zip(self.bands, np.random.uniform(low=-2.0, high=2.0, size=len(self.bands)))}
+        for nite in nites:
+            central_mag = random.uniform(central_mag - 1.0, central_mag + 1.0)
+            for band in self.bands:
+                output_data.append([nite, band, central_mag + colors[band]])
+
+        return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
+		'obj_type': 'Variable',
+                'sed': 'Variable'}
+    
+    def gen_flat(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        """
+        Generate a random flat light curve
         
+        :param redshift (ignored)
+        :param nites: a list of night relative to peak you want to obtain a magnitude for
+        :param sed_filename: (ignored) 
+        :param cosmo: (ignored)  
+        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed'] 
+            - 'lc' contains a dataframe of the light from the object 
+            - 'obj_type' contains a string for the type of object. Will always be 'Flat' here 
+            - 'sed' contains the filename of the sed used. Will always be 'Flat' here            
+        """
+        output_data_cols = ['NITE', 'BAND', 'MAG']
+        central_mag = random.uniform(12.0, 23.0)
+        mags = {band: mag for band, mag in zip(self.bands, central_mag + np.random.uniform(low=-2.0, high=2.0, size=len(self.bands)))}
+        output_data = []
+        for nite in nites:
+            for band in self.bands:
+                output_data.append([nite, band, mags[band]])
+
+        return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
+                'obj_type': 'Flat',
+                'sed': 'Flat'}
+    
+    def gen_variablenoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        """ 
+        Generate a variable light curve with small random noise
+        
+        :param redshift (ignored)
+        :param nites: a list of night relative to peak you want to obtain a magnitude for 
+        :param sed_filename: (ignored) 
+        :param cosmo: (ignored) 
+        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+            - 'lc' contains a dataframe of the light from the object  
+            - 'obj_type' contains a string for the type of object. Will always be 'VariableNoise' here   
+            - 'sed' contains the filename of the sed used. Will always be 'VariableNoise' here       
+        """
+        noiseless_lc_dict = self.gen_variable(redshift, nites)
+        noise = np.random.normal(loc=0, scale=0.25, size=noiseless_lc_dict['lc'].shape[0])
+        noiseless_lc_dict['lc']['MAG'] = noiseless_lc_dict['lc']['MAG'].values + noise
+        noiseless_lc_dict['obj_type'] = 'VariableNoise'
+        noiseless_lc_dict['sed'] = 'VariableNoise'
+        return noiseless_lc_dict
+
+    
+    def gen_flatnoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        """
+        Generate a flat light curve will small random noise
+
+        :param redshift (ignored)
+        :param nites: a list of night relative to peak you want to obtain a magnitude for 
+        :param sed_filename: (ignored) 
+        :param cosmo: (ignored)  
+        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed'] 
+            - 'lc' contains a dataframe of the light from the object  
+            - 'obj_type' contains a string for the type of object. Will always be 'FlatNoise' here
+            - 'sed' contains the filename of the sed used. Will always be 'FlatNoise' here     
+        """
+        noiseless_lc_dict = self.gen_flat(redshift, nites)
+        noise = np.random.normal(loc=0, scale=0.25, size=noiseless_lc_dict['lc'].shape[0])
+        noiseless_lc_dict['lc']['MAG'] = noiseless_lc_dict['lc']['MAG'].values + noise
+        noiseless_lc_dict['obj_type'] = 'FlatNoise'
+        noiseless_lc_dict['sed'] = 'FlatNoise'
+        return noiseless_lc_dict
         
     def gen_ia(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         """

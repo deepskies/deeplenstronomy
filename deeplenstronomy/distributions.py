@@ -22,6 +22,9 @@ def normal(mean, std, bands=''):
 def delta_function(value, bands=''):
     return [value] * len(bands.split(','))
 
+def symmetric_uniform_annulus(r1, r2, bands=''):
+    draw = random.uniform(minimum, maximum) * random.choice([-1.0 * 1.0])
+    return [draw] * len(bands.split(','))
 
 ## Grid sampling distributions
 
