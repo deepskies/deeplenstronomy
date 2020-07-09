@@ -1,8 +1,6 @@
 # Outer shell to do everything for you
 
-from astropy.visualization import make_lupton_rgb
 import h5py
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
@@ -245,43 +243,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
     return dataset
 
 
-def view_image(image):
-    if len(np.shape(image)) > 2:
-        #multi-band mode
-        fig, axs = plt.subplots(1, np.shape(image)[0])
-        for index, single_band_image in enumerate(image):
-            axs[index].matshow(np.log10(single_band_image))
-            axs[index].set_xticks([], [])
-            axs[index].set_yticks([], [])
 
-        fig.tight_layout()
-        plt.show(block=True)
-        plt.close()
-
-    else:
-        #simgle-band mode
-        plt.figure()
-        plt.matshow(np.log10(image))
-        plt.xticks([], [])
-        plt.yticks([], [])
-        plt.show(block=True)
-        plt.close()
-
-def view_image_rgb(image, Q=2.0, stretch=4.0):
-
-    assert len(image) > 2
-    
-    rgb = make_lupton_rgb(np.log10(image[2]),
-                          np.log10(image[1]),
-                          np.log10(image[0]),
-                          Q=Q, stretch=stretch)
-
-    plt.figure()
-    plt.imshow(rgb)
-    plt.xticks([], [])
-    plt.yticks([], [])
-    plt.show(block=True)
-    plt.close()
 
     
 if __name__ == "__main__":
