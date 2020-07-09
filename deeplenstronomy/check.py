@@ -1,6 +1,6 @@
 # A module to check for user errors in the main config file
 
-from benedict import benedict
+from deeplenstronomy.utils import KeyPathDict 
 import sys
 
 class AllChecks():
@@ -16,12 +16,12 @@ class AllChecks():
         Trigger the running of all checks
         """
         # convert to benedict objects for easier parsing
-        bene_f = benedict(full_dict, keypath_separator='.')
-        self.full = bene_f
-        self.full_keypaths = bene_f.keypaths()
-        bene_c = benedict(config_dict, keypath_separator='.')
-        self.config = bene_c
-        self.config_keypaths = bene_c.keypaths()
+        kp_f = KeyPathDict(full_dict, keypath_separator='.')
+        self.full = kp_f
+        self.full_keypaths = kp_f.keypaths()
+        kp_c = KeyPathDict(config_dict, keypath_separator='.')
+        self.config = kp_c
+        self.config_keypaths = kp_c.keypaths()
 
         # find all check functions
         self.checks = [x for x in dir(self) if x.find('check_') != -1]

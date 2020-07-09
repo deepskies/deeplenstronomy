@@ -1,7 +1,7 @@
 # Classes to parse inpAut yaml files and organize user settings
 
 from astropy.cosmology import FlatLambdaCDM
-from benedict import benedict
+from deeplenstronomy.utils import KeyPathDict
 import copy
 import random
 import numpy as np
@@ -44,21 +44,21 @@ class Parser():
         """
         Adds any input yaml files to config dict and assigns to self.
         """
-        config_dict = benedict(self.full_dict.copy(), keypath_separator='.')
+        config_dict = KeyPathDict(self.full_dict.copy(), keypath_separator='.')
         
         for input_path in self.input_paths:
-            input_dict = self.read(config_dict[input_path + '.INPUT'])
+            input_dict = self.read(eval('config_dict["' + input_path.replace('.', '"]["') + '"]["INPUT"]'))
             for k, v in input_dict.items():
-                config_dict[input_path + '.{0}'.format(k)] = v
-                
-        self.config_dict = benedict(config_dict, keypath_separator=None)
+                exec('config_dict["' + input_path.replace('.', '"]["') + '"][k] = v')
+
+        self.config_dict = config_dict
         return    
     
     def get_input_locations(self):
         """
         Find locations in main dictionary where input files are listed
         """
-        d = benedict(self.full_dict, keypath_separator='.')
+        d = KeyPathDict(self.full_dict, keypath_separator='.')
         input_locs = [x.find('INPUT') for x in d.keypaths()]
         input_paths = [y for y in [x[0:k-1] if k != -1 else '' for x, k in zip(d.keypaths(), input_locs)] if y != '']
         self.input_paths = input_paths
@@ -193,7 +193,7 @@ class Organizer():
         :return: obj_string: the location of the object in the flattened dictionary
         """
 
-        d = benedict(self.main_dict['GEOMETRY'][configuration].copy(), keypath_separator='.')
+        d = KeyPathDict(self.main_dict['GEOMETRY'][configuration].copy(), keypath_separator='.')
         return [x.replace('.', '-') for x in d.keypaths() if d[x] == obj_name][0]
 
     
