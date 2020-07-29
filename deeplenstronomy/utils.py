@@ -1,5 +1,9 @@
 # Helper functions and classes
 
+import numpy as np
+import pandas as pd
+from scipy.interpolate import LinearNDInterpolator
+
 def dict_select(input_dict, keys):
     """
     Trim a dictionary down to selected keys
@@ -91,3 +95,31 @@ class KeyPathDict(dict):
         kps = [self.keypath_separator.join(['{}'.format(key) for key in kl]) for kl in self.kls]
         kps.sort()
         return kps
+
+
+def draw_from_user_distribution(df, size, step=100):
+    """
+    Interpolate a user-specified N-dimensional probability distribution and
+    sample from it.
+
+    :param df: pandas.DataFrame containing the probability distribution
+    :param size: int, the number of times to sample the probability distribution
+    :param step: int, the number of steps on the interpolation grid
+    :return: choices: array with entries as arrays of drawn parameters
+    """
+
+    parameters = [x for x in df.columns if x != 'WEIGHT']
+    points = df[parameters].values
+    weights = df['WEIGHT'].values
+
+    # Interpolate the distribution and evaluate it on a grid of all possible parameter combinations
+    interpolator = LinearNDInterpolator(points, weights, fill_value=0.0)
+    grid_vectors = [np.linspace(df[x].values.min(), df[x].values.max(), step) for x in parameters]
+    param_grids = np.array(np.meshgrid(*grid_vectors)).T.reshape(step**len(parameters), len(parameters))
+    weighted_params = interpolator(param_grids)
+
+    # Draw from the grid based on its weight
+    draws = np.random.choice(np.arange(len(param_grids)), size=size, p=weighted_params/weighted_params.sum())
+    choices = param_grids[draws]
+
+    return choices
