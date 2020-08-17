@@ -19,6 +19,10 @@ def normal(mean, std, bands=''):
     draw = np.random.normal(loc=mean, scale=std)
     return [draw] * len(bands.split(','))
 
+def lognormal(mean, sigma, bands=''):
+    draw = np.random.lognormal(mean=mean, sigma=sigma)
+    return [draw] * len(bands.split(','))
+
 def delta_function(value, bands=''):
     return [value] * len(bands.split(','))
 
