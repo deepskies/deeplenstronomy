@@ -1,4 +1,4 @@
-# Outer shell to do everything for you
+# Outer shell to do everything for youA
 
 import h5py
 import numpy as np
@@ -7,6 +7,7 @@ import pandas as pd
 
 from deeplenstronomy.input_reader import Organizer, Parser
 from deeplenstronomy.image_generator import ImageGenerator
+from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images
 
 class Dataset():
     def __init__(self, config=None, save=False, store=True):
@@ -140,8 +141,41 @@ def flatten_image_info(sim_dict):
 
     return out_dict
     
+def get_forced_sim_inputs(forced_inputs, configurations, bands):
 
-def make_dataset(config, dataset=None, save=False, store=True, verbose=False, store_sample=False, image_file_format='npy'):
+    force_param_inputs = {}
+    for force_params in forced_inputs.values():
+        for name in force_params['names']:
+            prefices, suffices = [], []
+            # Configuration dependence  
+            if name.startswith("CONFIGURATION"):
+                prefices = [name.split('-')[0]]
+                param_name = ''.join(name.split('-')[1:])
+            else:
+                prefices = configurations[:]
+                param_name = name
+            # Color dependence
+            for b in bands:
+                if name.endswith('-' + b):
+                    suffices = [b]
+                    param_name = ''.join(param_name.split('-')[:-1])
+                    break
+            if len(suffices) == 0:
+                suffices = bands[:]
+                param_name = param_name
+
+            # Duplicate drawn values to necessary configurations / bands
+            for prefix in prefices:
+                for suffix in suffices:
+                    force_param_inputs[(prefix, param_name, suffix)] = force_params['values']
+
+    return force_param_inputs
+
+def _check_survey(survey):
+    return survey in dir(surveys)   
+
+
+def make_dataset(config, dataset=None, save=False, store=True, verbose=False, store_sample=False, image_file_format='npy', survey=None):
     """
     Generate a dataset from a config file
 
@@ -153,6 +187,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
     :param save: save images and metadata to disk
     :param store_sample: save five images and metadata as attribute
     :param image_file_format: outfile format type (npy, h5)
+    :param survey: str, a default astronomical survey to use
     :return: dataset: instance of dataset class
     """
 
@@ -166,13 +201,14 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
         dataset.config_file = config
         
         # Parse the config file and store config dict
-        P = Parser(config)
+        P = Parser(config, survey=survey)
         dataset.config_dict = P.config_dict
 
     # Store top-level dataset info
     dataset.name = dataset.config_dict['DATASET']['NAME']
     dataset.size = dataset.config_dict['DATASET']['PARAMETERS']['SIZE']
     dataset.outdir = dataset.config_dict['DATASET']['PARAMETERS']['OUTDIR']
+    dataset.bands = dataset.config_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
 
     # Make the output directory if it doesn't exist already
     if save:
@@ -182,23 +218,57 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
     # Organize the configuration dict
     O = Organizer(dataset.config_dict, verbose=verbose)
 
-    # Store species map
-    dataset.species_map = O._species_map
-
     # Store configurations
     dataset.configurations = list(O.configuration_sim_dicts.keys())
 
+    # Store species map
+    dataset.species_map = O._species_map
+
+    # If user-specified distributions exist, draw from them
+    forced_inputs = {}
+    for fp in P.file_paths:
+        filename = eval("P.config_dict['" + fp.replace('.', "']['") + "']")
+        draw_param_names, draw_param_values = draw_from_user_dist(filename, dataset.size)
+        forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
+    
+    # Overwrite the configuration dict with any forced values from user distribtuions
+    force_param_inputs = get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
+
+    for force_param, values in force_param_inputs.items():
+        configuration, param_name, band = force_param
+
+        sim_inputs = O.configuration_sim_dicts[configuration]
+        for sim_input, val in zip(sim_inputs, values):
+            sim_input[band][param_name] = val
+
     # Initialize the ImageGenerator
     ImGen = ImageGenerator()
+
+    # Handle image backgrounds if they exist
+    if len(P.image_paths) > 0:
+        im_dir = P.config_dict['BACKGROUNDS']
+        image_backgrounds = read_images(im_dir, P.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
+    else:
+        image_backgrounds = np.zeros((len(dataset.bands), P.config_dict['IMAGE']['PARAMETERS']['numPix'], P.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
     
     # Simulate images
     for configuration, sim_inputs in O.configuration_sim_dicts.items():
 
         if verbose: print("Generating images for {0}".format(configuration))
-        
+
+        # Handle image backgrounds if they exist
+        if len(P.image_paths) > 0:
+            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs])
+        else:
+            image_indices = np.zeros(len(sim_inputs), dtype=int) 
+            
         metadata, images = [], []
 
-        for image_info in sim_inputs:
+        for image_info, image_idx in zip(sim_inputs, image_indices):
+            # Add background image index to image_info
+            for band in dataset.bands:
+                image_info[band]['BACKGROUND_IDX'] = image_idx
+            
             # Save metadata for each simulated image 
             metadata.append(flatten_image_info(image_info))
 
@@ -208,6 +278,9 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
         # Group images -- the array index will correspond to the id_num of the metadata
         configuration_images = np.array(images)
 
+        # Add image backgrounds -- will just add zeros if no backgrounds have been specified
+        configuration_images += image_backgrounds[image_indices]
+        
         # Convert the metadata to a dataframe
         metadata_df = pd.DataFrame(metadata)
         del metadata

@@ -1,18 +1,19 @@
 # Classes to parse inpAut yaml files and organize user settings
 
-from astropy.cosmology import FlatLambdaCDM
-from deeplenstronomy.utils import KeyPathDict
 import copy
 import random
-import numpy as np
 import os
 import sys
 import yaml
 
+from astropy.cosmology import FlatLambdaCDM
+import numpy as np
+
 import deeplenstronomy.timeseries as timeseries
-from deeplenstronomy.utils import dict_select, dict_select_choose
+from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_user_dist, KeyPathDict
 import deeplenstronomy.distributions as distributions
 import deeplenstronomy.special as special
+import deeplenstronomy.surveys as surveys
 import deeplenstronomy.check as big_check
 
 class Parser():
@@ -20,13 +21,16 @@ class Parser():
     Load yaml inputs into a single dictionary. Check for user errors
 
     :param config: main yaml file name
-
     """
 
-    def __init__(self, config):
+    def __init__(self, config, survey=None):
 
         # Check for annoying tabs - there's probably a better way to do this
         self.parse_for_tabs(config)
+
+        # Fill in sections of the configuration file for a specific survey
+        if survey is not None:
+            config = self.write_survey(config, survey)
         
         # Read main configuration file
         self.full_dict = self.read(config)
@@ -34,11 +38,26 @@ class Parser():
         # If the main file points to any input files, read those too
         self.get_input_locations()
         self.include_inputs()
+
+        # Check for user-specifed probability distributions and backgrounds
+        self.get_file_locations()
+        self.get_image_locations()
         
         # Check for user errors in inputs
         self.check()
 
         return
+
+
+    def write_survey(self, config, survey):
+        """
+        Writes survey information to config file
+        """
+        outfile = survey + '_' + config
+        with open(config, 'r') as old, open(outfile, 'w+') as new:
+            new.writelines(old.readlines())
+            new.writelines(eval("surveys.{}()".format(survey)))
+        return outfile
     
     def include_inputs(self):
         """
@@ -53,18 +72,44 @@ class Parser():
 
         self.config_dict = config_dict
         return    
-    
+
     def get_input_locations(self):
-        """
-        Find locations in main dictionary where input files are listed
-        """
-        d = KeyPathDict(self.full_dict, keypath_separator='.')
-        input_locs = [x.find('INPUT') for x in d.keypaths()]
-        input_paths = [y for y in [x[0:k-1] if k != -1 else '' for x, k in zip(d.keypaths(), input_locs)] if y != '']
+        input_paths = self._get_kw_locations("INPUT")
         self.input_paths = input_paths
         return
+
+    def get_file_locations(self):
+        #file_paths = self._get_kw_locations("USERDIST")
         
+        file_paths = []
+        if "DISTRIBUTIONS" in self.full_dict.keys():
+            for k in self.full_dict['DISTRIBUTIONS'].keys():
+                file_paths.append('DISTRIBUTIONS.' + k)
+        self.file_paths = file_paths
+
+        return
+
+    def get_image_locations(self):
+        file_paths = []
+        if "BACKGROUNDS" in self.full_dict.keys():
+            file_paths.append(self.full_dict['BACKGROUNDS'])
+        self.image_paths = file_paths
+
+        return
     
+    def _get_kw_locations(self, kw):
+        """
+        Find locations in main dictionary where a keyword is used
+
+        :param kw: str, a keyword to search the dict keys for
+        :return: paths: list, the keypaths to all occurances of kw
+        """
+        d = KeyPathDict(self.full_dict, keypath_separator='.')
+        locs = [x.find(kw) for x in d.keypaths()]
+        paths = [y for y in [x[0:k-1] if k != -1 else '' for x, k in zip(d.keypaths(), locs)] if y != '']
+        return paths
+
+
     def read(self, config):
         """
         Reads config file into a dictionary and returns it.
@@ -152,7 +197,7 @@ class Organizer():
         :param distribution_dict: dicitonary containing pdf info
         :return: method: callable method as string
         """
-        #this some black magic
+        #this some magic
         if isinstance(distribution_dict['PARAMETERS'], dict):
             return distribution_dict['NAME'] + '(' + ', '.join(['{0}={1}'.format(k, v) for k, v in distribution_dict['PARAMETERS'].items()]) + ', bands="{0}"'.format(','.join(bands)) + ')'
         else:
