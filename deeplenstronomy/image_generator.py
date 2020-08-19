@@ -10,7 +10,13 @@ from deeplenstronomy.utils import dict_select, dict_select_choose, select_params
 
 
 class ImageGenerator():
-    def __init__(self):
+    def __init__(self, return_planes=False):
+        """
+        Pipe simulated inputs into Lenstronomy.
+
+        :param return_planes: bool, if True, also return separated source, lens, and point_source profiles
+        """
+        self.return_planes = return_planes
         return
     
     def sim_image(self, info_dict):
@@ -20,6 +26,8 @@ class ImageGenerator():
         :param info_dict: A single element of the output form Organizer.breakup()
         """
         output_image = []
+        if self.return_planes:
+            output_source, output_lens, output_point_source, output_noise = [], [], [], []
         
         #set the cosmology
         cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
@@ -143,16 +151,30 @@ class ImageGenerator():
                                 
                 
             # Add noise
+            image_noise = np.zeros(np.shape(image))
             for noise_source_num in range(1, sim_dict['NUMBER_OF_NOISE_SOURCES'] + 1):
-                image += self.generate_noise(sim_dict['NOISE_SOURCE_{0}-NAME'.format(noise_source_num)],
-                                             np.shape(image),
-                                             select_params(sim_dict, 'NOISE_SOURCE_{0}-'.format(noise_source_num)))
-            
+                image_noise += self.generate_noise(sim_dict['NOISE_SOURCE_{0}-NAME'.format(noise_source_num)],
+                                                   np.shape(image),
+                                                   select_params(sim_dict, 'NOISE_SOURCE_{0}-'.format(noise_source_num)))
+            image += image_noise
+                
             # Combine with other bands
             output_image.append(image)
+
+            # Store plane-separated info if requested
+            if self.return_planes:
+                output_lens.append(imSim.lens_surface_brightness(kwargs_lens_light_list))
+                output_source.append(imSim.source_surface_brightness(kwargs_source_list, kwargs_lens_model_list))
+                output_point_source.append(imSim.point_source(kwargs_point_source_list, kwargs_lens_model_list))
+                output_noise.append(image_noise)
         
         # Return simulated image
-        return np.array(output_image)
+        if not self.return_planes:
+            # Return the stacked image
+            return np.array(output_image)
+        else:
+            # Return the stacked image along with the separated planes
+            return np.array(output_image), np.array(output_lens), np.array(output_source), np.array(output_point_source), np.array(output_noise)
 
     def generate_noise(self, name, shape, params):
         """

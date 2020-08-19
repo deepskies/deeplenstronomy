@@ -175,7 +175,7 @@ def _check_survey(survey):
     return survey in dir(surveys)   
 
 
-def make_dataset(config, dataset=None, save=False, store=True, verbose=False, store_sample=False, image_file_format='npy', survey=None):
+def make_dataset(config, dataset=None, save=False, store=True, verbose=False, store_sample=False, image_file_format='npy', survey=None, return_planes=False):
     """
     Generate a dataset from a config file
 
@@ -188,6 +188,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
     :param store_sample: save five images and metadata as attribute
     :param image_file_format: outfile format type (npy, h5)
     :param survey: str, a default astronomical survey to use
+    :param return_planes: bool, if true, return the separate planes of simulated images
     :return: dataset: instance of dataset class
     """
 
@@ -242,7 +243,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
             sim_input[band][param_name] = val
 
     # Initialize the ImageGenerator
-    ImGen = ImageGenerator()
+    ImGen = ImageGenerator(return_planes)
 
     # Handle image backgrounds if they exist
     if len(P.image_paths) > 0:
@@ -263,6 +264,8 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
             image_indices = np.zeros(len(sim_inputs), dtype=int) 
             
         metadata, images = [], []
+        if return_planes:
+            planes = []
 
         for image_info, image_idx in zip(sim_inputs, image_indices):
             # Add background image index to image_info
@@ -273,10 +276,20 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
             metadata.append(flatten_image_info(image_info))
 
             # make the image
-            images.append(ImGen.sim_image(image_info))
+            simulated_image_data = ImGen.sim_image(image_info)
+            if not return_planes:
+                images.append(simulated_image_data)
+            else:
+                # Order is 0: stacked image, 1: lens, 2: source, 3: point_source, 4: noise
+                images.append(simulated_image_data[0])
+                planes.append(np.array(simulated_image_data[1:]))
 
         # Group images -- the array index will correspond to the id_num of the metadata
         configuration_images = np.array(images)
+
+        # Group planes if requested
+        if return_planes:
+            configuration_planes = np.array(planes)
 
         # Add image backgrounds -- will just add zeros if no backgrounds have been specified
         configuration_images += image_backgrounds[image_indices]
@@ -290,10 +303,16 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
             #Images
             if image_file_format == 'npy':
                 np.save('{0}/{1}_images.npy'.format(dataset.outdir, configuration), configuration_images)
+                if return_planes:
+                    np.save('{0}/{1}_planes.npy'.format(dataset.outdir, configuration), configuration_planes)
             elif image_file_format == 'h5':
                 hf = h5py.File('{0}/{1}_images.h5'.format(dataset.outdir, configuration), 'w')
                 hf.create_dataset(dataset.name, data=configuration_images)
                 hf.close()
+                if return_planes:
+                    hf = h5py.File('{0}/{1}_planes.h5'.format(dataset.outdir, configuration), 'w')
+                    hf.create_dataset(dataset.name, data=configuration_planes)
+                    hf.close()
             else:
                 print("ERROR: {0} is not a supported argument for image_file_format".format(image_file_format))
             #Metadata
@@ -303,15 +322,22 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
         if store:
             setattr(dataset, '{0}_images'.format(configuration), configuration_images)
             setattr(dataset, '{0}_metadata'.format(configuration), metadata_df)
+            if return_planes:
+                setattr(dataset, '{0}_planes'.format(configuration), configuration_planes)
         elif store_sample:
             setattr(dataset, '{0}_images'.format(configuration), configuration_images[0:5].copy())
             setattr(dataset, '{0}_metadata'.format(configuration), metadata_df.iloc[0:5].copy())
             del configuration_images
             del metadata_df                
+            if return_planes:
+                setattr(dataset, '{0}_planes'.format(configuration), configuration_planes[0:5].copy())
+                del configuration_planes
         else:
             # Clean up things that are done to save space
             del configuration_images
             del metadata_df
+            if return_planes:
+                del configuration_planes
     
     return dataset
 
