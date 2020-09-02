@@ -316,7 +316,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
             else:
                 print("ERROR: {0} is not a supported argument for image_file_format".format(image_file_format))
             #Metadata
-            metadata_df.to_csv('{0}/{1}_metadata.csv'.format(dataset.outdir, configuration))
+            metadata_df.to_csv('{0}/{1}_metadata.csv'.format(dataset.outdir, configuration), index=False)
 
         # Store the images and metadata to the Dataset object (ideal for small scale testing)
         if store:
