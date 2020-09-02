@@ -58,6 +58,9 @@ def _des_mag_color(pair):
     except:
         return 0.0
 
+def des_magnitude_zero_point(bands=''):
+    dist = {'g': 26.58, 'r': 26.78, 'i': 26.75, 'z': 26.48, 'Y': 25.40}
+    return [dist[b] for b in bands.split(',')]
     
 def des_sky_brightness(bands=''):
     # Figure 4 in https://arxiv.org/pdf/1801.03181.pdf
@@ -308,3 +311,24 @@ def delve_exposure_time(bands=''):
                               0.028, 0.011, 0.0, 0.01, 0.009, 0.0, 0.016, 0.0, 0.0, 0.009]}
             }
     return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
+
+# LSST at the Vera C. Rubin Observatory
+def lsst_num_exposures(bands='', coadd_years=10):
+    dist = {'u': 140, 'g': 200, 'r': 460, 'i': 460, 'z': 400, 'Y': 400}
+    return [coadd_years * dist[b] // 10 for b in bands.split(',')]
+
+def lsst_exposure_time(bands=''):
+    dist = {'u': 15.0, 'g': 15.0, 'r': 15.0, 'i': 15.0, 'z': 15.0, 'Y': 15.0}
+    return [dist[b] for b in bands.split(',')]
+
+def lsst_magnitude_zero_point(bands=''):
+    dist = {'u': 26.5, 'g': 28.3, 'r': 28.13, 'i': 27.79, 'z': 27.40, 'Y': 26.58}
+    return [dist[b] for b in bands.split(',')]
+
+def lsst_sky_brightness(bands=''):
+    dist = {'u': 22.99, 'g': 22.26, 'r': 21.2, 'i': 20.48, 'z': 19.6, 'Y': 18.61}
+    return [dist[b] for b in bands.split(',')]
+
+def lsst_seeing(bands=''):
+    dist = {'u': 0.81, 'g': 0.77, 'r': 0.73, 'i': 0.71, 'z': 0.69, 'Y': 0.68}
+    return [dist[b] for b in bands.split(',')]
