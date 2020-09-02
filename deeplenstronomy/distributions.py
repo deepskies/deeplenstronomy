@@ -15,6 +15,10 @@ def uniform(minimum, maximum, bands=''):
     draw = random.uniform(minimum, maximum)
     return [draw] * len(bands.split(','))
 
+def uniform_int(minimum, maximum, bands=''):
+    draw = round(random.uniform(minimum, maximum))
+    return [draw] * len(bands.split(','))
+
 def normal(mean, std, bands=''):
     draw = np.random.normal(loc=mean, scale=std)
     return [draw] * len(bands.split(','))
