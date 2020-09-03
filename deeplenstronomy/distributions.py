@@ -4,11 +4,6 @@ import numpy as np
 import random
 from scipy.stats import poisson
 
-try:
-    import des_private
-except:
-    pass
-
 ## Single parameter sampling distributions
 
 def uniform(minimum, maximum, bands=''):
@@ -40,27 +35,7 @@ def poisson_noise(shape, mean):
     return poisson.rvs(mu=mean, size=shape)
 
 
-## Empirical distributions
-
-def galaxy_color(bands=''):
-    dist = {'g': 18.0, 'r': 19.0, 'i': 19.8, 'z': 21.5, 'Y': 23.5}
-    return [dist[b] for b in bands.split(',')]
-
-
-
-# des_mag and _des_mag_color are based on currently undistributed DES data
-# If you are a DES member, contact the authors to receive the des_private.py file
-def des_mag(bands=''):
-    try:
-        return des_private.des_mag(bands)
-    except:
-        return galaxy_color(bands=bands)
-    
-def _des_mag_color(pair):
-    try:
-        return des_private._des_mag_color(pair)
-    except:
-        return 0.0
+## Empirical distributions from astronomical surveys
 
 def des_magnitude_zero_point(bands=''):
     dist = {'g': 26.58, 'r': 26.78, 'i': 26.75, 'z': 26.48, 'Y': 25.40}
