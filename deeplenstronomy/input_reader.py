@@ -7,6 +7,7 @@ import sys
 import yaml
 
 from astropy.cosmology import FlatLambdaCDM
+from astropy.cosmology import arcsec_per_kpc_comoving
 import numpy as np
 
 import deeplenstronomy.timeseries as timeseries
@@ -214,19 +215,32 @@ class Organizer():
         draw_command = 'distributions.{0}'.format(self._convert_to_string(distribution_dict, bands))
         return eval(draw_command)
 
-    def _choose_position(self, ra_host, dec_host, sep):
+    def _choose_position(self, ra_host, dec_host, sep, sep_unit, cosmo, redshift=None, angle=None):
         """
         Select an ra and dec that will be sep away from the host
         
         :param ra_host: x-coord of point source host
         :param dec_host: y-coord of point source host
         :param sep: angular separation between point source and host
+        :param sep_unit: either 'kpc' or 'arcsec'
+        :param redshift: cosmological redshift, required if units are in kpc
+        :param angle: desired position of point source in radians, random if None
         :return: chosen_ra: x-coord of chosen point sep away from host
         :return: chosen_dec: y-coord of chosen point sep away from host
         """
-        angle = random.uniform(0.0, 2 * np.pi)
-        chosen_ra = np.cos(angle) * sep + ra_host
-        chosen_dec = np.sin(angle) * sep + dec_host
+        if angle is None:
+            angle = random.uniform(0.0, 2 * np.pi)
+
+        if sep_unit == 'arsec':            
+            chosen_ra = np.cos(angle) * sep + ra_host
+            chosen_dec = np.sin(angle) * sep + dec_host
+        elif sep_unit == 'kpc':
+            kpc_to_arcsec = arcsec_per_kpc_comoving(redshift).value / (1. + redshift)
+            chosen_ra = np.cos(angle) * sep * kpc_to_arcsec + ra_host
+            chosen_dec = np.sin(angle) * sep * kpc_to_arcsec + dec_host
+        else:
+            raise NotImplementedError, "unexpected sep_unit"
+        
         return chosen_ra, chosen_dec
 
     def _find_obj_string(self, obj_name, configuration):
@@ -242,11 +256,12 @@ class Organizer():
         return [x.replace('.', '-') for x in d.keypaths() if d[x] == obj_name][0]
 
     
-    def _flatten_and_fill(self, config_dict, objid=0):
+    def _flatten_and_fill(self, config_dict, cosmo, objid=0):
         """
         Flatten input dictionary, and sample from any specified distributions
         
         :param config_dict: dictionary built up by self.breakup()
+        :param cosmo: an astropy.cosmology instance
         :return: flattened_and_filled dictionary: dict ready for individual image sim
         """
         bands = config_dict['SURVEY_DICT']['BANDS'].split(',')
@@ -347,14 +362,24 @@ class Organizer():
                         
                         # Determine location of point source in image
                         if 'sep' in self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS'].keys():
+                            sep_unit = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep_unit']
                             if isinstance(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep'], dict):
                                 draws = self._draw(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep']['DISTRIBUTION'], bands)
                                 sep = draws[0]
                             else:
                                 sep = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep']
 
+                            if 'angle' in self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS'].keys():    
+                                if isinstance(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['angle'], dict):
+                                    draws = self._draw(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['angle']['DISTRIBUTION'], bands)
+                                    angle = draws[0]
+                                else:
+                                    angle = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['angle']
+                            else:
+                                angle = None
+                                
                             ##convert image separation into ra and dec
-                            ra, dec = self._choose_position(ra_host, dec_host, sep)
+                            ra, dec = self._choose_position(ra_host, dec_host, sep, sep_unit, cosmo, config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)], angle)
 
                         else:
                             #set ra and dec to host center
@@ -367,6 +392,7 @@ class Organizer():
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-ra'.format(plane_num, obj_num)] = ra
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-dec'.format(plane_num, obj_num)] = dec
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-sep'.format(plane_num, obj_num)] = sep
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-sep_unit'.format(plane_num, obj_num)] = sep_unit
                     else:
                         #foreground, choose position randomly
                         im_size = self.main_dict['IMAGE']['PARAMETERS']['numPix'] * self.main_dict['IMAGE']['PARAMETERS']['pixel_scale'] / 2
@@ -591,6 +617,10 @@ class Organizer():
         #cosmo_dict['NAME'] = self.main_dict['COSMOLOGY']['NAME']
         for k in configurations.keys():
             configurations[k]['COSMOLOGY_DICT'] = cosmo_dict
+
+        # Set cosmology information
+        cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+        cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
             
         # Add noise metadata
         for k in configurations.keys():
@@ -601,7 +631,7 @@ class Organizer():
                 noise_source_num = noise_source_idx + 1
                 noise_dict['NOISE_SOURCE_{0}-NAME'.format(noise_source_num)] = self.main_dict['GEOMETRY'][k]['NOISE_SOURCE_{0}'.format(noise_source_num)]
             configurations[k]['NOISE_DICT'] = noise_dict
-
+            
         # Check for timeseries metadata
         for k in configurations.keys():
             setattr(self, k + '_time_series', False)
@@ -622,10 +652,6 @@ class Organizer():
                                             redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'].copy())
                                         else:
                                             redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'] + 0.0)
-
-                #set the cosmology for luminosity distance calculations
-                cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
-                cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
 
                 if verbose: print("Generating time series data for {0}".format(k))
 
@@ -658,7 +684,7 @@ class Organizer():
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
-                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy()))    
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo))    
 
         self.configuration_sim_dicts = configuration_sim_dicts
 
