@@ -178,7 +178,7 @@ def _check_survey(survey):
     return survey in dir(surveys)   
 
 
-def make_dataset(config, dataset=None, save=False, store=True, verbose=False, store_sample=False, image_file_format='npy', survey=None, return_planes=False):
+def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True, verbose=False, store_sample=False, image_file_format='npy', survey=None, return_planes=False):
     """
     Generate a dataset from a config file
 
@@ -186,8 +186,8 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
                    OR
                    pre-parsed yaml file as a dictionary
     :param verbose: if true, print status updates
-    :param store: save images and metadata as attributes
-    :param save: save images and metadata to disk
+    :param store_in_memory: save images and metadata as attributes
+    :param save_to_disk: save images and metadata to disk
     :param store_sample: save five images and metadata as attribute
     :param image_file_format: outfile format type (npy, h5)
     :param survey: str, a default astronomical survey to use
@@ -215,7 +215,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
     dataset.bands = dataset.config_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
 
     # Make the output directory if it doesn't exist already
-    if save:
+    if save_to_disk:
         if not os.path.exists(dataset.outdir):
             os.mkdir(dataset.outdir)
     
@@ -302,7 +302,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
         del metadata
 
         # Save the images and metadata to the outdir if desired (ideal for large simulation production)
-        if save:
+        if save_to_disk:
             #Images
             if image_file_format == 'npy':
                 np.save('{0}/{1}_images.npy'.format(dataset.outdir, configuration), configuration_images)
@@ -322,7 +322,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
             metadata_df.to_csv('{0}/{1}_metadata.csv'.format(dataset.outdir, configuration), index=False)
 
         # Store the images and metadata to the Dataset object (ideal for small scale testing)
-        if store:
+        if store_in_memory:
             setattr(dataset, '{0}_images'.format(configuration), configuration_images)
             setattr(dataset, '{0}_metadata'.format(configuration), metadata_df)
             if return_planes:
