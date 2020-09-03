@@ -178,7 +178,9 @@ def _check_survey(survey):
     return survey in dir(surveys)   
 
 
-def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True, verbose=False, store_sample=False, image_file_format='npy', survey=None, return_planes=False):
+def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
+                 verbose=False, store_sample=False, image_file_format='npy',
+                 survey=None, return_planes=False, skip_image_generation=False):
     """
     Generate a dataset from a config file
 
@@ -192,6 +194,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     :param image_file_format: outfile format type (npy, h5)
     :param survey: str, a default astronomical survey to use
     :param return_planes: bool, if true, return the separate planes of simulated images
+    :param skip_image_generation: bool, if true, skip image generation
     :return: dataset: instance of dataset class
     """
 
@@ -245,6 +248,19 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         for sim_input, val in zip(sim_inputs, values):
             sim_input[band][param_name] = val
 
+    # Skip image generation if desired
+    if skip_image_generation:
+        # Handle metadata and return dataset object
+        for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
+            metadata = [flatten_image_info(image_info) for image_info in sim_inputs]
+            metadata_df = pd.DataFrame(metadata)
+            del metadata
+            if save_to_disk:
+                metadata_df.to_csv('{0}/{1}_metadata.csv'.format(dataset.outdir, configuration), index=False)
+            if store_in_memory:
+                setattr(dataset, '{0}_metadata'.format(configuration), metadata_df)
+        return dataset
+                
     # Initialize the ImageGenerator
     ImGen = ImageGenerator(return_planes)
 
