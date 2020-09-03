@@ -202,8 +202,8 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
         dataset.config_file = config
         
         # Parse the config file and store config dict
-        P = Parser(config, survey=survey)
-        dataset.config_dict = P.config_dict
+        parser = Parser(config, survey=survey)
+        dataset.config_dict = parser.config_dict
 
     # Store top-level dataset info
     dataset.name = dataset.config_dict['DATASET']['NAME']
@@ -217,18 +217,18 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
             os.mkdir(dataset.outdir)
     
     # Organize the configuration dict
-    O = Organizer(dataset.config_dict, verbose=verbose)
+    organizer = Organizer(dataset.config_dict, verbose=verbose)
 
     # Store configurations
-    dataset.configurations = list(O.configuration_sim_dicts.keys())
+    dataset.configurations = list(organizer.configuration_sim_dicts.keys())
 
     # Store species map
-    dataset.species_map = O._species_map
+    dataset.species_map = organizer._species_map
 
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
     for fp in P.file_paths:
-        filename = eval("P.config_dict['" + fp.replace('.', "']['") + "']")
+        filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']")
         draw_param_names, draw_param_values = draw_from_user_dist(filename, dataset.size)
         forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
     
@@ -238,7 +238,7 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
     for force_param, values in force_param_inputs.items():
         configuration, param_name, band = force_param
 
-        sim_inputs = O.configuration_sim_dicts[configuration]
+        sim_inputs = organizer.configuration_sim_dicts[configuration]
         for sim_input, val in zip(sim_inputs, values):
             sim_input[band][param_name] = val
 
@@ -246,19 +246,19 @@ def make_dataset(config, dataset=None, save=False, store=True, verbose=False, st
     ImGen = ImageGenerator(return_planes)
 
     # Handle image backgrounds if they exist
-    if len(P.image_paths) > 0:
-        im_dir = P.config_dict['BACKGROUNDS']
-        image_backgrounds = read_images(im_dir, P.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
+    if len(parser.image_paths) > 0:
+        im_dir = parser.config_dict['BACKGROUNDS']
+        image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
     else:
         image_backgrounds = np.zeros((len(dataset.bands), P.config_dict['IMAGE']['PARAMETERS']['numPix'], P.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
     
     # Simulate images
-    for configuration, sim_inputs in O.configuration_sim_dicts.items():
+    for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
 
         if verbose: print("Generating images for {0}".format(configuration))
 
         # Handle image backgrounds if they exist
-        if len(P.image_paths) > 0:
+        if len(parser.image_paths) > 0:
             image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs])
         else:
             image_indices = np.zeros(len(sim_inputs), dtype=int) 
