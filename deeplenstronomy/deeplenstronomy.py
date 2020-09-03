@@ -72,8 +72,11 @@ class Dataset():
             # Trim the band if the user left it in
             param = param[:-2]
 
+        # DATASET- allowed params
+        if param in ['SIZE', 'OUTDIR']:
+            return "['DATASET']['PARAMETERS']['{0}']".format(param)
         # COSMOLOGY
-        if param in ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']:
+        elif param in ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']:
             return "['COSMOLOGY']['PARAMETERS']['{0}']".format(param)
         # IMAGE
         elif param in ['exposure_time', 'numPix', 'pixel_scale', 'psf_type', 'read_noise', 'ccd_gain']:
