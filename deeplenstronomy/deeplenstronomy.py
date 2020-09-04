@@ -180,7 +180,8 @@ def _check_survey(survey):
 
 def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                  verbose=False, store_sample=False, image_file_format='npy',
-                 survey=None, return_planes=False, skip_image_generation=False):
+                 survey=None, return_planes=False, skip_image_generation=False,
+                 solve_lens_equation=False):
     """
     Generate a dataset from a config file
 
@@ -195,9 +196,13 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     :param survey: str, a default astronomical survey to use
     :param return_planes: bool, if true, return the separate planes of simulated images
     :param skip_image_generation: bool, if true, skip image generation
+    :param solve_lens_equation: bool, if true, calculate the source positions
     :return: dataset: instance of dataset class
     """
 
+    if solve_lens_equation and skip_image_generation:
+        raise RuntimeError, "You cannot skip image generation and solve the lens equation"
+    
     if not dataset:
         dataset = Dataset()
 
@@ -262,7 +267,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         return dataset
                 
     # Initialize the ImageGenerator
-    ImGen = ImageGenerator(return_planes)
+    ImGen = ImageGenerator(return_planes, solve_lens_equation)
 
     # Handle image backgrounds if they exist
     if len(parser.image_paths) > 0:
@@ -290,19 +295,28 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             # Add background image index to image_info
             for band in dataset.bands:
                 image_info[band]['BACKGROUND_IDX'] = image_idx
-            
-            # Save metadata for each simulated image 
-            metadata.append(flatten_image_info(image_info))
-
+                
             # make the image
             simulated_image_data = ImGen.sim_image(image_info)
             if not return_planes:
-                images.append(simulated_image_data)
+                images.append(simulated_image_data['output_image'])
             else:
-                # Order is 0: stacked image, 1: lens, 2: source, 3: point_source, 4: noise
-                images.append(simulated_image_data[0])
-                planes.append(np.array(simulated_image_data[1:]))
+                images.append(simulated_image_data['output_image'])
+                planes.append(np.array([simulated_image_data['output_lens_plane'],
+                                        simulated_image_data['output_source_plane'],
+                                        simulated_image_data['output_point_source_plane'],
+                                        simulated_image_data['output_noise_plane'])))
 
+            if solve_lens_equation:
+                for band in dataset.bands:
+                    image_info[band]['x_mins'] = ';'.join([str(x) for x in simulated_image_data['x_mins']])
+                    image_info[band]['y_mins'] = ';'.join([str(x) for x in simulated_image_data['y_mins']])
+                    image_info[band]['num_source_images'] = simulated_image_data['num_source_images']
+                              
+            # Save metadata for each simulated image 
+            metadata.append(flatten_image_info(image_info))
+
+                              
         # Group images -- the array index will correspond to the id_num of the metadata
         configuration_images = np.array(images)
 

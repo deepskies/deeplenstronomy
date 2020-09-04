@@ -2,6 +2,7 @@
 
 from astropy.cosmology import FlatLambdaCDM
 from lenstronomy.SimulationAPI.sim_api import SimAPI
+from lenstronomy.LensModel.Solver import lens_equation_solver
 import numpy as np
 
 import deeplenstronomy.distributions as distributions
@@ -10,13 +11,15 @@ from deeplenstronomy.utils import dict_select, dict_select_choose, select_params
 
 
 class ImageGenerator():
-    def __init__(self, return_planes=False):
+    def __init__(self, return_planes=False, solve_lens_equation=False):
         """
         Pipe simulated inputs into Lenstronomy.
 
         :param return_planes: bool, if True, also return separated source, lens, and point_source profiles
+        :param solve_lens_equation: bool, if True, solve lens equation for source positions
         """
         self.return_planes = return_planes
+        self.solve_lens_equation = solve_lens_equation
         return
     
     def sim_image(self, info_dict):
@@ -149,7 +152,14 @@ class ImageGenerator():
                                 kwargs_source=kwargs_source_list,
                                 kwargs_ps=kwargs_point_source_list)
                                 
-                
+            # Solve lens equation if desired
+            if self.solve_lens_equation:
+                solver = lens_equation_solver.LensEquationSolver(imSim.LensModel)
+                x_mins, y_mins = solver.image_position_from_source(source_x=kwargs_model['source_light_model_list'][0]['center_x'],
+                                                                   source_y=kwargs_model['source_light_model_list'][0]['center_y'],
+                                                                   kwargs_lens=kwargs_lens_model_list)
+                num_source_images = len(x_mins)
+            
             # Add noise
             image_noise = np.zeros(np.shape(image))
             for noise_source_num in range(1, sim_dict['NUMBER_OF_NOISE_SOURCES'] + 1):
@@ -168,13 +178,27 @@ class ImageGenerator():
                 output_point_source.append(imSim.point_source(kwargs_point_source_list, kwargs_lens_model_list))
                 output_noise.append(image_noise)
         
-        # Return simulated image
-        if not self.return_planes:
-            # Return the stacked image
-            return np.array(output_image)
-        else:
-            # Return the stacked image along with the separated planes
-            return np.array(output_image), np.array(output_lens), np.array(output_source), np.array(output_point_source), np.array(output_noise)
+        # Return the desired information in a dictionary
+        return_dict = {'output_image': None,
+                       'output_lens_plane': None,
+                       'output_source_plane': None,
+                       'output_point_source_plane': None,
+                       'output_noise_plane': None,
+                       'x_mins': None,
+                       'y_mins': None,
+                       'num_source_images': None}
+        return_dict['output_image'] = np.array(output_image)
+        if self.return_planes:
+            return_dict['output_lens_plane'] = np.array(output_lens)
+            return_dict['output_source_plane'] = np.array(output_source)
+            return_dict['output_point_source_plane'] = np.array(output_point_source)
+            return_dict['output_noise_plane'] = np.array(output_noise)
+        if self.solve_lens_equation:
+            return_dict['x_mins'] = x_mins
+            return_dict['y_mins'] = y_mins
+            return_dict['num_source_images'] = num_source_images
+
+        return return_dict
 
     def generate_noise(self, name, shape, params):
         """
