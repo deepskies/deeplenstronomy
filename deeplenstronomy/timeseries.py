@@ -1,10 +1,13 @@
+# Class for light curve generation from time-series spectral energy distributions
+
+import glob
+import os
+import random
+
 from astropy.cosmology import FlatLambdaCDM
 import astropy.units as u
-import glob
 import numpy as np
-import os
 import pandas as pd
-import random
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
 
