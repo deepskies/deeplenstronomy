@@ -151,19 +151,6 @@ class Parser():
         """
         big_check.run_checks(self.full_dict, self.config_dict)
         
-        #BIG TODO
-        
-        
-        #don't name an object 'None'
-        #object names must be unique
-        #spell 'parameters' right for once in your life
-        
-        #sigma_bkg versus background_rms depends on lenstronomy version
-        
-        #require point sources to be listed after the host
-
-        # if timeseries, and num exposures > 1 issue a warning
-        
         return
     
 
