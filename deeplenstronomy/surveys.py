@@ -61,7 +61,10 @@ SURVEY:
             DISTRIBUTION:
                 NAME: delve_seeing
                 PARAMETERS: None
-        magnitude_zero_point: 30.0
+        magnitude_zero_point:
+            DISTRIBUTION:
+                NAME: delve_magnitude_zero_point
+                PARAMETERS: None
         sky_brightness:
             DISTRIBUTION:
                 NAME: delve_sky_brightness
