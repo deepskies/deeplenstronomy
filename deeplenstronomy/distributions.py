@@ -311,3 +311,17 @@ def lsst_sky_brightness(bands=''):
 def lsst_seeing(bands=''):
     dist = {'u': 0.81, 'g': 0.77, 'r': 0.73, 'i': 0.71, 'z': 0.69, 'Y': 0.68}
     return [dist[b] for b in bands.split(',')]
+
+# ZTF
+def ztf_magnitude_zero_point(bands=''):
+    dist = {'g': 26.325, 'r': 26.275, 'i': 25.660}
+    return [dist[b] for b in bands.split(',')]
+
+def ztf_seeing(bands=''):
+    dist = {'g': 2.1, 'r': 2.0, 'i': 2.1}
+    return [dist[b] for b in bands.split(',')]
+
+def ztf_sky_brightness(bands=''):
+    dist = {'g': 22.01, 'r': 21.15, 'i': 19.89}
+    return [dist[b] for b in bands.split(',')]
+    

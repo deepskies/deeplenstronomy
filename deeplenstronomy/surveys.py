@@ -144,3 +144,32 @@ SURVEY:
         num_exposures: 4
 """
     return info
+
+def ztf():
+    info = """
+IMAGE:
+    PARAMETERS:
+        exposure_time: 30.0
+        numPix: 100
+        pixel_scale: 1.01
+        psf_type: 'GAUSSIAN'
+        read_noise: 10.3
+        ccd_gain: 5.8
+SURVEY:
+    PARAMETERS:
+        BANDS: g,r,i
+        seeing:
+            DISTRIBUTION:
+                NAME: ztf_seeing
+                PARAMETERS: None
+        magnitude_zero_point:
+            DISTRIBUTION:
+                NAME: ztf_magnitude_zero_point
+                PARAMETERS: None
+        sky_brightness: 
+            DISTRIBUTION:
+                NAME: ztf_sky_brightness
+                PARAMETERS: None
+        num_exposures: 24
+"""
+    return info
