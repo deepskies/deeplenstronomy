@@ -1,16 +1,18 @@
 # A module to check for user errors in the main config file
 
-from deeplenstronomy.utils import KeyPathDict 
 import sys
+
+from deeplenstronomy.utils import KeyPathDict
+import deeplenstronomy.distributions as distributions
 
 class ConfigFileError(Exception): pass
 
 class AllChecks():
     """
     Define new checks as methods starting with 'check_'
-    Methods must return err_code, err_message where
-    err_code == 0 means success and err_code != 0 means failure
-    If failure, the err_message is printed and sys.exit() is called
+    Methods must return a list of err_message where
+    an empty list means success and a nonempty list means failure
+    If failure, the err_messages are printed and sys.exit() is called
     """
     
     def __init__(self, full_dict, config_dict):
@@ -110,6 +112,105 @@ class AllChecks():
                 errs.append(param + " cannot be drawn from a distribution")
         return errs
 
+    def _valid_galaxy(self, k):
+        errs, names = [], []
+
+        # Must have a name key
+        if "NAME" not in self.config_dict['SPECIES'][k].keys():
+            errs.append("SPECIES." + k + " is missing an entry for NAME")
+        else:
+            # name must be a string
+            if not isinstance(self.config_dict['SPECIES'][k]["NAME"], str):
+                errs.append("SPECIES." + k + ".NAME must be the name of a function in distribution.py")
+            else:
+                names.append(self.config_dict['SPECIES'][k]["NAME"])
+
+        # Check LIGHT_PROFILEs, MASS_PROFILEs, and SHEAR_PROFILEs
+        
+
+        return errs, names
+
+    def _valid_point_source(self, k):
+        errs, names = [], []
+        return errs, names
+
+    def _valid_noise(self, k):
+        errs, names = [], []
+        # Must have name key
+        if "NAME" not in self.config_dict['SPECIES'][k].keys():
+            errs.append("SPECIES." + k + " is missing an entry for NAME")
+        else:
+            # name must be a string 
+            if not isinstance(self.config_dict['SPECIES'][k]["NAME"], str):
+                errs.append("SPECIES." + k + ".NAME must be the name of a function in distribution.py")
+            else:
+                names.append(self.config_dict['SPECIES'][k]["NAME"])
+
+            # name must be a valid distribution
+            if self.config_dict['SPECIES'][k]["NAME"].lower() not in dir(distributions):
+                errs.append("SPECIES." + k + ".NAME must be the name of a function in distribution.py")
+
+        # Must have parameter key
+        if "PARAMETERS" not in self.config_dict['SPECIES'][k].keys():
+            errs.append("SPECIES." + k + " is missing an entry for PARAMETERS")
+
+        return errs, names
+
+    def _valid_index(self, k, path):
+        detections, errs = [], []
+        try:
+            val = int(k.split('_')[-1])
+            detections.append(val)
+        except TypeError:
+            errs.append(path + '.' + k + ' must be indexed with a valid integer')
+        return detections, errs
+    
+    def check_valid_species(self):
+        errs, names = [], []
+
+        # There must be at least one species
+        if len(list(self.config_dict['SPECIES'].keys())) == 0:
+            errs.append("SPECIES sections needs at least one SPECIES")
+
+        # Check keys
+        detected_galaxies, detected_point_sources, detected_noise_sources = [], [], []
+        for k in self.config_dict['SPECIES'].keys():
+            detections, errors = self._valid_index(k, "SPECIES")
+            errs += errors
+            
+            if k.startswith('GALAXY_'):
+                detected_galaxies += detections
+                errors, obj_names = self._valid_galaxy(k)
+                errs += errors
+                names += obj_names
+            elif k.startswith('POINT_SOURCE_'):
+                detected_point_sources += detections
+                errors, obj_names = self._valid_point_source(k)
+                errs +=	errors
+                names += obj_names
+            elif k.startswith('NOISE_'):
+                detected_noise_sources += detections
+                errors, obj_names = self._valid_noise(k)
+                errs +=	errors
+                names += obj_names
+            else:
+                # unexpected entry
+                errs.append(k + " in SPECIES is an invalid entry")
+
+        # each class must be indexed sequentially
+        if len(detected_galaxies) != max(detected_galaxies):
+            errs.append('GALAXY objects in SPECIES must be indexed like 1, 2, 3, ...')
+        if len(detected_point_sources) != max(detected_point_sources):
+            errs.append('POINT_SOURCE objects in SPECIES must be indexed like 1, 2, 3, ...')
+        if len(detected_noise_sources) != max(detected_noise_sources):
+            errs.append('NOISE objects in SPECIES must be indexed like 1, 2, 3, ...')
+
+        # All objects must have a unique name
+        if len(set(names)) != len(names):
+            errs.append("All entries in SPECIES must have a unique NAME")
+
+        return errs
+    
     def check_valid_geometry(self):
         errs = []
 
