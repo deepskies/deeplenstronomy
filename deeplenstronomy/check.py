@@ -112,6 +112,11 @@ class AllChecks():
                 errs.append(param + " cannot be drawn from a distribution")
         return errs
 
+    def _valid_model(self, model_name, path):
+        errs = []
+        print("Add checking for valid timeseries model when testing timeseries")
+        return errs
+
     def _valid_galaxy(self, k):
         errs, names = [], []
 
@@ -126,12 +131,107 @@ class AllChecks():
                 names.append(self.config_dict['SPECIES'][k]["NAME"])
 
         # Check LIGHT_PROFILEs, MASS_PROFILEs, and SHEAR_PROFILEs
-        
+        detected_light_profiles, detected_mass_profiles, detected_shear_profiles = [], [], []
+        for profile_k in self.config_dict['SPECIES'][k].keys():
+            if profile_k.startswith('LIGHT_PROFILE_') or profile_k.startswith('MASS_PROFILE_') or profile_k.startswith('SHEAR_PROFILE_'):
+                # Index must be valid
+                detections, errors = self._valid_index(profile_k, "SPECIES." + k)
+                if profile_k.startswith('LIGHT_PROFILE_'):
+                    detected_light_profiles += detections
+                elif profile_k.startswith('MASS_PROFILE_'):
+                    detected_mass_profiles += detections
+                elif profile_k.startswith('SHEAR_PROFILE_'):
+                    detected_shear_profiles += detections
+                errs += errors
 
+                # Must have name and parameters
+                if "NAME" not in self.config_dict['SPECIES'][k][profile_k].keys():
+                    errs.append("SPECIES." + k + "." + profile_k + " needs a NAME")
+                else:
+                    if not isinstance(self.config_dict['SPECIES'][k][profile_k]["NAME"], str):
+                        errs.append("SPECIES." + k + "." + profile_k + ".NAME must be a single name")
+                if "PARAMETERS" not in self.config_dict['SPECIES'][k][profile_k].keys():
+                    errs.append("SPECIES." + k + "." + profile_k + " needs PARAMETERS")
+                else:
+                    if not isinstance(self.config_dict['SPECIES'][k][profile_k]["PARAMETERS"], dict):
+                        errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS must contain all parameters for the lenstronomy profile")
+
+            # If MODEL is specified, it must be valid
+            if profile_k == "MODEL":
+                if not isinstance(self.config_dict['SPECIES'][k][profile_k], str):
+                    errs.append("SPECIES." + k + "." + profile_k + ".MODEL must be a single name")
+                else:
+                    errs += self._valid_model(self.config_dict['SPECIES'][k][profile_k], "SPECIES." + k + "." + profile_k)
+
+        # need at least one light profile
+        if len(detected_light_profiles) < 1:
+            errs.append("SPECIES." + k + " needs at least one LIGHT_PROFILE")
+        # all indexing must be valid
+        elif len(detected_light_profiles) != max(detected_light_profiles):
+            errs.append("SPECIES." + k + " LIGHT_PROFILEs must be indexed as 1, 2, 3 ...")
+        if len(detected_mass_profiles) > 0 and len(detected_mass_profiles) != max(detected_mass_profiles):
+            errs.append("SPECIES." + k + " MASS_PROFILEs must be indexed as 1, 2, 3 ...")
+        if len(detected_shear_profiles) > 0 and len(detected_shear_profiles) != max(detected_shear_profiles):
+            errs.append("SPECIES." + k + " SHEAR_PROFILEs must be indexed as 1, 2, 3 ...")
+            
         return errs, names
 
     def _valid_point_source(self, k):
         errs, names = [], []
+        # Must have name key
+        if "NAME" not in self.config_dict['SPECIES'][k].keys():
+            errs.append("SPECIES." + k + " is missing an entry for NAME")
+        else:
+            # name must be a string
+            if not isinstance(self.config_dict['SPECIES'][k]["NAME"], str):
+                errs.append("SPECIES." + k + ".NAME must be a sinlge unique value")
+            else:
+                names.append(self.config_dict['SPECIES'][k]["NAME"])
+
+        # Must have a host key
+        if "HOST" not in self.config_dict['SPECIES'][k].keys():
+            errs.append("SPECIES." + k + " must have a valid HOST")
+        else:
+            # host name must be a single value
+            if not isinstance(self.config_dict['SPECIES'][k]["HOST"], str):
+                errs.append("SPECIES." + k + ".HOST must be a single name")
+            elif self.config_dict['SPECIES'][k]["HOST"] == "Foreground":
+                pass
+            else:
+                # host must appear in SPECIES section
+                if len([x for x in self.config if x.startswith("SPECIES.") and x.find("NAME." + self.config_dict['SPECIES'][k]["HOST"]) != -1]) == 0:
+                    errs.append("HOST for SPECIES." + k + " is not found in SPECIES section")
+
+        # Must have PARAMETERS
+        if "PARAMETERS" not in self.config_dict['SPECIES'][k].keys():
+            errs.append("SPECIES." + k + " must have PARAMETERS")
+        else:
+            if not isinstance(self.config_dict['SPECIES'][k]["PARAMETERS"], dict):
+                errs.append("SPECIES." + k + ".PARAMETERS must be a dictionary")
+            else:
+                # separation must be used properly
+                if "sep" in self.config_dict['SPECIES'][k]["PARAMETERS"].keys():
+                    # sep unit must be specified
+                    if "sep_unit" not in self.config_dict['SPECIES'][k]["PARAMETERS"].keys():
+                        errs.append("sep is specified for SPECIES." + k + ".PARAMETERS but sep_unit is missing")
+                    else:
+                        if not isinstance(self.config_dict['SPECIES'][k]["PARAMETERS"]["sep_unit"], str):
+                            errs.append("SPECIES." + k + ".PARAMETERS.sep_unit must be either 'arcsec' or 'kpc'")
+                        else:
+                            if self.config_dict['SPECIES'][k]["PARAMETERS"]["sep_unit"] not in ['arcsec', 'kpc']:
+                                errs.append("SPECIES." + k + ".PARAMETERS.sep_unit must be either 'arcsec' or 'kpc'")
+
+                # magnitude must be one of the parameters
+                if "magnitude" not in self.config_dict['SPECIES'][k]["PARAMETERS"].keys():
+                    errs.append("SPECIES." + k + ".PARAMETERS.magnitude must be specified")
+
+        # If timeseries model is specified, it must be a valid model
+        if "MODEL" in self.config_dict['SPECIES'][k].keys():
+            if not isinstance(self.config_dict['SPECIES'][k]["MODEL"], str):
+                errs.append("SPECIES." + k + ".MODEL must be a single name")
+            else:
+                errs += self._valid_model(self.config_dict['SPECIES'][k]["MODEL"], "SPECIES." + k + '.MODEL')
+                    
         return errs, names
 
     def _valid_noise(self, k):
@@ -183,7 +283,7 @@ class AllChecks():
                 errors, obj_names = self._valid_galaxy(k)
                 errs += errors
                 names += obj_names
-            elif k.startswith('POINT_SOURCE_'):
+            elif k.startswith('POINTSOURCE_'):
                 detected_point_sources += detections
                 errors, obj_names = self._valid_point_source(k)
                 errs +=	errors
@@ -201,7 +301,7 @@ class AllChecks():
         if len(detected_galaxies) != max(detected_galaxies):
             errs.append('GALAXY objects in SPECIES must be indexed like 1, 2, 3, ...')
         if len(detected_point_sources) != max(detected_point_sources):
-            errs.append('POINT_SOURCE objects in SPECIES must be indexed like 1, 2, 3, ...')
+            errs.append('POINTSOURCE objects in SPECIES must be indexed like 1, 2, 3, ...')
         if len(detected_noise_sources) != max(detected_noise_sources):
             errs.append('NOISE objects in SPECIES must be indexed like 1, 2, 3, ...')
 
