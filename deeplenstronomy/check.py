@@ -1,6 +1,10 @@
 # A module to check for user errors in the main config file
 
+import os
 import sys
+
+from astropy.io import fits
+import pandas as pd
 
 from deeplenstronomy.utils import KeyPathDict
 import deeplenstronomy.distributions as distributions
@@ -112,6 +116,84 @@ class AllChecks():
                 errs.append(param + " cannot be drawn from a distribution")
         return errs
 
+    def check_input_distributions(self):
+        errs = []
+        if "DISTRIBUTIONS" in self.config_dict.keys():
+            # there must be at least 1 USERDIST_ key
+            userdists = [x for x in self.config_dict["DISTRIBUTIONS"].keys() if x.startswith("USERDIST_")]
+            if len(userdists) == 0:
+                errs.append("DISTRIBUTIONS section must have at least 1 USERDIST key")
+            else:
+                for userdist in userdists:
+                    # name must be a single value
+                    if not isinstance(self.config_dict["DISTRIBUTIONS"][userdist], str):
+                        errs.append("DISTRIBUTIONS." + userdist + " must be a single name of a file")
+                    else:
+                        # specified file must exist
+                        if not os.path.exists(self.config_dict["DISTRIBUTIONS"][userdist]):
+                            errs.append("DISTRIBUTIONS." + userdist + "File '" + self.config_dict["DISTRIBUTIONS"][userdist] + "' not found")
+                        else:
+                            # must be able to read file
+                            df = None
+                            try:
+                                df = pd.read_csv(filename, delim_whitespace=True)
+                                if "WEIGHT" not in df.columns:
+                                    errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config_dict["DISTRIBUTIONS"][userdist] + "'")
+                            except Exception:
+                                errs.append("Error reading DISTRIBUTIONS." + userdist + "File '" + self.config_dict["DISTRIBUTIONS"][userdist] + "'")
+                            finally:
+                                del df
+        return errs
+
+    def check_image_backgrounds(self):
+        errs = []
+        if "BACKGROUNDS" in self.config_dict.keys():
+            # value must be a single value
+            if not isinstance(self.config_dict["BACKGROUNDS"], str):
+                errs.append("BACKGROUNDS must be a single value")
+            else:
+                # directory must exist
+                if not os.path.exists(self.config_dict["BACKGROUNDS"]):
+                    errs.append("BACKGROUNDS directory '" + self.config_dict["BACKGROUNDS"] + "' not found")
+                else:
+                    dimensions = {}
+                    # one file must exist per band
+                    for band in self.config_dict["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
+                        if not os.path.exists(self.config_dict["BACKGROUNDS"] + "/" + band + ".fits"):
+                            errs.append("BACKGROUNDS: " + self.config_dict["BACKGROUNDS"] + '/' + band + ".fits is missing")
+                        else:
+                            # must be able to open file
+                            hdu, data = None, None
+                            try:
+                                hdu = fits.open(self.config_dict["BACKGROUNDS"] + '/' + band + '.fits')
+                                data = hdu[0].data
+                                if len(data.shape) != 3:
+                                    errs.append("image data in " + self.config_dict["BACKGROUNDS"] + '/' + band + '.fits is formatted incorrectly')
+                                dimensions[band] = data.shape[0]
+                            except Exception:
+                                errs.append("Error reading " + self.config_dict["BACKGROUNDS"] + '/' + band + '.fits')
+                            finally:
+                                if hdu is not None:
+                                    hdu.close()
+                                del data
+
+                    # map.txt file is formatted correctly
+                    if os.path.exists(self.config_dict["BACKGROUNDS"] + '/map.txt'):
+                        df = None
+                        try:
+                            df = pd.read_csv(self.config_dict["BACKGROUNDS"] + '/' + 'map.txt', delim_whitespace=True)
+                            dimensions["map"] = df.shape[0]
+                        except Exception:
+                            err.append("Error reading " + self.config_dict["BACKGROUNDS"] + '/map.txt')
+                        finally:
+                            del df
+
+                    # dimensions of images and (optional) map must be the same
+                    if len(set(dimensions.values())) != 1:
+                        errs.append("BACKGROUNDS: dimensions of images files and possibly map.txt are inconsistent")
+
+        return errs
+    
     def _valid_model(self, model_name, path):
         errs = []
         print("Add checking for valid timeseries model when testing timeseries")
