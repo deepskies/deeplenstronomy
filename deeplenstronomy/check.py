@@ -1,5 +1,6 @@
 # A module to check for user errors in the main config file
 
+import glob
 import os
 import sys
 
@@ -23,6 +24,9 @@ class AllChecks():
         """
         Trigger the running of all checks
         """
+        # flag for already checked timeseries files
+        self.checked_ts_bands = False
+        
         # convert to KeyPathDict objects for easier parsing
         kp_f = KeyPathDict(full_dict, keypath_separator='.')
         self.full = kp_f
@@ -196,6 +200,31 @@ class AllChecks():
     
     def _valid_model(self, model_name, path):
         errs = []
+
+        # check that transmission curves exist for the bands
+        if model_name not in ['flat', 'flatnoise', 'variable', 'variablenoise']:
+            if not self.checked_ts_bands:
+                for band in self.config_dict["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
+                    try:
+                        filter_file = [x for x in glob.glob('filters/*_' + band + '.*')][0]
+                        passband = pd.read_csv(filter_file,
+                                               names=['WAVELENGTH', 'TRANSMISSION'],
+                                               delim_whitespace=True, comment='#')
+                    except Exception:
+                        errs.append("Unable to find transmission curve for " + band + " in the filters/ directory")
+                self.checked_ts_bands = True
+
+            # check that the model name is allowed
+            try:
+                obj = model_name.split('_')[0]
+                sed = model_name.split('_')[1]
+            except IndexError:
+                errs.append(path + '.' + model_name + ' is an invalid timeseries model')
+                obj, sed = 'ia', 'random'
+
+            # left off here
+            raise NotImplementedError
+                        
         print("Add checking for valid timeseries model when testing timeseries")
         return errs
 
