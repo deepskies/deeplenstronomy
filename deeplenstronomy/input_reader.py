@@ -508,6 +508,18 @@ class Organizer():
                     output_dict[band][obj_string + '-type'] = closest_redshift_lc['obj_type']
 
                     noise_idx += 1
+
+                # Use independent observing conditions for each nite if conditions are drawn from distributions
+                # seeing
+                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"], dict):
+                    output_dict[band]["seeing"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"]["DISTRIBUTION"], bands=band)
+                # sky_brightness
+                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"], dict):
+                    output_dict[band]["sky_brightness"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"]["DISTRIBUTION"], bands=band)
+                # magnitude_zero_point
+                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"], dict):
+                    output_dict[band]["magnitude_zero_point"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"]["DISTRIBUTION"], bands=band)
+
                     
             output_dicts.append(copy.deepcopy(output_dict))
             del output_dict
