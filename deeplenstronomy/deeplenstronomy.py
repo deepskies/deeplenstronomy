@@ -177,6 +177,12 @@ def get_forced_sim_inputs(forced_inputs, configurations, bands):
 def _check_survey(survey):
     return survey in dir(surveys)   
 
+def _graceful_exit(err):
+    """
+    Clost the program with a neat error message.
+    """
+    print(err)
+    return
 
 def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                  verbose=False, store_sample=False, image_file_format='npy',
@@ -200,6 +206,19 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     :return: dataset: instance of dataset class
     """
 
+    try:
+        return _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
+                             image_file_format, survey, return_planes, skip_image_generation,
+                             solve_lens_equation)
+    except Exception as err:
+        _graceful_exit(err)
+
+    return
+
+def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
+                  image_file_format, survey, return_planes, skip_image_generation,	
+                  solve_lens_equation):
+
     if solve_lens_equation and skip_image_generation:
         raise RuntimeError, "You cannot skip image generation and solve the lens equation"
     
@@ -213,7 +232,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         dataset.config_file = config
         
         # Parse the config file and store config dict
-        if survey not in dir(surveys):
+        if not _check_survey(survey):
             raise RuntimeError, "survey={0} is not a valid survey.".format(survey)
         parser = Parser(config, survey=survey)
         dataset.config_dict = parser.config_dict
