@@ -1,6 +1,7 @@
 # A module to check for user errors in the main config file
 
 import glob
+from inspect import getfullargspec
 import os
 import sys
 
@@ -61,9 +62,12 @@ class AllChecks():
     def config_dict_format(*args):
         return "['" + "']['".join(list(args)) + "']"
 
-    def config_lookup(self, lookup_str):
-        return eval("self.config_dict" + lookup_str)
-    
+    def config_lookup(self, lookup_str, full=False):
+        if not full:
+            return eval("self.config_dict" + lookup_str)
+        else:
+            return eval("self.full_dict" + lookup_str)
+        
     ### Check functions
     def check_top_level_existence(self):
         errs = []
@@ -120,6 +124,41 @@ class AllChecks():
                 errs.append(param + " cannot be drawn from a distribution")
         return errs
 
+    def check_for_auxiliary_files(self):
+        errs = []
+        input_paths = [x for x in self.full_keypaths if x.find("INPUT") != -1]
+        input_files = [self.config_lookup(self.config_dict_format(param.split('.')), full=True) for param in input_paths]
+        for filename in input_files:
+            if not os.path.exists(filename):
+                errs.append("Unable to find auxiliary file: " + filename)
+        return errs
+
+    def check_for_valid_distribution_entry(self):
+        errs = []
+        distribution_paths = [x for x in self.full_keypaths if x.find("DISTRIBUTION.") != -1]
+        distribution_dicts = [self.config_lookup(self.config_dict_format(param.split('.'))) for param in distribution_paths]
+        for distribution_dict, path in zip(distribution_dicts, distribution_paths):
+            # must have name key - return early to not break the remaining parts of this function
+            if "NAME" not in distribution_dict.keys():
+                errs.append(path + " is missing the NAME key")
+                return errs
+            else:
+                # name must be valid
+                if distribution_dict["NAME"] not in dir(distributions):
+                    errs.append(path + " is not a valid distribution name")
+                    return errs
+
+            # must have parameter key
+            if "PARAMETERS" not in distribution_dict.keys():
+                errs.append(path + " is missing the PARAMETERS key")
+            else:
+                # parameters must be valid for the distribution
+                allowed_params = getfullargspec(eval("distributions." + distribution_dict["NAME"]))[0]
+                for param in distribution_dict["PARAMETERS"]:
+                    if param not in allowed_params:
+                        errs.append(path + '.PARAMETERS.' + param + ' is not in the allowed list of ({0}) for the distribtuion '.format(', '.join(allowed_params)) + distribution_dict["NAME"]) 
+        return errs
+    
     def check_input_distributions(self):
         errs = []
         if "DISTRIBUTIONS" in self.config_dict.keys():
@@ -578,7 +617,14 @@ class AllChecks():
                                 del nites
                             except TypeError:
                                 errs.append("Listed NITES in GEOMETRY." + k + ".TIMESERIES.NITES must be numeric")
-                        
+
+                    # Impose restriction on num_exposures
+                    if isinstance(self.config["SURVEY"]["PARAMETERS"]["num_exposures"], dict):
+                        errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
+                    else:
+                        if self.config["SURVEY"]["PARAMETERS"]["num_exposures"] != 1:
+                            errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
+
                 # unexpected entry
                 else:
                     errs.append('GEOMETRY.' + k + '.' + config_k + ' is not a valid entry')
