@@ -7,6 +7,8 @@ import sys
 
 from astropy.io import fits
 import pandas as pd
+from lenstronomy.LensModel import Profiles as LensModelProfiles
+from lenstronomy.LightModel import Profiles as LightModelProfiles
 
 from deeplenstronomy.utils import KeyPathDict
 import deeplenstronomy.distributions as distributions
@@ -310,6 +312,12 @@ class AllChecks():
         detected_light_profiles, detected_mass_profiles, detected_shear_profiles = [], [], []
         for profile_k in self.config_dict['SPECIES'][k].keys():
             if profile_k.startswith('LIGHT_PROFILE_') or profile_k.startswith('MASS_PROFILE_') or profile_k.startswith('SHEAR_PROFILE_'):
+                #set profile_type
+                if profile_k.startswith('LIGHT_PROFILE_'):
+                    profile_type = "LightModelProfiles"
+                else:
+                    profile_type = "LensModelProfiles"
+                
                 # Index must be valid
                 detections, errors = self._valid_index(profile_k, "SPECIES." + k)
                 if profile_k.startswith('LIGHT_PROFILE_'):
@@ -320,18 +328,29 @@ class AllChecks():
                     detected_shear_profiles += detections
                 errs += errors
 
-                # Must have name and parameters
+                # Must have name - return early if no name exists
                 if "NAME" not in self.config_dict['SPECIES'][k][profile_k].keys():
                     errs.append("SPECIES." + k + "." + profile_k + " needs a NAME")
                 else:
                     if not isinstance(self.config_dict['SPECIES'][k][profile_k]["NAME"], str):
                         errs.append("SPECIES." + k + "." + profile_k + ".NAME must be a single name")
+                        return errs
+                    else:
+                        # name must be a valid lenstronomy profile
+                        if self.config_dict['SPECIES'][k][profile_k]["NAME"].lower() not in dir(eval(profile_type)):
+                            errs.append("SPECIES." + k + "." + profile_k + " (" + self.config_dict['SPECIES'][k][profile_k]["NAME"] + ") is not a valid lenstronomy profile")
+                # Must have parameters
                 if "PARAMETERS" not in self.config_dict['SPECIES'][k][profile_k].keys():
                     errs.append("SPECIES." + k + "." + profile_k + " needs PARAMETERS")
                 else:
                     if not isinstance(self.config_dict['SPECIES'][k][profile_k]["PARAMETERS"], dict):
                         errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS must contain all parameters for the lenstronomy profile")
-
+                    else:
+                        # specified parameters must be what lenstronomy is expecting
+                        for param_name in self.config_dict['SPECIES'][k][profile_k]["PARAMETERS"].keys():
+                            if param_name not in getfullargspec(eval(profile_type + "." + self.config_dict['SPECIES'][k][profile_k]["NAME"].title() + ".function"))[0]:
+                                errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name " is not a valid_parameter for " + self.config_dict['SPECIES'][k][profile_k]["NAME"])
+                        
             # If MODEL is specified, it must be valid
             if profile_k == "MODEL":
                 if not isinstance(self.config_dict['SPECIES'][k][profile_k], str):
