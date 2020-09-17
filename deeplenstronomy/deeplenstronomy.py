@@ -213,6 +213,8 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         dataset.config_file = config
         
         # Parse the config file and store config dict
+        if survey not in dir(surveys):
+            raise RuntimeError, "survey={0} is not a valid survey.".format(survey)
         parser = Parser(config, survey=survey)
         dataset.config_dict = parser.config_dict
 
