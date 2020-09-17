@@ -222,10 +222,36 @@ class AllChecks():
                 errs.append(path + '.' + model_name + ' is an invalid timeseries model')
                 obj, sed = 'ia', 'random'
 
-            # left off here
-            raise NotImplementedError
-                        
-        print("Add checking for valid timeseries model when testing timeseries")
+            if obj == 'ia':
+                if sed not in ['random', 'salt2_template_0.dat', 'salt2_template_0.dat']:
+                    errs.append(path + '.' + model_name + ' does not have a valid sed specified')
+            elif obj == 'cc':
+                if sed not in ['random', 'Nugent+Scolnic_IIL.SED', 'SNLS-04D1la.SED', 'SNLS-04D4jv.SED',
+                               'CSP-2004fe.SED', 'CSP-2004gq.SED', 'CSP-2004gv.SED', 'CSP-2006ep.SED',
+                               'CSP-2007Y.SED', 'SDSS-000018.SED', 'SDSS-000020.SED', 'SDSS-002744.SED',
+                               'SDSS-003818.SED', 'SDSS-004012.SED', 'SDSS-012842.SED', 'SDSS-013195.SED',
+                               'SDSS-013376.SED', 'SDSS-013449.SED', 'SDSS-014450.SED', 'SDSS-014475.SED',
+                               'SDSS-014492.SED', 'SDSS-014599.SED', 'SDSS-015031.SED', 'SDSS-015320.SED',
+                               'SDSS-015339.SED', 'SDSS-015475.SED', 'SDSS-017548.SED', 'SDSS-017564.SED',
+                               'SDSS-017862.SED', 'SDSS-018109.SED', 'SDSS-018297.SED', 'SDSS-018408.SED',
+                               'SDSS-018441.SED', 'SDSS-018457.SED', 'SDSS-018590.SED', 'SDSS-018596.SED',
+                               'SDSS-018700.SED', 'SDSS-018713.SED', 'SDSS-018734.SED', 'SDSS-018793.SED',
+                               'SDSS-018834.SED', 'SDSS-018892.SED', 'SDSS-019323.SED', 'SDSS-020038.SED']:
+                    errs.append(path + '.' + model_name + ' does not have a valid sed specified')
+            elif obj == 'user':
+                if not os.path.exists("seds/user/" + sed):
+                    errs.append(path + '.' + model_name + ' sed file ({0}) is missing'.format(sed))
+                else:
+                    # check that the file can be opened properly
+                    try:
+                        df = pd.read_csv(sed_filename,
+                                         names=['NITE', 'WAVELENGTH_REST', 'FLUX'],
+                                         delim_whitespace=True, comment='#')
+                    except Exception:
+                        errs.append(path + "." + model_name + " sed file ({0})) could not be read properly.".format(sed))
+            else:
+                errs.append(path + '.' + model_name + ' is an invalid timeseries model')
+                
         return errs
 
     def _valid_galaxy(self, k):
