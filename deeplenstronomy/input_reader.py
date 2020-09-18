@@ -7,7 +7,7 @@ import sys
 import yaml
 
 from astropy.cosmology import FlatLambdaCDM
-from astropy.cosmology import arcsec_per_kpc_comoving
+#from astropy.cosmology import arcsec_per_kpc_comoving
 import numpy as np
 
 import deeplenstronomy.timeseries as timeseries
@@ -222,11 +222,11 @@ class Organizer():
             chosen_ra = np.cos(angle) * sep + ra_host
             chosen_dec = np.sin(angle) * sep + dec_host
         elif sep_unit == 'kpc':
-            kpc_to_arcsec = arcsec_per_kpc_comoving(redshift).value / (1. + redshift)
+            kpc_to_arcsec = cosmo.arcsec_per_kpc_comoving(redshift).value / (1. + redshift)
             chosen_ra = np.cos(angle) * sep * kpc_to_arcsec + ra_host
             chosen_dec = np.sin(angle) * sep * kpc_to_arcsec + dec_host
         else:
-            raise NotImplementedError, "unexpected sep_unit"
+            raise NotImplementedError("unexpected sep_unit")
         
         return chosen_ra, chosen_dec
 

@@ -349,7 +349,7 @@ class AllChecks():
                         # specified parameters must be what lenstronomy is expecting
                         for param_name in self.config_dict['SPECIES'][k][profile_k]["PARAMETERS"].keys():
                             if param_name not in getfullargspec(eval(profile_type + "." + self.config_dict['SPECIES'][k][profile_k]["NAME"].title() + ".function"))[0]:
-                                errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name " is not a valid_parameter for " + self.config_dict['SPECIES'][k][profile_k]["NAME"])
+                                errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name + " is not a valid_parameter for " + self.config_dict['SPECIES'][k][profile_k]["NAME"])
                         
             # If MODEL is specified, it must be valid
             if profile_k == "MODEL":
@@ -530,13 +530,13 @@ class AllChecks():
 
             # Every configuration needs a FRACTION that is a valid float
             if "FRACTION" not in self.config_dict['GEOMETRY'][k].keys():
-                errs.append("GEOMETRY." + k " .FRACTION is missing")
+                errs.append("GEOMETRY." + k + " .FRACTION is missing")
             else:
                 try:
                     fraction = float(self.config_dict['GEOMETRY'][k]['FRACTION'])
                     fractions.append(fraction)
                 except TypeError:
-                    errs.append("GEOMETRY." + k " .FRACTION must be a float")
+                    errs.append("GEOMETRY." + k + " .FRACTION must be a float")
 
             # Configurations must have at least one plane
             if len(list(self.config_dict['GEOMETRY'][k].keys())) == 0:

@@ -1,4 +1,4 @@
-# Outer shell to do everything for youA
+# Outer shell to do everything for you
 
 import h5py
 import numpy as np
@@ -220,7 +220,7 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
                   solve_lens_equation):
 
     if solve_lens_equation and skip_image_generation:
-        raise RuntimeError, "You cannot skip image generation and solve the lens equation"
+        raise RuntimeError("You cannot skip image generation and solve the lens equation")
     
     if not dataset:
         dataset = Dataset()
@@ -233,7 +233,7 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
         
         # Parse the config file and store config dict
         if not _check_survey(survey):
-            raise RuntimeError, "survey={0} is not a valid survey.".format(survey)
+            raise RuntimeError("survey={0} is not a valid survey.".format(survey))
         parser = Parser(config, survey=survey)
         dataset.config_dict = parser.config_dict
 
@@ -326,7 +326,7 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
                 planes.append(np.array([simulated_image_data['output_lens_plane'],
                                         simulated_image_data['output_source_plane'],
                                         simulated_image_data['output_point_source_plane'],
-                                        simulated_image_data['output_noise_plane'])))
+                                        simulated_image_data['output_noise_plane']]))
 
             if solve_lens_equation:
                 for band in dataset.bands:
