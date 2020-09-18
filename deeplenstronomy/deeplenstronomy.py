@@ -8,6 +8,7 @@ import pandas as pd
 from deeplenstronomy.input_reader import Organizer, Parser
 from deeplenstronomy.image_generator import ImageGenerator
 from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images
+from deeplenstronomy import surveys
 
 class Dataset():
     def __init__(self, config=None, save=False, store=True):
@@ -175,7 +176,10 @@ def get_forced_sim_inputs(forced_inputs, configurations, bands):
     return force_param_inputs
 
 def _check_survey(survey):
-    return survey in dir(surveys)   
+    if survey is None:
+        return True
+    else:
+        return survey in dir(surveys)   
 
 def _graceful_exit(err):
     """
@@ -206,14 +210,18 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     :return: dataset: instance of dataset class
     """
 
-    try:
-        return _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
-                             image_file_format, survey, return_planes, skip_image_generation,
-                             solve_lens_equation)
-    except Exception as err:
-        _graceful_exit(err)
+    return _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
+                         image_file_format, survey, return_planes, skip_image_generation,
+                         solve_lens_equation)
+    
+    #try:
+    #    return _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
+    #                         image_file_format, survey, return_planes, skip_image_generation,
+    #                         solve_lens_equation)
+    #except Exception as err:
+    #    _graceful_exit(err)
 
-    return
+    #return
 
 def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
                   image_file_format, survey, return_planes, skip_image_generation,	
@@ -259,7 +267,7 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
 
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
-    for fp in P.file_paths:
+    for fp in parser.file_paths:
         filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']")
         draw_param_names, draw_param_values = draw_from_user_dist(filename, dataset.size)
         forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}

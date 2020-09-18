@@ -372,6 +372,7 @@ class Organizer():
                             #set ra and dec to host center
                             ra, dec = ra_host, dec_host
                             sep = 0.0
+                            sep_unit = 'arcsec'
 
                         for band in bands:
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-HOST'.format(plane_num, obj_num)] = self.main_dict['SPECIES'][self._species_map[obj_name]]['HOST']

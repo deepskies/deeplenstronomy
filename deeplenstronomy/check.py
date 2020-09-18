@@ -10,6 +10,17 @@ import pandas as pd
 from lenstronomy.LensModel import Profiles as LensModelProfiles
 from lenstronomy.LightModel import Profiles as LightModelProfiles
 
+# import lenstronomy models into the global scope so dir() can find them
+import lenstronomy
+lenstronomy_path = lenstronomy.__file__[:-11] # length of __init__.py
+light_models = [x.split('/')[-1][0:-3] for x in glob.glob(lenstronomy_path + 'LightModel/Profiles/*.py') if not x.split('/')[-1].startswith('__')]
+lens_models = [x.split('/')[-1][0:-3] for x in glob.glob(lenstronomy_path + 'LensModel/Profiles/*.py') if not x.split('/')[-1].startswith('__')]
+for model in light_models:
+    exec(f'import lenstronomy.LightModel.Profiles.{model} as {model}_light')
+for model in lens_models:
+    exec(f'import lenstronomy.LensModel.Profiles.{model} as {model}_lens')
+
+
 from deeplenstronomy.utils import KeyPathDict
 import deeplenstronomy.distributions as distributions
 
@@ -38,6 +49,13 @@ class AllChecks():
         self.config = kp_c
         self.config_keypaths = kp_c.keypaths()
 
+        # set lenstronomy name map
+        self.set_lenstronomy_maps()
+        self.lenstronomy_valid_models = ['GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'ELLIPSOID', 'MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE',
+                                         'SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'SHAPELETS', 'SHAPELETS_POLAR', 'SHAPELETS_POLAR_EXP',
+                                         'HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE', 'UNIFORM', 'POWER_LAW', 'NIE',
+                                         'CHAMELEON', 'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'INTERPOL', 'SLIT_STARLETS', 'SLIT_STARLETS_GEN2']
+        
         # find all check functions
         self.checks = [x for x in dir(self) if x.find('check_') != -1]
 
@@ -45,10 +63,11 @@ class AllChecks():
         total_errs = []
         for check in self.checks:
 
-            try:
-                err_messages = eval('self.' + check + '()')
-            except Exception:
-                err_messages = ["CheckFunctionError: " + check] 
+            err_messages = eval('self.' + check + '()') 
+            #try:
+            #    err_messages = eval('self.' + check + '()')
+            #except Exception:
+            #    err_messages = ["CheckFunctionError: " + check] 
 
             total_errs += err_messages
 
@@ -60,15 +79,48 @@ class AllChecks():
         return
 
     ### Helper methods
+    def set_lenstronomy_maps(self):
+         p = {'GAUSSIAN': ".gaussian.Gaussian",
+              'GAUSSIAN_ELLIPSE': ".gaussian.GaussianEllipse",
+              'ELLIPSOID': ".ellipsoid.Ellipsoid",
+              'MULTI_GAUSSIAN': ".gaussian.MultiGaussian",
+              'MULTI_GAUSSIAN_ELLIPSE': ".gaussian.MultiGaussianEllipse",
+              'SERSIC': ".sersic.Sersic",
+              'SERSIC_ELLIPSE': ".sersic.SersicElliptic",
+              'CORE_SERSIC': ".sersic.CoreSersic",
+              'SHAPELETS': ".shapelets.Shapelets",
+              'SHAPELETS_POLAR': ".shapelets_polar.ShapeletsPolar",
+              'SHAPELETS_POLAR_EXP': ".shapelets_polar.ShapeletsPolarExp",
+              'HERNQUIST': ".hernquist.Hernquist",
+              'HERNQUIST_ELLIPSE': ".hernquist.HernquistEllipse",
+              'PJAFFE': ".p_jaffe.PJaffe",
+              'PJAFFE_ELLIPSE': ".p_jaffe.PJaffe_Ellipse",
+              'UNIFORM': ".uniform.Uniform",
+              'POWER_LAW': ".power_law.PowerLaw",
+              'NIE': ".nie.NIE",
+              'CHAMELEON': ".chameleon.Chameleon",
+              'DOUBLE_CHAMELEON': ".chameleon.DoubleChameleon",
+              'TRIPLE_CHAMELEON': ".chameleon.TripleChameleon",
+              'INTERPOL': ".interpolation.Interpol",
+              'SLIT_STARLETS': ".starlets.SLIT_Starlets",
+              'SLIT_STARLETS_GEN2': ".starlets.SLIT_Starlets"}
+         setattr(self, "lenstronomy_light_map", p)
+
+         d = {'SIE': ".sie.SIE",
+              'SHEAR': ".shear.Shear"
+         }
+         setattr(self, "lenstronomy_lens_map", d)
+         return
+    
     @staticmethod
     def config_dict_format(*args):
-        return "['" + "']['".join(list(args)) + "']"
+        return "['" + "']['".join(args) + "']"
 
     def config_lookup(self, lookup_str, full=False):
         if not full:
-            return eval("self.config_dict" + lookup_str)
+            return eval("self.config" + lookup_str)
         else:
-            return eval("self.full_dict" + lookup_str)
+            return eval("self.full" + lookup_str)
         
     ### Check functions
     def check_top_level_existence(self):
@@ -97,9 +149,9 @@ class AllChecks():
                        "SURVEY.PARAMETERS.num_exposures"}
         for param in param_names:
             try:
-                config_obj = self.config_lookup(self.config_dict_format(param.split('.')))
+                config_obj = self.config_lookup(self.config_dict_format(*param.split('.')))
             except KeyError:
-                errs.append(param + "is missing from the Config File")
+                errs.append(param + " is missing from the Config File")
 
         return errs
 
@@ -117,7 +169,7 @@ class AllChecks():
                        "COSMOLOGY.PARAMETERS.Ob0"}
         for param in param_names:
             try:
-                config_obj = self.config_lookup(self.config_dict_format(param.split('.')))
+                config_obj = self.config_lookup(self.config_dict_format(*param.split('.')))
             except KeyError:
                 # The checked parameter was not in the config dict
                 continue
@@ -129,7 +181,7 @@ class AllChecks():
     def check_for_auxiliary_files(self):
         errs = []
         input_paths = [x for x in self.full_keypaths if x.find("INPUT") != -1]
-        input_files = [self.config_lookup(self.config_dict_format(param.split('.')), full=True) for param in input_paths]
+        input_files = [self.config_lookup(self.config_dict_format(*param.split('.')), full=True) for param in input_paths]
         for filename in input_files:
             if not os.path.exists(filename):
                 errs.append("Unable to find auxiliary file: " + filename)
@@ -137,8 +189,8 @@ class AllChecks():
 
     def check_for_valid_distribution_entry(self):
         errs = []
-        distribution_paths = [x for x in self.full_keypaths if x.find("DISTRIBUTION.") != -1]
-        distribution_dicts = [self.config_lookup(self.config_dict_format(param.split('.'))) for param in distribution_paths]
+        distribution_paths = [x for x in self.full_keypaths if x.endswith("DISTRIBUTION")]
+        distribution_dicts = [self.config_lookup(self.config_dict_format(*param.split('.'))) for param in distribution_paths]
         for distribution_dict, path in zip(distribution_dicts, distribution_paths):
             # must have name key - return early to not break the remaining parts of this function
             if "NAME" not in distribution_dict.keys():
@@ -147,7 +199,7 @@ class AllChecks():
             else:
                 # name must be valid
                 if distribution_dict["NAME"] not in dir(distributions):
-                    errs.append(path + " is not a valid distribution name")
+                    errs.append(path + "." + distribution_dict["NAME"] +  " is not a valid distribution name")
                     return errs
 
             # must have parameter key
@@ -163,73 +215,73 @@ class AllChecks():
     
     def check_input_distributions(self):
         errs = []
-        if "DISTRIBUTIONS" in self.config_dict.keys():
+        if "DISTRIBUTIONS" in self.config.keys():
             # there must be at least 1 USERDIST_ key
-            userdists = [x for x in self.config_dict["DISTRIBUTIONS"].keys() if x.startswith("USERDIST_")]
+            userdists = [x for x in self.config["DISTRIBUTIONS"].keys() if x.startswith("USERDIST_")]
             if len(userdists) == 0:
                 errs.append("DISTRIBUTIONS section must have at least 1 USERDIST key")
             else:
                 for userdist in userdists:
                     # name must be a single value
-                    if not isinstance(self.config_dict["DISTRIBUTIONS"][userdist], str):
+                    if not isinstance(self.config["DISTRIBUTIONS"][userdist], str):
                         errs.append("DISTRIBUTIONS." + userdist + " must be a single name of a file")
                     else:
                         # specified file must exist
-                        if not os.path.exists(self.config_dict["DISTRIBUTIONS"][userdist]):
-                            errs.append("DISTRIBUTIONS." + userdist + "File '" + self.config_dict["DISTRIBUTIONS"][userdist] + "' not found")
+                        if not os.path.exists(self.config["DISTRIBUTIONS"][userdist]):
+                            errs.append("DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist] + "' not found")
                         else:
                             # must be able to read file
                             df = None
                             try:
-                                df = pd.read_csv(filename, delim_whitespace=True)
+                                df = pd.read_csv(self.config["DISTRIBUTIONS"][userdist], delim_whitespace=True)
                                 if "WEIGHT" not in df.columns:
-                                    errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config_dict["DISTRIBUTIONS"][userdist] + "'")
-                            except Exception:
-                                errs.append("Error reading DISTRIBUTIONS." + userdist + "File '" + self.config_dict["DISTRIBUTIONS"][userdist] + "'")
+                                    errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config["DISTRIBUTIONS"][userdist] + "'")
+                            except Exception as e:
+                                errs.append("Error reading DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist] + "'")
                             finally:
                                 del df
         return errs
 
     def check_image_backgrounds(self):
         errs = []
-        if "BACKGROUNDS" in self.config_dict.keys():
+        if "BACKGROUNDS" in self.config.keys():
             # value must be a single value
-            if not isinstance(self.config_dict["BACKGROUNDS"], str):
+            if not isinstance(self.config["BACKGROUNDS"], str):
                 errs.append("BACKGROUNDS must be a single value")
             else:
                 # directory must exist
-                if not os.path.exists(self.config_dict["BACKGROUNDS"]):
-                    errs.append("BACKGROUNDS directory '" + self.config_dict["BACKGROUNDS"] + "' not found")
+                if not os.path.exists(self.config["BACKGROUNDS"]):
+                    errs.append("BACKGROUNDS directory '" + self.config["BACKGROUNDS"] + "' not found")
                 else:
                     dimensions = {}
                     # one file must exist per band
-                    for band in self.config_dict["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
-                        if not os.path.exists(self.config_dict["BACKGROUNDS"] + "/" + band + ".fits"):
-                            errs.append("BACKGROUNDS: " + self.config_dict["BACKGROUNDS"] + '/' + band + ".fits is missing")
+                    for band in self.config["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
+                        if not os.path.exists(self.config["BACKGROUNDS"] + "/" + band + ".fits"):
+                            errs.append("BACKGROUNDS: " + self.config["BACKGROUNDS"] + '/' + band + ".fits is missing")
                         else:
                             # must be able to open file
                             hdu, data = None, None
                             try:
-                                hdu = fits.open(self.config_dict["BACKGROUNDS"] + '/' + band + '.fits')
+                                hdu = fits.open(self.config["BACKGROUNDS"] + '/' + band + '.fits')
                                 data = hdu[0].data
                                 if len(data.shape) != 3:
-                                    errs.append("image data in " + self.config_dict["BACKGROUNDS"] + '/' + band + '.fits is formatted incorrectly')
+                                    errs.append("image data in " + self.config["BACKGROUNDS"] + '/' + band + '.fits is formatted incorrectly')
                                 dimensions[band] = data.shape[0]
                             except Exception:
-                                errs.append("Error reading " + self.config_dict["BACKGROUNDS"] + '/' + band + '.fits')
+                                errs.append("Error reading " + self.config["BACKGROUNDS"] + '/' + band + '.fits')
                             finally:
                                 if hdu is not None:
                                     hdu.close()
                                 del data
 
                     # map.txt file is formatted correctly
-                    if os.path.exists(self.config_dict["BACKGROUNDS"] + '/map.txt'):
+                    if os.path.exists(self.config["BACKGROUNDS"] + '/map.txt'):
                         df = None
                         try:
-                            df = pd.read_csv(self.config_dict["BACKGROUNDS"] + '/' + 'map.txt', delim_whitespace=True)
+                            df = pd.read_csv(self.config["BACKGROUNDS"] + '/' + 'map.txt', delim_whitespace=True)
                             dimensions["map"] = df.shape[0]
                         except Exception:
-                            err.append("Error reading " + self.config_dict["BACKGROUNDS"] + '/map.txt')
+                            err.append("Error reading " + self.config["BACKGROUNDS"] + '/map.txt')
                         finally:
                             del df
 
@@ -245,7 +297,7 @@ class AllChecks():
         # check that transmission curves exist for the bands
         if model_name not in ['flat', 'flatnoise', 'variable', 'variablenoise']:
             if not self.checked_ts_bands:
-                for band in self.config_dict["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
+                for band in self.config["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
                     try:
                         filter_file = [x for x in glob.glob('filters/*_' + band + '.*')][0]
                         passband = pd.read_csv(filter_file,
@@ -299,24 +351,26 @@ class AllChecks():
         errs, names = [], []
 
         # Must have a name key
-        if "NAME" not in self.config_dict['SPECIES'][k].keys():
+        if "NAME" not in self.config['SPECIES'][k].keys():
             errs.append("SPECIES." + k + " is missing an entry for NAME")
         else:
             # name must be a string
-            if not isinstance(self.config_dict['SPECIES'][k]["NAME"], str):
+            if not isinstance(self.config['SPECIES'][k]["NAME"], str):
                 errs.append("SPECIES." + k + ".NAME must be the name of a function in distribution.py")
             else:
-                names.append(self.config_dict['SPECIES'][k]["NAME"])
+                names.append(self.config['SPECIES'][k]["NAME"])
 
         # Check LIGHT_PROFILEs, MASS_PROFILEs, and SHEAR_PROFILEs
         detected_light_profiles, detected_mass_profiles, detected_shear_profiles = [], [], []
-        for profile_k in self.config_dict['SPECIES'][k].keys():
+        for profile_k in self.config['SPECIES'][k].keys():
             if profile_k.startswith('LIGHT_PROFILE_') or profile_k.startswith('MASS_PROFILE_') or profile_k.startswith('SHEAR_PROFILE_'):
                 #set profile_type
                 if profile_k.startswith('LIGHT_PROFILE_'):
                     profile_type = "LightModelProfiles"
+                    lenstronomy_map = self.lenstronomy_light_map
                 else:
                     profile_type = "LensModelProfiles"
+                    lenstronomy_map = self.lenstronomy_lens_map
                 
                 # Index must be valid
                 detections, errors = self._valid_index(profile_k, "SPECIES." + k)
@@ -329,34 +383,34 @@ class AllChecks():
                 errs += errors
 
                 # Must have name - return early if no name exists
-                if "NAME" not in self.config_dict['SPECIES'][k][profile_k].keys():
+                if "NAME" not in self.config['SPECIES'][k][profile_k].keys():
                     errs.append("SPECIES." + k + "." + profile_k + " needs a NAME")
                 else:
-                    if not isinstance(self.config_dict['SPECIES'][k][profile_k]["NAME"], str):
+                    if not isinstance(self.config['SPECIES'][k][profile_k]["NAME"], str):
                         errs.append("SPECIES." + k + "." + profile_k + ".NAME must be a single name")
                         return errs
                     else:
                         # name must be a valid lenstronomy profile
-                        if self.config_dict['SPECIES'][k][profile_k]["NAME"].lower() not in dir(eval(profile_type)):
-                            errs.append("SPECIES." + k + "." + profile_k + " (" + self.config_dict['SPECIES'][k][profile_k]["NAME"] + ") is not a valid lenstronomy profile")
+                        if self.config['SPECIES'][k][profile_k]["NAME"] not in self.lenstronomy_valid_models:
+                            errs.append("SPECIES." + k + "." + profile_k + " (" + self.config['SPECIES'][k][profile_k]["NAME"] + ") is not a valid lenstronomy profile")
                 # Must have parameters
-                if "PARAMETERS" not in self.config_dict['SPECIES'][k][profile_k].keys():
+                if "PARAMETERS" not in self.config['SPECIES'][k][profile_k].keys():
                     errs.append("SPECIES." + k + "." + profile_k + " needs PARAMETERS")
                 else:
-                    if not isinstance(self.config_dict['SPECIES'][k][profile_k]["PARAMETERS"], dict):
+                    if not isinstance(self.config['SPECIES'][k][profile_k]["PARAMETERS"], dict):
                         errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS must contain all parameters for the lenstronomy profile")
                     else:
                         # specified parameters must be what lenstronomy is expecting
-                        for param_name in self.config_dict['SPECIES'][k][profile_k]["PARAMETERS"].keys():
-                            if param_name not in getfullargspec(eval(profile_type + "." + self.config_dict['SPECIES'][k][profile_k]["NAME"].title() + ".function"))[0]:
-                                errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name + " is not a valid_parameter for " + self.config_dict['SPECIES'][k][profile_k]["NAME"])
+                        for param_name in self.config['SPECIES'][k][profile_k]["PARAMETERS"].keys():
+                            if param_name not in getfullargspec(eval(profile_type + lenstronomy_map[self.config['SPECIES'][k][profile_k]["NAME"]] + ".function"))[0]:
+                                errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name + " is not a valid_parameter for " + self.config['SPECIES'][k][profile_k]["NAME"])
                         
             # If MODEL is specified, it must be valid
             if profile_k == "MODEL":
-                if not isinstance(self.config_dict['SPECIES'][k][profile_k], str):
+                if not isinstance(self.config['SPECIES'][k][profile_k], str):
                     errs.append("SPECIES." + k + "." + profile_k + ".MODEL must be a single name")
                 else:
-                    errs += self._valid_model(self.config_dict['SPECIES'][k][profile_k], "SPECIES." + k + "." + profile_k)
+                    errs += self._valid_model(self.config['SPECIES'][k][profile_k], "SPECIES." + k + "." + profile_k)
 
         # need at least one light profile
         if len(detected_light_profiles) < 1:
@@ -374,79 +428,79 @@ class AllChecks():
     def _valid_point_source(self, k):
         errs, names = [], []
         # Must have name key
-        if "NAME" not in self.config_dict['SPECIES'][k].keys():
+        if "NAME" not in self.config['SPECIES'][k].keys():
             errs.append("SPECIES." + k + " is missing an entry for NAME")
         else:
             # name must be a string
-            if not isinstance(self.config_dict['SPECIES'][k]["NAME"], str):
+            if not isinstance(self.config['SPECIES'][k]["NAME"], str):
                 errs.append("SPECIES." + k + ".NAME must be a sinlge unique value")
             else:
-                names.append(self.config_dict['SPECIES'][k]["NAME"])
+                names.append(self.config['SPECIES'][k]["NAME"])
 
         # Must have a host key
-        if "HOST" not in self.config_dict['SPECIES'][k].keys():
+        if "HOST" not in self.config['SPECIES'][k].keys():
             errs.append("SPECIES." + k + " must have a valid HOST")
         else:
             # host name must be a single value
-            if not isinstance(self.config_dict['SPECIES'][k]["HOST"], str):
+            if not isinstance(self.config['SPECIES'][k]["HOST"], str):
                 errs.append("SPECIES." + k + ".HOST must be a single name")
-            elif self.config_dict['SPECIES'][k]["HOST"] == "Foreground":
+            elif self.config['SPECIES'][k]["HOST"] == "Foreground":
                 pass
             else:
                 # host must appear in SPECIES section
-                if len([x for x in self.config if x.startswith("SPECIES.") and x.find("NAME." + self.config_dict['SPECIES'][k]["HOST"]) != -1]) == 0:
+                if len([x for x in self.config if x.startswith("SPECIES.") and x.find("NAME." + self.config['SPECIES'][k]["HOST"]) != -1]) == 0:
                     errs.append("HOST for SPECIES." + k + " is not found in SPECIES section")
 
         # Must have PARAMETERS
-        if "PARAMETERS" not in self.config_dict['SPECIES'][k].keys():
+        if "PARAMETERS" not in self.config['SPECIES'][k].keys():
             errs.append("SPECIES." + k + " must have PARAMETERS")
         else:
-            if not isinstance(self.config_dict['SPECIES'][k]["PARAMETERS"], dict):
+            if not isinstance(self.config['SPECIES'][k]["PARAMETERS"], dict):
                 errs.append("SPECIES." + k + ".PARAMETERS must be a dictionary")
             else:
                 # separation must be used properly
-                if "sep" in self.config_dict['SPECIES'][k]["PARAMETERS"].keys():
+                if "sep" in self.config['SPECIES'][k]["PARAMETERS"].keys():
                     # sep unit must be specified
-                    if "sep_unit" not in self.config_dict['SPECIES'][k]["PARAMETERS"].keys():
+                    if "sep_unit" not in self.config['SPECIES'][k]["PARAMETERS"].keys():
                         errs.append("sep is specified for SPECIES." + k + ".PARAMETERS but sep_unit is missing")
                     else:
-                        if not isinstance(self.config_dict['SPECIES'][k]["PARAMETERS"]["sep_unit"], str):
+                        if not isinstance(self.config['SPECIES'][k]["PARAMETERS"]["sep_unit"], str):
                             errs.append("SPECIES." + k + ".PARAMETERS.sep_unit must be either 'arcsec' or 'kpc'")
                         else:
-                            if self.config_dict['SPECIES'][k]["PARAMETERS"]["sep_unit"] not in ['arcsec', 'kpc']:
+                            if self.config['SPECIES'][k]["PARAMETERS"]["sep_unit"] not in ['arcsec', 'kpc']:
                                 errs.append("SPECIES." + k + ".PARAMETERS.sep_unit must be either 'arcsec' or 'kpc'")
 
                 # magnitude must be one of the parameters
-                if "magnitude" not in self.config_dict['SPECIES'][k]["PARAMETERS"].keys():
+                if "magnitude" not in self.config['SPECIES'][k]["PARAMETERS"].keys():
                     errs.append("SPECIES." + k + ".PARAMETERS.magnitude must be specified")
 
         # If timeseries model is specified, it must be a valid model
-        if "MODEL" in self.config_dict['SPECIES'][k].keys():
-            if not isinstance(self.config_dict['SPECIES'][k]["MODEL"], str):
+        if "MODEL" in self.config['SPECIES'][k].keys():
+            if not isinstance(self.config['SPECIES'][k]["MODEL"], str):
                 errs.append("SPECIES." + k + ".MODEL must be a single name")
             else:
-                errs += self._valid_model(self.config_dict['SPECIES'][k]["MODEL"], "SPECIES." + k + '.MODEL')
+                errs += self._valid_model(self.config['SPECIES'][k]["MODEL"], "SPECIES." + k + '.MODEL')
                     
         return errs, names
 
     def _valid_noise(self, k):
         errs, names = [], []
         # Must have name key
-        if "NAME" not in self.config_dict['SPECIES'][k].keys():
+        if "NAME" not in self.config['SPECIES'][k].keys():
             errs.append("SPECIES." + k + " is missing an entry for NAME")
         else:
             # name must be a string 
-            if not isinstance(self.config_dict['SPECIES'][k]["NAME"], str):
+            if not isinstance(self.config['SPECIES'][k]["NAME"], str):
                 errs.append("SPECIES." + k + ".NAME must be the name of a function in distribution.py")
             else:
-                names.append(self.config_dict['SPECIES'][k]["NAME"])
+                names.append(self.config['SPECIES'][k]["NAME"])
 
             # name must be a valid distribution
-            if self.config_dict['SPECIES'][k]["NAME"].lower() not in dir(distributions):
+            if self.config['SPECIES'][k]["NAME"].lower() not in dir(distributions):
                 errs.append("SPECIES." + k + ".NAME must be the name of a function in distribution.py")
 
         # Must have parameter key
-        if "PARAMETERS" not in self.config_dict['SPECIES'][k].keys():
+        if "PARAMETERS" not in self.config['SPECIES'][k].keys():
             errs.append("SPECIES." + k + " is missing an entry for PARAMETERS")
 
         return errs, names
@@ -464,12 +518,12 @@ class AllChecks():
         errs, names = [], []
 
         # There must be at least one species
-        if len(list(self.config_dict['SPECIES'].keys())) == 0:
+        if len(list(self.config['SPECIES'].keys())) == 0:
             errs.append("SPECIES sections needs at least one SPECIES")
 
         # Check keys
         detected_galaxies, detected_point_sources, detected_noise_sources = [], [], []
-        for k in self.config_dict['SPECIES'].keys():
+        for k in self.config['SPECIES'].keys():
             detections, errors = self._valid_index(k, "SPECIES")
             errs += errors
             
@@ -510,12 +564,12 @@ class AllChecks():
         errs = []
 
         # There must be at least one configuration
-        if len(list(self.config_dict['GEOMETRY'].keys())) == 0:
+        if len(list(self.config['GEOMETRY'].keys())) == 0:
             errs.append("GEOMETRY sections needs at least one CONFIGURATION")
         
         # Check keys
         detected_configurations, detected_noise_sources, fractions = [], [], []
-        for k in self.config_dict['GEOMETRY'].keys():
+        for k in self.config['GEOMETRY'].keys():
             if not k.startswith('CONFIGURATION_'):
                 errs.append('GEOMETRY.' + k + ' is an invalid Config File entry')
 
@@ -529,21 +583,21 @@ class AllChecks():
                 errs.append('GEOMETRY.' + k + ' needs a valid integer index greater than zero')
 
             # Every configuration needs a FRACTION that is a valid float
-            if "FRACTION" not in self.config_dict['GEOMETRY'][k].keys():
+            if "FRACTION" not in self.config['GEOMETRY'][k].keys():
                 errs.append("GEOMETRY." + k + " .FRACTION is missing")
             else:
                 try:
-                    fraction = float(self.config_dict['GEOMETRY'][k]['FRACTION'])
+                    fraction = float(self.config['GEOMETRY'][k]['FRACTION'])
                     fractions.append(fraction)
                 except TypeError:
                     errs.append("GEOMETRY." + k + " .FRACTION must be a float")
 
             # Configurations must have at least one plane
-            if len(list(self.config_dict['GEOMETRY'][k].keys())) == 0:
+            if len(list(self.config['GEOMETRY'][k].keys())) == 0:
                 errs.append("CEOMETRY." + k + " must have at least one PLANE")
 
             detected_planes = []
-            for config_k in self.config_dict['GEOMETRY'][k].keys():
+            for config_k in self.config['GEOMETRY'][k].keys():
                 # check individual plane properties
                 if config_k.startswith('PLANE_'):
                     # Plane index must be a valid integer
@@ -556,11 +610,11 @@ class AllChecks():
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' needs a valid integer index greater than zero')
 
                     # Plane must have a redshift
-                    if 'REDSHIFT' not in config_k in self.config_dict['GEOMETRY'][k][config_k]['PARAMETERS'].keys():
+                    if 'REDSHIFT' not in config_k in self.config['GEOMETRY'][k][config_k]['PARAMETERS'].keys():
                         errs.append('REDSHIFT is missing from GEOMETRY.' + k + '.' + config_k)
 
                     detected_objects = []
-                    for obj_k in self.config_dict['GEOMETRY'][k][config_k].keys():
+                    for obj_k in self.config['GEOMETRY'][k][config_k].keys():
                         # check individual object properties
                         if obj_k.startswith('OBJECT_'):
                             # Object index must be a valid integer
@@ -573,12 +627,16 @@ class AllChecks():
                                 errs.append('GEOMETRY.' + k + '.' + config_k + '.' + obj_k + ' needs a valid integer index greater than zero')
 
                             # Objects must have a value that appears in the species section
-                            if not isinstance(self.config_dict['GEOMETRY'][k][config_k][obj_k], str):
+                            if not isinstance(self.config['GEOMETRY'][k][config_k][obj_k], str):
                                 errs.append('GEOMETRY.' + k + '.' + config_k + '.' + obj_k + ' must be a single name')
 
-                            species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + self.config_dict['GEOMETRY'][k][config_k][obj_k] + '.') != -1]
+                            #species_paths = [x for x in self.config_keypaths if x.startswith('SPECIES') and x.find('.' + self.config['GEOMETRY'][k][config_k][obj_k] + '.') != -1]
+                            species_paths =  [x for x in self.config_keypaths if x.startswith('SPECIES') and x.endswith('NAME')]
+                            # use config_lookup to get the actual name value
+                            raise NotImplementedError
                             if len(species_paths) == 0:
-                                errs.append('GEOMETRY.' + k + '.' + config_k + '.' + obj_k + ' is missing from the SPECIES section')
+                                errs.append('GEOMETRY.' + k + '.' + config_k + '.' + obj_k + '(' + self.config['GEOMETRY'][k][config_k][obj_k] + ') is missing from the SPECIES section')
+                                print([x for x in self.config_keypaths if x.startswith('SPECIES')])
                                 
                     # Objects must be indexed sequentially
                     if len(detected_objects) != max(detected_objects):
@@ -588,7 +646,7 @@ class AllChecks():
                 elif config_k.startswith('NOISE_SOURCE_'):
                     # index must be a valid integer
                     try:
-                        val = int(obj_k.split('_')[-1])
+                        val = int(config_k.split('_')[-1])
                         if val < 1:
                             errs.append('GEOMETRY.' + k + '.' + config_k + ' is an invalid Config File entry')
                         detected_noise_sources.append(val)
@@ -596,43 +654,43 @@ class AllChecks():
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' needs a valid integer index greater than zero')
 
                     # Noise sources must have a single value that appears i the species section
-                    if not isinstance(self.config_dict['GEOMETRY'][k][config_k], str):
+                    if not isinstance(self.config['GEOMETRY'][k][config_k], str):
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' must be a single name')
 
-                    species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + self.config_dict['GEOMETRY'][k][config_k] + '.') != -1]
+                    species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + self.config['GEOMETRY'][k][config_k] + '.') != -1]
                     if len(species_paths) == 0:
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' is missing from the SPECIES section')
                         
                 # check timeseries properties
                 elif config_k == 'TIMESERIES':
                     # Must have objects as keys
-                    if "OBJECTS" not in self.config_dict['GEOMETRY'][k][config_k].keys():
+                    if "OBJECTS" not in self.config['GEOMETRY'][k][config_k].keys():
                         errs.append("GEOMETRY." + k + ".TIMESERIES is missing the OBJECTS parameter")
                     else:
-                        if not isinstance(self.config_dict['GEOMETRY'][k][config_k]["OBJECTS"], list):
+                        if not isinstance(self.config['GEOMETRY'][k][config_k]["OBJECTS"], list):
                             errs.append("GEOMETRY." + k + ".TIMESERIES.OBJECTS must be a list")
                         else:
                             # listed objects must appear in species section, in the configuration, and have a model defined
-                            for obj in self.config_dict['GEOMETRY'][k][config_k]['OBJECTS']:
+                            for obj in self.config['GEOMETRY'][k][config_k]['OBJECTS']:
                                 species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + obj + '.') != -1]
                                 if len(species_paths) == 0:
                                     errs.append(obj + "in GEOMETRY." + k + ".TIMESERIES.OBJECTS is missing from the SPECIES section")
-                                elif "MODEL" not in config_lookup(config_dict_format(species_paths[0].split('.'))).keys():
+                                elif "MODEL" not in config_lookup(config_dict_format(*species_paths[0].split('.'))).keys():
                                     errs.append("MODEL for " + obj + " in GEOMETRY." + k + ".TIMESERIES.OBJECTS is missing from the SPECIES section")
                                 configuration_paths = [x for x in self.config if x.startswith('GEOMETRY.' + k + '.') and x.find('.' + obj + '.') != -1]
                                 if len(configuration_paths) == 0:
                                     errs.append(obj + " in GEOMETRY." + k + ".TIMESERIES.OBJECTS is missing from GEOMETRY." + k)
                         
                     # Must have nites as keys
-                    if "NITES" not in self.config_dict['GEOMETRY'][k][config_k].keys():
+                    if "NITES" not in self.config['GEOMETRY'][k][config_k].keys():
                         errs.append("GEOMETRY." + k + ".TIMESERIES is missing the NITES parameter")
                     else:
-                        if not isinstance(self.config_dict['GEOMETRY'][k][config_k]["NITES"], list):
+                        if not isinstance(self.config['GEOMETRY'][k][config_k]["NITES"], list):
                             errs.append("GEOMETRY." + k + ".TIMESERIES.NITES must be a list")
                         else:
                             # listed nights must be numeric
                             try:
-                                nites = [int(float(x)) for x in self.config_dict['GEOMETRY'][k][config_k]["NITES"]]
+                                nites = [int(float(x)) for x in self.config['GEOMETRY'][k][config_k]["NITES"]]
                                 del nites
                             except TypeError:
                                 errs.append("Listed NITES in GEOMETRY." + k + ".TIMESERIES.NITES must be numeric")
@@ -644,6 +702,9 @@ class AllChecks():
                         if self.config["SURVEY"]["PARAMETERS"]["num_exposures"] != 1:
                             errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
 
+                elif config_k == 'NAME' or config_k == 'FRACTION':
+                    pass
+                
                 # unexpected entry
                 else:
                     errs.append('GEOMETRY.' + k + '.' + config_k + ' is not a valid entry')
@@ -689,6 +750,7 @@ def run_checks(full_dict, config_dict):
         check_runner = AllChecks(full_dict, config_dict)
     except ConfigFileError:
         print("Fatal error(s) detected in config file. Please edit and rerun.")
-        sys.exit()
+
+    return
 
         
