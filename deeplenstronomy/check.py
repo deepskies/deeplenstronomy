@@ -25,6 +25,7 @@ from deeplenstronomy.utils import KeyPathDict
 import deeplenstronomy.distributions as distributions
 
 class ConfigFileError(Exception): pass
+class LenstronomyWarning(Exception): pass
 
 class AllChecks():
     """
@@ -51,10 +52,20 @@ class AllChecks():
 
         # set lenstronomy name map
         self.set_lenstronomy_maps()
-        self.lenstronomy_valid_models = ['GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'ELLIPSOID', 'MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE',
-                                         'SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'SHAPELETS', 'SHAPELETS_POLAR', 'SHAPELETS_POLAR_EXP',
-                                         'HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE', 'UNIFORM', 'POWER_LAW', 'NIE',
-                                         'CHAMELEON', 'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'INTERPOL', 'SLIT_STARLETS', 'SLIT_STARLETS_GEN2']
+        self.lenstronomy_valid_models = {"LightModelProfiles": ['GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'ELLIPSOID', 'MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE',
+                                                                'SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'SHAPELETS', 'SHAPELETS_POLAR', 'SHAPELETS_POLAR_EXP',
+                                                                'HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE', 'UNIFORM', 'POWER_LAW', 'NIE',
+                                                                'CHAMELEON', 'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'INTERPOL', 'SLIT_STARLETS', 'SLIT_STARLETS_GEN2'],
+                                         "LensModelProfiles": ['SHIFT', 'NIE_POTENTIAL', 'CONST_MAG', 'SHEAR', 'SHEAR_GAMMA_PSI', 'CONVERGENCE', 'FLEXION',
+                                                               'FLEXIONFG', 'POINT_MASS', 'SIS', 'SIS_TRUNCATED', 'SIE', 'SPP', 'NIE', 'NIE_SIMPLE', 'CHAMELEON',
+                                                               'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'SPEP', 'PEMD', 'SPEMD', 'EPL', 'NFW', 'NFW_ELLIPSE',
+                                                               'NFW_ELLIPSE_GAUSS_DEC', 'TNFW', 'CNFW', 'CNFW_ELLIPSE', 'CTNFW_GAUSS_DEC', 'NFW_MC', 'SERSIC',
+                                                               'SERSIC_ELLIPSE_POTENTIAL', 'SERSIC_ELLIPSE_KAPPA', 'SERSIC_ELLIPSE_GAUSS_DEC', 'PJAFFE',
+                                                               'PJAFFE_ELLIPSE', 'HERNQUIST', 'HERNQUIST_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_KAPPA',
+                                                               'GAUSSIAN_ELLIPSE_KAPPA', 'GAUSSIAN_ELLIPSE_POTENTIAL', 'MULTI_GAUSSIAN_KAPPA',
+                                                               'MULTI_GAUSSIAN_KAPPA_ELLIPSE', 'INTERPOL', 'INTERPOL_SCALED', 'SHAPELETS_POLAR', 'SHAPELETS_CART',
+                                                               'DIPOLE', 'CURVED_ARC', 'ARC_PERT', 'coreBURKERT', 'CORED_DENSITY', 'CORED_DENSITY_2',
+                                                               'CORED_DENSITY_MST', 'CORED_DENSITY_2_MST', 'NumericalAlpha', 'MULTIPOLE', 'HESSIAN']}
         
         # find all check functions
         self.checks = [x for x in dir(self) if x.find('check_') != -1]
@@ -106,9 +117,65 @@ class AllChecks():
               'SLIT_STARLETS_GEN2': ".starlets.SLIT_Starlets"}
          setattr(self, "lenstronomy_light_map", p)
 
-         d = {'SIE': ".sie.SIE",
-              'SHEAR': ".shear.Shear"
-         }
+         d = {"SHIFT": ".alpha_shift.Shift",
+              "NIE_POTENTIAL": ".nie_potential.NIE_POTENTIAL",
+              "CONST_MAG": ".const_mag.ConstMag",
+              "SHEAR": ".shear.Shear",
+              "SHEAR_GAMMA_PSI": ".shear.ShearGammaPsi",
+              "CONVERGENCE": ".convergence.Convergence",
+              "FLEXION": ".flexion.Flexion",
+              "FLEXIONFG": ".flexionfg.Flexionfg",
+              "POINT_MASS": ".point_mass.PointMass",
+              "SIS": ".sis.SIS",
+              "SIS_TRUNCATED": ".sis_truncate.SIS_truncate",
+              "SIE": ".sie.SIE",
+              "SPP": ".spp.SPP",
+              "NIE": ".nie.NIE",
+              "NIE_SIMPLE": "warn",
+              "CHAMELEON": ".chameleon.Chameleon",
+              "DOUBLE_CHAMELEON": ".chameleon.DoubleChameleon",
+              "TRIPLE_CHAMELEON": ".chameleon.TripleChameleon",
+              "SPEP": ".spep.SPEP",
+              "PEMD": ".pemd.PEMD",
+              "SPEMD": "spemd.SPEMD",
+              "EPL": "epl.EPL",
+              "NFW": ".nfw.NFW",
+              "NFW_ELLIPSE": ".nfw_ellipse.NFW_ELLIPSE",
+              "NFW_ELLIPSE_GAUSS_DEC": "warn",
+              "TNFW": ".tnfw.TNFW",
+              "CNFW": ".cnfw.CNFW",
+              "CNFW_ELLIPSE": ".cnfw_ellipse.CNFW_ELLIPSE",
+              "CTNFW_GAUSS_DEC": "warn",
+              "NFW_MC": ".nfw_mass_concentration.NFWMC",
+              "SERSIC": ".sersic.Sersic",
+              "SERSIC_ELLIPSE_POTENTIAL": ".sersic_ellipse_potential.SersicEllipse",
+              "SERSIC_ELLIPSE_KAPPA": ".sersic_ellipse_kappa.SersicEllipseKappa",
+              "SERSIC_ELLIPSE_GAUSS_DEC": "warn",
+              "PJAFFE": ".p_jaffe.PJaffe",
+              "PJAFFE_ELLIPSE": ".p_jaffe_ellipse.PJaffe_Ellipse",
+              "HERNQUIST": ".hernquist.Hernquist",
+              "HERNQUIST_ELLIPSE": ".hernquist_ellipse.Hernquist_Ellipse",
+              "GAUSSIAN": ".gaussian_potential.Gaussian",
+              "GAUSSIAN_KAPPA": ".gaussian_kappa.GaussianKappa",
+              "GAUSSIAN_ELLIPSE_KAPPA": ".gaussian_ellipse_kappa.GaussianEllipseKappa",
+              "GAUSSIAN_ELLIPSE_POTENTIAL": ".gaussian_ellipse_potential.GaussianEllipsePotential",
+              "MULTI_GAUSSIAN_KAPPA": ".multi_gaussian_kappa.MultiGaussianKappa",
+              "MULTI_GAUSSIAN_KAPPA_ELLIPSE": ".multi_gaussian_kappa.MultiGaussianKappaEllipse",
+              "INTERPOL": ".interpol.Interpol",
+              "INTERPOL_SCALED": ".interpol.InterpolScaled",
+              "SHAPELETS_POLAR": ".shapelet_pot_polar.PolarShapelets",
+              "SHAPELETS_CART": ".shapelet_pot_cartesian.CartShapelets",
+              "DIPOLE": ".dipole.Dipole",
+              "CURVED_ARC": ".curved_arc.CurvedArc",
+              "ARC_PERT": ".arc_perturbations.ArcPerturbations",
+              "coreBURKERT": ".coreBurkert.CoreBurkert",
+              "CORED_DENSITY": ".cored_density.CoredDensity",
+              "CORED_DENSITY_2": ".cored_density_2.CoredDensity2",
+              "CORED_DENSITY_MST": ".cored_density_mst.CoredDensityMST",
+              "CORED_DENSITY_2_MST": "warn",
+              "NumericalAlpha": ".numerical_deflections.NumericalAlpha",
+              "MULTIPOLE": ".multipole.Multipole",
+              "HESSIAN": ".hessian.Hessian"}
          setattr(self, "lenstronomy_lens_map", d)
          return
     
@@ -391,8 +458,11 @@ class AllChecks():
                         return errs
                     else:
                         # name must be a valid lenstronomy profile
-                        if self.config['SPECIES'][k][profile_k]["NAME"] not in self.lenstronomy_valid_models:
+                        if self.config['SPECIES'][k][profile_k]["NAME"] not in self.lenstronomy_valid_models[profile_type]:
                             errs.append("SPECIES." + k + "." + profile_k + " (" + self.config['SPECIES'][k][profile_k]["NAME"] + ") is not a valid lenstronomy profile")
+                        elif lenstronomy_map[self.config['SPECIES'][k][profile_k]["NAME"]] == "warn":
+                            # warn about unstable / incompatible profiles
+                            errs.append("The lenstronomy model " + self.config['SPECIES'][k][profile_k]["NAME"] + " is not usable within deeplenstronomy")
                 # Must have parameters
                 if "PARAMETERS" not in self.config['SPECIES'][k][profile_k].keys():
                     errs.append("SPECIES." + k + "." + profile_k + " needs PARAMETERS")
@@ -403,7 +473,8 @@ class AllChecks():
                         # specified parameters must be what lenstronomy is expecting
                         for param_name in self.config['SPECIES'][k][profile_k]["PARAMETERS"].keys():
                             if param_name not in getfullargspec(eval(profile_type + lenstronomy_map[self.config['SPECIES'][k][profile_k]["NAME"]] + ".function"))[0]:
-                                errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name + " is not a valid_parameter for " + self.config['SPECIES'][k][profile_k]["NAME"])
+                                if param_name != 'magnitude': #lenstronomy functions use `amp` but deeplenstronomy works with `magnitude`
+                                    errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name + " is not a valid_parameter for " + self.config['SPECIES'][k][profile_k]["NAME"])
                         
             # If MODEL is specified, it must be valid
             if profile_k == "MODEL":
@@ -448,7 +519,9 @@ class AllChecks():
                 pass
             else:
                 # host must appear in SPECIES section
-                if len([x for x in self.config if x.startswith("SPECIES.") and x.find("NAME." + self.config['SPECIES'][k]["HOST"]) != -1]) == 0:
+                species_paths = [self.config_lookup(self.config_dict_format(*x.split('.'))) for x in self.config_keypaths if x.startswith("SPECIES.") and x.endswith(".NAME")]
+                species_paths = [x for x in species_paths if x == self.config['SPECIES'][k]["HOST"]]
+                if len(species_paths) == 0:
                     errs.append("HOST for SPECIES." + k + " is not found in SPECIES section")
 
         # Must have PARAMETERS
@@ -630,13 +703,10 @@ class AllChecks():
                             if not isinstance(self.config['GEOMETRY'][k][config_k][obj_k], str):
                                 errs.append('GEOMETRY.' + k + '.' + config_k + '.' + obj_k + ' must be a single name')
 
-                            #species_paths = [x for x in self.config_keypaths if x.startswith('SPECIES') and x.find('.' + self.config['GEOMETRY'][k][config_k][obj_k] + '.') != -1]
-                            species_paths =  [x for x in self.config_keypaths if x.startswith('SPECIES') and x.endswith('NAME')]
-                            # use config_lookup to get the actual name value
-                            raise NotImplementedError
+                            species_paths = [self.config_lookup(self.config_dict_format(*x.split('.'))) for x in self.config_keypaths if x.startswith('SPECIES.') and x.endswith('.NAME')]
+                            species_paths = [x for x in species_paths if x == self.config['GEOMETRY'][k][config_k][obj_k]]
                             if len(species_paths) == 0:
                                 errs.append('GEOMETRY.' + k + '.' + config_k + '.' + obj_k + '(' + self.config['GEOMETRY'][k][config_k][obj_k] + ') is missing from the SPECIES section')
-                                print([x for x in self.config_keypaths if x.startswith('SPECIES')])
                                 
                     # Objects must be indexed sequentially
                     if len(detected_objects) != max(detected_objects):
@@ -653,11 +723,14 @@ class AllChecks():
                     except TypeError:
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' needs a valid integer index greater than zero')
 
-                    # Noise sources must have a single value that appears i the species section
+                    # Noise sources must have a single value that appears in the species section
                     if not isinstance(self.config['GEOMETRY'][k][config_k], str):
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' must be a single name')
 
-                    species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + self.config['GEOMETRY'][k][config_k] + '.') != -1]
+                    #species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + self.config['GEOMETRY'][k][config_k] + '.') != -1]
+                    species_paths = [self.config_lookup(self.config_dict_format(*x.split('.'))) for x in self.config_keypaths if x.startswith('SPECIES.') and x.endswith('.NAME')]
+                    species_paths = [x for x in species_paths if x == self.config['GEOMETRY'][k][config_k]]
+
                     if len(species_paths) == 0:
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' is missing from the SPECIES section')
                         
