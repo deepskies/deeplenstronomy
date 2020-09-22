@@ -218,7 +218,7 @@ class Organizer():
         if angle is None:
             angle = random.uniform(0.0, 2 * np.pi)
 
-        if sep_unit == 'arsec':            
+        if sep_unit == 'arcsec':            
             chosen_ra = np.cos(angle) * sep + ra_host
             chosen_dec = np.sin(angle) * sep + dec_host
         elif sep_unit == 'kpc':
@@ -320,10 +320,19 @@ class Organizer():
             for k_param, v_param in self.main_dict['GEOMETRY'][geometry_key]['PLANE_{0}'.format(plane_num)]['PARAMETERS'].items():
                 if isinstance(v_param, dict):
                     draws = self._draw(v_param['DISTRIBUTION'], bands)
+
+                    # Set the PLANE's redshift in the config_dict
+                    if k_param == 'REDSHIFT':
+                        config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)] = draws[0]
+                    
                     for band, draw in zip(bands, draws):
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, k_param)] = draw
                 else:
+                    # Set the PLANE's redshift in the config_dict
+                    if k_param == 'REDSHIFT':
+                        config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)]	= v_param
+                    
                     for band in bands:
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, k_param)] = v_param
