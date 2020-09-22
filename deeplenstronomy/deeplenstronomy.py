@@ -303,7 +303,7 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
         im_dir = parser.config_dict['BACKGROUNDS']
         image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
     else:
-        image_backgrounds = np.zeros((len(dataset.bands), P.config_dict['IMAGE']['PARAMETERS']['numPix'], P.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+        image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
     
     # Simulate images
     for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
