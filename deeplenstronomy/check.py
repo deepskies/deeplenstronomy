@@ -641,7 +641,7 @@ class AllChecks():
             errs.append("GEOMETRY sections needs at least one CONFIGURATION")
         
         # Check keys
-        detected_configurations, detected_noise_sources, fractions = [], [], []
+        detected_configurations, fractions = [], []
         for k in self.config['GEOMETRY'].keys():
             if not k.startswith('CONFIGURATION_'):
                 errs.append('GEOMETRY.' + k + ' is an invalid Config File entry')
@@ -669,7 +669,7 @@ class AllChecks():
             if len(list(self.config['GEOMETRY'][k].keys())) == 0:
                 errs.append("CEOMETRY." + k + " must have at least one PLANE")
 
-            detected_planes = []
+            detected_planes, detected_noise_sources = [], []
             for config_k in self.config['GEOMETRY'][k].keys():
                 # check individual plane properties
                 if config_k.startswith('PLANE_'):
@@ -786,8 +786,8 @@ class AllChecks():
             if len(detected_planes) != max(detected_planes):
                 errs.append("PLANEs in the GEOMETRY." + k + " section must be indexed as 1, 2, 3, ...")
 
-            # Noise sources must be indexed sequentially    
-            if len(detected_noise_sources) != max(detected_noise_sources):
+            # Noise sources must be indexed sequentially
+            if len(detected_noise_sources) != 0 and len(detected_noise_sources) != max(detected_noise_sources):
                 errs.append("NOISE_SOURCEs in the GEOMETRY." + k + " section must be indexed as 1, 2, 3, ...")
                     
                     
