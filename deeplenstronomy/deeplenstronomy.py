@@ -118,14 +118,16 @@ class Dataset():
             print("If you're seeing this message, you're trying to update something I wasn't prepared for.\nShoot me a message on Slack")
 
         
-    def regenerate(self, save=False, store=True):
+    def regenerate(self, **make_dataset_args):
         """
         Using the dictionary stored in self.config_dict, make a new dataset
         
-        :param store: If true, the generated data is stored as attributes of this object
-        :param save: If true, the generated data is written to disk
+        :param make_dataset_args: dict, arguments supplied to make_dataset when original dataset was generated
         """
-        make_dataset(config=self.config_dict, dataset=self, save=save, store=store)
+        params = dict(**make_dataset_args)
+        params['config'] = self.config_dict
+        params['dataset'] = self
+        make_dataset(**params)
         return
 
 def flatten_image_info(sim_dict):
@@ -230,8 +232,13 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
     if solve_lens_equation and skip_image_generation:
         raise RuntimeError("You cannot skip image generation and solve the lens equation")
     
-    if not dataset:
+    if dataset is None:
         dataset = Dataset()
+    else:
+        parser = dataset.parser
+
+    # set arguments of dataset generation
+    dataset.arguments = dict(**locals())
 
     if isinstance(config, dict):
         dataset.config_dict = config
@@ -400,7 +407,11 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
             del metadata_df
             if return_planes:
                 del configuration_planes
-    
+
+    # store parser and organizer as attributes
+    dataset.parser = parser
+    #dataset.organizer = organizer
+                
     return dataset
 
 
