@@ -114,13 +114,14 @@ def read_distribution_file(filename):
     return df
         
 
-def draw_from_user_dist(filename, size, step=100):
+def draw_from_user_dist(filename, size, mode, step=10):
     """
     Interpolate a user-specified N-dimensional probability distribution and
     sample from it.
 
     :param filename: str, the file containing the distribution
     :param size: int, the number of times to sample the probability distribution
+    :param mode: str, choose from ['interpolate', 'sample']
     :param step: int, the number of steps on the interpolation grid
     :return: parameters: list, the names of the paramters
     :return: choices: array with entries as arrays of drawn parameters
@@ -132,27 +133,35 @@ def draw_from_user_dist(filename, size, step=100):
     points = df[parameters].values
     weights = df['WEIGHT'].values
 
-    # 2+ Dimension case
-    if len(parameters) > 1:
-        # Interpolate the distribution and evaluate it on a grid of all possible parameter combinations
-        interpolator = LinearNDInterpolator(points, weights, fill_value=0.0)
-        grid_vectors = [np.linspace(df[x].values.min(), df[x].values.max(), step) for x in parameters]
-        param_grids = np.array(np.meshgrid(*grid_vectors)).T.reshape(step**len(parameters), len(parameters))
-        weighted_params = interpolator(param_grids)
+    if mode == 'interpolate':
+        # 2+ Dimension case
+        if len(parameters) > 1:
+            # Interpolate the distribution and evaluate it on a grid of all possible parameter combinations
+            interpolator = LinearNDInterpolator(points, weights, fill_value=0.0)
+            grid_vectors = [np.linspace(df[x].values.min(), df[x].values.max(), step) for x in parameters]
+            param_grids = np.array(np.meshgrid(*grid_vectors)).T.reshape(step**len(parameters), len(parameters))
+            weighted_params = interpolator(param_grids)
     
-        # Draw from the grid based on its weight
-        draws = np.random.choice(np.arange(len(param_grids)), size=size, p=weighted_params/weighted_params.sum())
-        choices = param_grids[draws]
+            # Draw from the grid based on its weight
+            draws = np.random.choice(np.arange(len(param_grids)), size=size, p=weighted_params/weighted_params.sum())
+            choices = param_grids[draws]
 
-    elif len(parameters) == 1:
-        # Interpolate the 1D grid
-        grid = np.linspace(df[parameters].values.min(), df[parameters].values.max(), step)
-        interpolator = interp1d(points.flatten(), weights, fill_value=0.0)
-        weighted_params = interpolator(grid)
+        elif len(parameters) == 1:
+            # Interpolate the 1D grid
+            grid = np.linspace(df[parameters].values.min(), df[parameters].values.max(), step)
+            interpolator = interp1d(points.flatten(), weights, fill_value=0.0)
+            weighted_params = interpolator(grid)
+            
+            # Draw from the grid based on its weight
+            choices = np.random.choice(grid, size=size, p=weighted_params/weighted_params.sum())
 
-        # Draw from the grid based on its weight
-        choices = np.random.choice(grid, size=size, p=weighted_params/weighted_params.sum())
-        
+    elif mode == 'sample':
+        index_arr = np.random.choice(np.arange(len(points), dtype=int), size=size, p=weights / weights.sum())
+        choices = points[index_arr]
+
+    else:
+        raise NotImplementedError("unexpected mode passed, must be 'sample' or 'interpolate'")
+            
     return parameters, choices
 
 def read_images(im_dir, im_size, bands):

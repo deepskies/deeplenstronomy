@@ -269,15 +269,29 @@ class AllChecks():
                     errs.append(path + "." + distribution_dict["NAME"] +  " is not a valid distribution name")
                     return errs
 
-            # must have parameter key
-            if "PARAMETERS" not in distribution_dict.keys():
-                errs.append(path + " is missing the PARAMETERS key")
-            else:
-                # parameters must be valid for the distribution
-                allowed_params = getfullargspec(eval("distributions." + distribution_dict["NAME"]))[0]
-                for param in distribution_dict["PARAMETERS"]:
-                    if param not in allowed_params:
-                        errs.append(path + '.PARAMETERS.' + param + ' is not in the allowed list of ({0}) for the distribtuion '.format(', '.join(allowed_params)) + distribution_dict["NAME"]) 
+            allowed_params = list(set(getfullargspec(eval("distributions." + distribution_dict["NAME"]))[0]) - set(['bands']))
+            remaining_params = allowed_params.copy()
+            if len(set(allowed_params) - set(["bands"])) != 0:
+                # the requested distribution requires parameters so config dict must have parameter key
+                if "PARAMETERS" not in distribution_dict.keys():
+                    errs.append(path + " is missing the PARAMETERS key")
+                else:
+                    # if parameters is not a dict, skip
+                    if distribution_dict["PARAMETERS"] is None: 
+                        continue
+                    elif not isinstance(distribution_dict["PARAMETERS"], dict):
+                        errs.append(path + '.PARAMETERS must be a dictionary or None')
+                    else:
+                        # parameters must be valid for the distribution
+                        for param in distribution_dict["PARAMETERS"]:
+                            if param not in allowed_params:
+                                errs.append(path + '.PARAMETERS.' + param + ' is not in the allowed list of ({0}) for the distribtuion '.format(', '.join(allowed_params)) + distribution_dict["NAME"]) 
+                            else:
+                                remaining_params.pop(remaining_params.index(param))
+
+                        if len(remaining_params) != 0:
+                            errs.append(path + ".PARAMETERS is missing parameters: " + ', '.join(remaining_params))
+                                
         return errs
     
     def check_input_distributions(self):
@@ -289,24 +303,42 @@ class AllChecks():
                 errs.append("DISTRIBUTIONS section must have at least 1 USERDIST key")
             else:
                 for userdist in userdists:
-                    # name must be a single value
-                    if not isinstance(self.config["DISTRIBUTIONS"][userdist], str):
-                        errs.append("DISTRIBUTIONS." + userdist + " must be a single name of a file")
+                    # must be a dictionary
+                    if not isinstance(self.config["DISTRIBUTIONS"][userdist], dict):
+                        errs.append("DISTRIBUTIONS." + userdist + " must be a dictionary with keys FILENAME and MODE")
                     else:
+                        # must specify FILENAME and MODE - return early if these are missing to avoid future errors
+                        for param in ['FILENAME', 'MODE']:
+                            if param not in self.config["DISTRIBUTIONS"][userdist].keys():
+                                errs.append("DISTRIBUTIONS." + userdist + " is missing the " + param + " key")
+                                return errs
+                        
                         # specified file must exist
-                        if not os.path.exists(self.config["DISTRIBUTIONS"][userdist]):
-                            errs.append("DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist] + "' not found")
+                        if not os.path.exists(self.config["DISTRIBUTIONS"][userdist]['FILENAME']):
+                            errs.append("DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "' not found")
                         else:
                             # must be able to read file
                             df = None
                             try:
-                                df = pd.read_csv(self.config["DISTRIBUTIONS"][userdist], delim_whitespace=True)
+                                df = pd.read_csv(self.config["DISTRIBUTIONS"][userdist]['FILENAME'], delim_whitespace=True)
                                 if "WEIGHT" not in df.columns:
-                                    errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config["DISTRIBUTIONS"][userdist] + "'")
+                                    errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
                             except Exception as e:
-                                errs.append("Error reading DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist] + "'")
+                                errs.append("Error reading DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
                             finally:
                                 del df
+
+                        # mode must be valid
+                        if self.config["DISTRIBUTIONS"][userdist]['MODE'] not in ['interpolate', 'sample']:
+                            errs.append("DISTRIBUTIONS." + userdist + ".MODE must be either 'interpolate' or 'sample'")
+
+                        # if step is specified, it must be an integer
+                        if 'STEP' in self.config["DISTRIBUTIONS"][userdist].keys():
+                            if not isinstance(self.config["DISTRIBUTIONS"][userdist]['STEP'], int):
+                                errs.append("DISTRIBUTIONS." + userdist + ".STEP must be a positive integer")
+                            else:
+                                if self.config["DISTRIBUTIONS"][userdist]['STEP'] < 1:
+                                    errs.append("DISTRIBUTIONS." + userdist + ".STEP must be a positive integer")
         return errs
 
     def check_image_backgrounds(self):

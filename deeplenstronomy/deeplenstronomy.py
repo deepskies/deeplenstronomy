@@ -16,7 +16,7 @@ class Dataset():
         Create a dataset. If config file or config dict is supplied, generate it.
 
         :param config: yaml file specifying dataset characteristics 
-                       OR                                                                                                                                                                                                                                                                                                                                                                                                                                       pre-parsed yaml file as a dictionary 
+                       OR                                                                                                                                                                                                                                                                                                                                                                                                                                       pre-parsed y                       yaml file as a dictionary 
         :param store: If true, the generated data is stored as attributes of this object
         :param save: If true, the generated data is written to disk
         """
@@ -151,12 +151,12 @@ def get_forced_sim_inputs(forced_inputs, configurations, bands):
 
     force_param_inputs = {}
     for force_params in forced_inputs.values():
-        for name in force_params['names']:
+        for name_idx, name in enumerate(force_params['names']):
             prefices, suffices = [], []
             # Configuration dependence  
             if name.startswith("CONFIGURATION"):
                 prefices = [name.split('-')[0]]
-                param_name = ''.join(name.split('-')[1:])
+                param_name = '-'.join(name.split('-')[1:])
             else:
                 prefices = configurations[:]
                 param_name = name
@@ -164,16 +164,20 @@ def get_forced_sim_inputs(forced_inputs, configurations, bands):
             for b in bands:
                 if name.endswith('-' + b):
                     suffices = [b]
-                    param_name = ''.join(param_name.split('-')[:-1])
+                    param_name = '-'.join(param_name.split('-')[:-1])
                     break
             if len(suffices) == 0:
                 suffices = bands[:]
-                param_name = param_name
+                param_name = param_name # this is not necessary at all, but makes me feel good inside seeing it match with the other blocks
 
             # Duplicate drawn values to necessary configurations / bands
             for prefix in prefices:
                 for suffix in suffices:
-                    force_param_inputs[(prefix, param_name, suffix)] = force_params['values']
+                    if len(np.shape(force_params['values'])) == 1:
+                        force_param_inputs[(prefix, param_name, suffix)] = force_params['values']
+                    else:
+                        #numpy array for multiple dimensions
+                        force_param_inputs[(prefix, param_name, suffix)] = force_params['values'][:,name_idx]
 
     return force_param_inputs
 
@@ -275,8 +279,13 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
     for fp in parser.file_paths:
-        filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']")
-        draw_param_names, draw_param_values = draw_from_user_dist(filename, dataset.size)
+        filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['FILENAME']")
+        mode = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['MODE']")
+        try:
+            step = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['STEP']")
+        except KeyError:
+            step = 10
+        draw_param_names, draw_param_values = draw_from_user_dist(filename, dataset.size, mode, step)
         forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
     
     # Overwrite the configuration dict with any forced values from user distribtuions
