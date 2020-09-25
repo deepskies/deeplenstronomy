@@ -411,7 +411,7 @@ class AllChecks():
                 obj = model_name.split('_')[0]
                 sed = model_name.split('_')[1]
             except IndexError:
-                errs.append(path + '.' + model_name + ' is an invalid timeseries model')
+                errs.append(path + '.' + model_name + ' is formatted incorrectly; use MODEL: <obj>_<sed>')
                 obj, sed = 'ia', 'random'
 
             if obj == 'ia':
@@ -430,6 +430,8 @@ class AllChecks():
                                'SDSS-018700.SED', 'SDSS-018713.SED', 'SDSS-018734.SED', 'SDSS-018793.SED',
                                'SDSS-018834.SED', 'SDSS-018892.SED', 'SDSS-019323.SED', 'SDSS-020038.SED']:
                     errs.append(path + '.' + model_name + ' does not have a valid sed specified')
+            elif obj == 'kn':
+                pass    
             elif obj == 'user':
                 if not os.path.exists("seds/user/" + sed):
                     errs.append(path + '.' + model_name + ' sed file ({0}) is missing'.format(sed))
@@ -759,10 +761,8 @@ class AllChecks():
                     if not isinstance(self.config['GEOMETRY'][k][config_k], str):
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' must be a single name')
 
-                    #species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + self.config['GEOMETRY'][k][config_k] + '.') != -1]
                     species_paths = [self.config_lookup(self.config_dict_format(*x.split('.'))) for x in self.config_keypaths if x.startswith('SPECIES.') and x.endswith('.NAME')]
                     species_paths = [x for x in species_paths if x == self.config['GEOMETRY'][k][config_k]]
-
                     if len(species_paths) == 0:
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' is missing from the SPECIES section')
                         
@@ -777,12 +777,14 @@ class AllChecks():
                         else:
                             # listed objects must appear in species section, in the configuration, and have a model defined
                             for obj in self.config['GEOMETRY'][k][config_k]['OBJECTS']:
-                                species_paths = [x for x in self.config if x.startswith('SPECIES') and x.find('.' + obj + '.') != -1]
+                                species_paths = [x for x in self.config_keypaths if x.startswith('SPECIES.') and x.endswith('.NAME')]
+                                species_paths = ['.'.join(x.split('.')[:-1]) for x in species_paths if self.config_lookup(self.config_dict_format(*x.split('.'))) == obj]
                                 if len(species_paths) == 0:
-                                    errs.append(obj + "in GEOMETRY." + k + ".TIMESERIES.OBJECTS is missing from the SPECIES section")
-                                elif "MODEL" not in config_lookup(config_dict_format(*species_paths[0].split('.'))).keys():
+                                    errs.append(obj + " in GEOMETRY." + k + ".TIMESERIES.OBJECTS is missing from the SPECIES section")
+                                elif "MODEL" not in self.config_lookup(self.config_dict_format(*species_paths[0].split('.'))).keys():
                                     errs.append("MODEL for " + obj + " in GEOMETRY." + k + ".TIMESERIES.OBJECTS is missing from the SPECIES section")
-                                configuration_paths = [x for x in self.config if x.startswith('GEOMETRY.' + k + '.') and x.find('.' + obj + '.') != -1]
+                                configuration_paths = [x for x in self.config_keypaths if x.startswith('GEOMETRY.' + k + '.') and x.find('.OBJECT_') != -1]
+                                configuration_paths = [x for x in configuration_paths if self.config_lookup(self.config_dict_format(*x.split('.'))) == obj]
                                 if len(configuration_paths) == 0:
                                     errs.append(obj + " in GEOMETRY." + k + ".TIMESERIES.OBJECTS is missing from GEOMETRY." + k)
                         
