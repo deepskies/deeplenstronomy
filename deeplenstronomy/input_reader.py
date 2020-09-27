@@ -240,7 +240,13 @@ class Organizer():
         """
 
         d = KeyPathDict(self.main_dict['GEOMETRY'][configuration].copy(), keypath_separator='.')
-        return [x.replace('.', '-') for x in d.keypaths() if d[x] == obj_name][0]
+        for x in d.keypaths():
+            f = "['" + "']['".join(x.split('.')) + "']"
+            k = eval("d" + f)
+            if k == obj_name:
+                return x.replace('.', '-')
+
+        #return [x.replace('.', '-') for x in d.keypaths() if eval("d['" + "']['".join(x.split('.')) + "']") == obj_name][0]
 
     
     def _flatten_and_fill(self, config_dict, cosmo, objid=0):
@@ -475,7 +481,7 @@ class Organizer():
         return output_dict
 
 
-    def _flatten_and_fill_time_series(self, config_dict, configuration, obj_strings, objid):
+    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid):
         """
         Generate an image info dictionary for each step in the time series
 
@@ -487,7 +493,7 @@ class Organizer():
         output_dicts = []
         bands = self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
         # Get flattened and filled dictionary
-        base_output_dict = self._flatten_and_fill(config_dict, objid)
+        base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
 
         closest_redshift_lcs = []
         for obj_name, obj_string in zip(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['OBJECTS'], obj_strings):
@@ -647,7 +653,8 @@ class Organizer():
             if 'TIMESERIES' in self.main_dict['GEOMETRY'][k].keys():
                 
                 # Make a directory to store light curve data
-                if not os.path.exists('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])): os.mkdir('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']))
+                if not os.path.exists('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])):
+                    os.mkdir('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']))
                 
                 # Find the plane of the ojects and save the redshift sub-dict
                 redshift_dicts = []
@@ -666,10 +673,10 @@ class Organizer():
 
                 # If light curves already exist, skip generation
                 if os.path.exists('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])):
-                    setattr(self, k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), np.load('lightcurves/{0}_{1}.npy'.format(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])).item()) 
+                    setattr(self, k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), np.load('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True) 
                 else:
                     self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
-                    np.save('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), eval('self.' + k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])))
+                    np.save('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), eval('self.' + k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True)
 
                 setattr(self, k + '_time_series', True)
 
@@ -689,11 +696,11 @@ class Organizer():
             for objid in range(v['SIZE']):
 
                 if time_series:
-                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), k, obj_strings, objid)
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
-                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo))    
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, objid))    
 
         self.configuration_sim_dicts = configuration_sim_dicts
 
