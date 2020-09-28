@@ -155,8 +155,8 @@ class ImageGenerator():
             # Solve lens equation if desired
             if self.solve_lens_equation:
                 solver = lens_equation_solver.LensEquationSolver(imSim.LensModel)
-                x_mins, y_mins = solver.image_position_from_source(source_x=kwargs_model['source_light_model_list'][0]['center_x'],
-                                                                   source_y=kwargs_model['source_light_model_list'][0]['center_y'],
+                x_mins, y_mins = solver.image_position_from_source(sourcePos_x=kwargs_source_list[0]['center_x'],
+                                                                   sourcePos_y=kwargs_source_list[0]['center_y'],
                                                                    kwargs_lens=kwargs_lens_model_list)
                 num_source_images = len(x_mins)
             
