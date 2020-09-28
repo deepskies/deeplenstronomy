@@ -145,7 +145,7 @@ class ImageGenerator():
                                                                                                            kwargs_source_mag=kwargs_source_list,
                                                                                                            kwargs_ps_mag=kwargs_point_source_list)
             
-            #kwargs_lens_model_list = sim.physical2lensing_conversion(kwargs_mass=kwargs_lens_model_list)
+            kwargs_lens_model_list = sim.physical2lensing_conversion(kwargs_mass=kwargs_lens_model_list)
                                                                                                   
             image = imSim.image(kwargs_lens=kwargs_lens_model_list,
                                 kwargs_lens_light=kwargs_lens_light_list,

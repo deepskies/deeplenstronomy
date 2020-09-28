@@ -507,7 +507,9 @@ class AllChecks():
                         # specified parameters must be what lenstronomy is expecting
                         for param_name in self.config['SPECIES'][k][profile_k]["PARAMETERS"].keys():
                             if param_name not in getfullargspec(eval(profile_type + lenstronomy_map[self.config['SPECIES'][k][profile_k]["NAME"]] + ".function"))[0]:
-                                if param_name != 'magnitude': #lenstronomy functions use `amp` but deeplenstronomy works with `magnitude`
+                                if param_name not in ['magnitude', 'sigma_v']:
+                                    #lenstronomy functions use `amp` but deeplenstronomy works with `magnitude`
+                                    #allow sigma_v to be used as a way to parameterize the lensing
                                     errs.append("SPECIES." + k + "." + profile_k + ".PARAMETERS." + param_name + " is not a valid_parameter for " + self.config['SPECIES'][k][profile_k]["NAME"])
                         
             # If MODEL is specified, it must be valid
