@@ -415,7 +415,7 @@ class AllChecks():
                 obj, sed = 'ia', 'random'
 
             if obj == 'ia':
-                if sed not in ['random', 'salt2_template_0.dat', 'salt2_template_0.dat']:
+                if sed not in ['random', 'salt2-template-0.dat', 'snflux-1a-Nugent2002.dat']:
                     errs.append(path + '.' + model_name + ' does not have a valid sed specified')
             elif obj == 'cc':
                 if sed not in ['random', 'Nugent+Scolnic_IIL.SED', 'SNLS-04D1la.SED', 'SNLS-04D4jv.SED',
@@ -438,7 +438,7 @@ class AllChecks():
                 else:
                     # check that the file can be opened properly
                     try:
-                        df = pd.read_csv(sed_filename,
+                        df = pd.read_csv('seds/user/' + sed,
                                          names=['NITE', 'WAVELENGTH_REST', 'FLUX'],
                                          delim_whitespace=True, comment='#')
                     except Exception:
@@ -656,11 +656,11 @@ class AllChecks():
                 errs.append(k + " in SPECIES is an invalid entry")
 
         # each class must be indexed sequentially
-        if len(detected_galaxies) != max(detected_galaxies):
+        if len(detected_galaxies) !=0 and len(detected_galaxies) != max(detected_galaxies):
             errs.append('GALAXY objects in SPECIES must be indexed like 1, 2, 3, ...')
-        if len(detected_point_sources) != max(detected_point_sources):
+        if len(detected_point_sources) != 0 and len(detected_point_sources) != max(detected_point_sources):
             errs.append('POINTSOURCE objects in SPECIES must be indexed like 1, 2, 3, ...')
-        if len(detected_noise_sources) != max(detected_noise_sources):
+        if len(detected_noise_sources) != 0 and len(detected_noise_sources) != max(detected_noise_sources):
             errs.append('NOISE objects in SPECIES must be indexed like 1, 2, 3, ...')
 
         # All objects must have a unique name
