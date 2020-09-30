@@ -528,13 +528,13 @@ class Organizer():
                 # Use independent observing conditions for each nite if conditions are drawn from distributions
                 # seeing
                 if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"], dict):
-                    output_dict[band]["seeing"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"]["DISTRIBUTION"], bands=band)
+                    output_dict[band]["seeing"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"]["DISTRIBUTION"], bands=band)[0]
                 # sky_brightness
                 if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"], dict):
-                    output_dict[band]["sky_brightness"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"]["DISTRIBUTION"], bands=band)
+                    output_dict[band]["sky_brightness"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"]["DISTRIBUTION"], bands=band)[0]
                 # magnitude_zero_point
                 if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"], dict):
-                    output_dict[band]["magnitude_zero_point"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"]["DISTRIBUTION"], bands=band)
+                    output_dict[band]["magnitude_zero_point"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"]["DISTRIBUTION"], bands=band)[0]
 
                     
             output_dicts.append(copy.deepcopy(output_dict))
@@ -571,7 +571,7 @@ class Organizer():
                     lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)'.format(model_info[0])))
             else:
                 for redshift in redshifts:
-                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, sed_filename={1}, cosmo=cosmo)'.format(model_info[0], model_info[1])))
+                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, sed_filename="{1}", cosmo=cosmo)'.format(model_info[0], model_info[1])))
             
             setattr(self, configuration + '_' + obj + '_' + 'lightcurves', {'library': lc_library, 'redshifts': redshifts})
         
@@ -653,9 +653,12 @@ class Organizer():
             if 'TIMESERIES' in self.main_dict['GEOMETRY'][k].keys():
                 
                 # Make a directory to store light curve data
+                if not os.path.exists(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']):
+                    os.mkdir(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])
+                    
                 if not os.path.exists('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])):
                     os.mkdir('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']))
-                
+
                 # Find the plane of the ojects and save the redshift sub-dict
                 redshift_dicts = []
                 for obj_name in self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS']:
@@ -672,12 +675,14 @@ class Organizer():
                 if verbose: print("Generating time series data for {0}".format(k))
 
                 # If light curves already exist, skip generation
-                if os.path.exists('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])):
-                    setattr(self, k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), np.load('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True) 
-                else:
-                    self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
-                    np.save('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), eval('self.' + k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True)
+                #if os.path.exists('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])):
+                #    setattr(self, k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), np.load('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True) 
+                #else:
+                #    self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
+                #    np.save('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), eval('self.' + k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True)
 
+                # Generate the time-series data
+                self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
                 setattr(self, k + '_time_series', True)
 
                 

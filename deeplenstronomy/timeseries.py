@@ -293,7 +293,7 @@ class LCGen():
             - 'sed' contains the filename of the sed used  
         """
         if not sed:
-            sed = self._read_sed(sed_filename)
+            sed = self._read_sed('seds/user/' + sed_filename)
 
         return self.gen_lc_from_sed(redshift, nites, sed, sed_filename, sed_filename, cosmo=cosmo)
 
@@ -310,6 +310,8 @@ class LCGen():
             - 'obj_type' contains a string for the type of object. Will always be 'KN' here 
             - 'sed' contains the filename of the sed used  
         """
+
+        sed_filename = 'seds/kn/kn.SED'
         if not sed:
             sed = self._read_sed(sed_filename)
 
@@ -333,7 +335,7 @@ class LCGen():
         # Read rest-frame sed if not supplied as argument
         if not sed:
             if sed_filename:
-                sed = self._read_sed(sed_filename)
+                sed = self._read_sed('seds/ia/' + sed_filename)
             else:
                 sed_filename = random.choice(self.ia_sed_files)
                 sed = self._read_sed(sed_filename)
@@ -355,11 +357,13 @@ class LCGen():
             - 'obj_type' contains a string for the type of object. Will be 'II', 'Ibc', etc.
             - 'sed' contains the filename of the sed used
         """
+
+        print(sed_filename)
         
         # If sed not specified, choose sed based on weight map
         if not sed:
             if sed_filename:
-                sed = self._read_sed(sed_filename)
+                sed = self._read_sed('seds/cc/' + sed_filename)
             else:
                 sed_filename = random.choices(self.cc_sed_files, weights=self.cc_weights, k=1)[0]
                 sed = self._read_sed(sed_filename)

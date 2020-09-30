@@ -96,7 +96,7 @@ class ImageGenerator():
                                 # point sources in the source plane
                                 kwargs_model['point_source_model_list'].append('SOURCE_POSITION')
                                 ps_info = ['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, x) for x in ['ra', 'dec', 'magnitude']]
-                                ps_dict_info = dict_select(sim_dict, ps_info) 
+                                ps_dict_info = dict_select(sim_dict, ps_info)
                                 kwargs_point_source_list.append({'ra_source': ps_dict_info['PLANE_{0}-OBJECT_{1}-ra'.format(plane_num, obj_num)], 
                                                                  'dec_source': ps_dict_info['PLANE_{0}-OBJECT_{1}-dec'.format(plane_num, obj_num)], 
                                                                  'magnitude': ps_dict_info['PLANE_{0}-OBJECT_{1}-magnitude'.format(plane_num, obj_num)]})
@@ -139,6 +139,7 @@ class ImageGenerator():
             sim = SimAPI(numpix=sim_dict['numPix'], 
                          kwargs_single_band=kwargs_single_band, 
                          kwargs_model=kwargs_model)
+
             imSim = sim.image_model_class(kwargs_numerics)
             
             kwargs_lens_light_list, kwargs_source_list, kwargs_point_source_list = sim.magnitude2amplitude(kwargs_lens_light_mag=kwargs_lens_light_list,
