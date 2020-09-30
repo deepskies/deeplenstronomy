@@ -26,7 +26,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='deeplenstronomy',
-    version='0.0.0.7',
+    version='0.0.0.10',
     description='wrap lenstronomy for efficient simulation generation',
     long_description=long_description,
     long_description_content_type='text/markdown',
