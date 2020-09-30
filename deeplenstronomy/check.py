@@ -403,7 +403,11 @@ class AllChecks():
                                                names=['WAVELENGTH', 'TRANSMISSION'],
                                                delim_whitespace=True, comment='#')
                     except Exception:
-                        errs.append("Unable to find transmission curve for " + band + " in the filters/ directory")
+                        if band in ['g', 'r', 'i', 'z', 'Y']:
+                            print("Warning: Unable to find transmission curve for " + band + " in the filters/ directory")
+                            print("\tIf this is the first time using TIMESERIES, the transmission curve will be downloaded automatically")
+                        else:
+                            errs.append("Unable to find transmission curve for " + band + " in the filters/ directory")
                 self.checked_ts_bands = True
 
             # check that the model name is allowed
