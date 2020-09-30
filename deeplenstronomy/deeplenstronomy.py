@@ -4,6 +4,8 @@ import h5py
 import numpy as np
 import os
 import pandas as pd
+import sys
+import time
 
 from deeplenstronomy.input_reader import Organizer, Parser
 from deeplenstronomy.image_generator import ImageGenerator
@@ -194,6 +196,18 @@ def _graceful_exit(err):
     print(err)
     return
 
+def _format_time(elapsed_time):
+    """
+    Format a number of seconds as a HHMMSS string
+
+    :param elapsed_time: float, an amount of time in seconds
+    :return time_string: a formatted string of the elapsed time
+    """
+    hours = elapsed_time // 3600
+    minutes = (elapsed_time - hours * 3600) // 60
+    seconds = elapsed_time - (hours * 3600) - (minutes * 60)
+    return "%i H %i M %i S" %(hours, minutes, seconds)
+
 def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                  verbose=False, store_sample=False, image_file_format='npy',
                  survey=None, return_planes=False, skip_image_generation=False,
@@ -324,7 +338,11 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
     # Simulate images
     for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
 
-        if verbose: print("Generating images for {0}".format(configuration))
+        if verbose:
+            print("Generating images for {0}".format(configuration))
+            start_time = time.time()
+            counter = 0
+            total = len(sim_inputs)
 
         # Handle image backgrounds if they exist
         if len(parser.image_paths) > 0:
@@ -337,6 +355,15 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
             planes = []
 
         for image_info, image_idx in zip(sim_inputs, image_indices):
+            # track progress if verbose
+            if verbose:
+                counter += 1
+                if counter % 50 == 0:
+                    progress = counter / total * 100
+                    elapsed_time = time.time() - start_time
+                    sys.stdout.write('\r\tProgress: %.1f %%  ---  Elapsed Time: %s' %(progress, _format_time(elapsed_time)))
+                    sys.stdout.flush()
+            
             # Add background image index to image_info
             for band in dataset.bands:
                 image_info[band]['BACKGROUND_IDX'] = image_idx
@@ -360,6 +387,13 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
                               
             # Save metadata for each simulated image 
             metadata.append(flatten_image_info(image_info))
+
+            # update the progress if in verbose mode
+            if verbose:
+                elapsed_time = time.time() - start_time
+                if counter == len(sim_inputs):
+                    sys.stdout.write('\r\tProgress: 100.0 %%  ---  Elapsed Time: %s\n' %(_format_time(elapsed_time)))
+                    sys.stdout.flush()
 
                               
         # Group images -- the array index will correspond to the id_num of the metadata
