@@ -858,8 +858,9 @@ def run_checks(full_dict, config_dict):
     try:
         check_runner = AllChecks(full_dict, config_dict)
     except ConfigFileError:
-        print("Fatal error(s) detected in config file. Please edit and rerun.")
-
+        print("\nFatal error(s) detected in config file. Please edit and rerun.")
+        raise ConfigFileError
+        
     return
 
         
