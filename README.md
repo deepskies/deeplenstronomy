@@ -1,4 +1,4 @@
-# DeepLenStronomy
+# DeepLenstronomy
 
 
 ![](bad_logo_small.png)

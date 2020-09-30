@@ -1,18 +1,20 @@
 # Classes to parse inpAut yaml files and organize user settings
 
-from astropy.cosmology import FlatLambdaCDM
-from benedict import benedict
 import copy
 import random
-import numpy as np
 import os
 import sys
 import yaml
 
+from astropy.cosmology import FlatLambdaCDM
+#from astropy.cosmology import arcsec_per_kpc_comoving
+import numpy as np
+
 import deeplenstronomy.timeseries as timeseries
-from deeplenstronomy.utils import dict_select, dict_select_choose
+from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_user_dist, KeyPathDict
 import deeplenstronomy.distributions as distributions
 import deeplenstronomy.special as special
+import deeplenstronomy.surveys as surveys
 import deeplenstronomy.check as big_check
 
 class Parser():
@@ -20,13 +22,16 @@ class Parser():
     Load yaml inputs into a single dictionary. Check for user errors
 
     :param config: main yaml file name
-
     """
 
-    def __init__(self, config):
+    def __init__(self, config, survey=None):
 
         # Check for annoying tabs - there's probably a better way to do this
         self.parse_for_tabs(config)
+
+        # Fill in sections of the configuration file for a specific survey
+        if survey is not None:
+            config = self.write_survey(config, survey)
         
         # Read main configuration file
         self.full_dict = self.read(config)
@@ -34,37 +39,85 @@ class Parser():
         # If the main file points to any input files, read those too
         self.get_input_locations()
         self.include_inputs()
+
+        # Check for user-specifed probability distributions and backgrounds
+        self.get_file_locations()
+        self.get_image_locations()
         
         # Check for user errors in inputs
         self.check()
 
         return
+
+
+    def write_survey(self, config, survey):
+        """
+        Writes survey information to config file
+        """
+        # set new config file name
+        config_basename = config.split('/')
+        if len(config_basename) == 1:
+            outfile = survey + '_' + config
+        else:
+            outfile = '/'.join(config_basename[0:-1]) + '/' + survey + '_' + config_basename[-1]
+
+        # write new config file
+        with open(config, 'r') as old, open(outfile, 'w+') as new:
+            new.writelines(old.readlines())
+            new.writelines(eval("surveys.{}()".format(survey)))
+        return outfile
     
     def include_inputs(self):
         """
         Adds any input yaml files to config dict and assigns to self.
         """
-        config_dict = benedict(self.full_dict.copy(), keypath_separator='.')
+        config_dict = KeyPathDict(self.full_dict.copy(), keypath_separator='.')
         
         for input_path in self.input_paths:
-            input_dict = self.read(config_dict[input_path + '.INPUT'])
+            input_dict = self.read(eval('config_dict["' + input_path.replace('.', '"]["') + '"]["INPUT"]'))
             for k, v in input_dict.items():
-                config_dict[input_path + '.{0}'.format(k)] = v
-                
-        self.config_dict = benedict(config_dict, keypath_separator=None)
+                exec('config_dict["' + input_path.replace('.', '"]["') + '"][k] = v')
+
+        self.config_dict = config_dict
         return    
-    
+
     def get_input_locations(self):
-        """
-        Find locations in main dictionary where input files are listed
-        """
-        d = benedict(self.full_dict, keypath_separator='.')
-        input_locs = [x.find('INPUT') for x in d.keypaths()]
-        input_paths = [y for y in [x[0:k-1] if k != -1 else '' for x, k in zip(d.keypaths(), input_locs)] if y != '']
+        input_paths = self._get_kw_locations("INPUT")
         self.input_paths = input_paths
         return
+
+    def get_file_locations(self):
+        #file_paths = self._get_kw_locations("USERDIST")
         
+        file_paths = []
+        if "DISTRIBUTIONS" in self.full_dict.keys():
+            for k in self.full_dict['DISTRIBUTIONS'].keys():
+                file_paths.append('DISTRIBUTIONS.' + k)
+        self.file_paths = file_paths
+
+        return
+
+    def get_image_locations(self):
+        file_paths = []
+        if "BACKGROUNDS" in self.full_dict.keys():
+            file_paths.append(self.full_dict['BACKGROUNDS'])
+        self.image_paths = file_paths
+
+        return
     
+    def _get_kw_locations(self, kw):
+        """
+        Find locations in main dictionary where a keyword is used
+
+        :param kw: str, a keyword to search the dict keys for
+        :return: paths: list, the keypaths to all occurances of kw
+        """
+        d = KeyPathDict(self.full_dict, keypath_separator='.')
+        locs = [x.find(kw) for x in d.keypaths()]
+        paths = [y for y in [x[0:k-1] if k != -1 else '' for x, k in zip(d.keypaths(), locs)] if y != '']
+        return paths
+
+
     def read(self, config):
         """
         Reads config file into a dictionary and returns it.
@@ -105,19 +158,6 @@ class Parser():
         """
         big_check.run_checks(self.full_dict, self.config_dict)
         
-        #BIG TODO
-        
-        
-        #don't name an object 'None'
-        #object names must be unique
-        #spell 'parameters' right for once in your life
-        
-        #sigma_bkg versus background_rms depends on lenstronomy version
-        
-        #require point sources to be listed after the host
-
-        # if timeseries, and num exposures > 1 issue a warning
-        
         return
     
 
@@ -152,7 +192,7 @@ class Organizer():
         :param distribution_dict: dicitonary containing pdf info
         :return: method: callable method as string
         """
-        #this some black magic
+        #this some magic
         if isinstance(distribution_dict['PARAMETERS'], dict):
             return distribution_dict['NAME'] + '(' + ', '.join(['{0}={1}'.format(k, v) for k, v in distribution_dict['PARAMETERS'].items()]) + ', bands="{0}"'.format(','.join(bands)) + ')'
         else:
@@ -169,19 +209,32 @@ class Organizer():
         draw_command = 'distributions.{0}'.format(self._convert_to_string(distribution_dict, bands))
         return eval(draw_command)
 
-    def _choose_position(self, ra_host, dec_host, sep):
+    def _choose_position(self, ra_host, dec_host, sep, sep_unit, cosmo, redshift=None, angle=None):
         """
         Select an ra and dec that will be sep away from the host
         
         :param ra_host: x-coord of point source host
         :param dec_host: y-coord of point source host
         :param sep: angular separation between point source and host
+        :param sep_unit: either 'kpc' or 'arcsec'
+        :param redshift: cosmological redshift, required if units are in kpc
+        :param angle: desired position of point source in radians, random if None
         :return: chosen_ra: x-coord of chosen point sep away from host
         :return: chosen_dec: y-coord of chosen point sep away from host
         """
-        angle = random.uniform(0.0, 2 * np.pi)
-        chosen_ra = np.cos(angle) * sep + ra_host
-        chosen_dec = np.sin(angle) * sep + dec_host
+        if angle is None:
+            angle = random.uniform(0.0, 2 * np.pi)
+
+        if sep_unit == 'arcsec':            
+            chosen_ra = np.cos(angle) * sep + ra_host
+            chosen_dec = np.sin(angle) * sep + dec_host
+        elif sep_unit == 'kpc':
+            kpc_to_arcsec = cosmo.arcsec_per_kpc_comoving(redshift).value / (1. + redshift)
+            chosen_ra = np.cos(angle) * sep * kpc_to_arcsec + ra_host
+            chosen_dec = np.sin(angle) * sep * kpc_to_arcsec + dec_host
+        else:
+            raise NotImplementedError("unexpected sep_unit")
+        
         return chosen_ra, chosen_dec
 
     def _find_obj_string(self, obj_name, configuration):
@@ -193,15 +246,22 @@ class Organizer():
         :return: obj_string: the location of the object in the flattened dictionary
         """
 
-        d = benedict(self.main_dict['GEOMETRY'][configuration].copy(), keypath_separator='.')
-        return [x.replace('.', '-') for x in d.keypaths() if d[x] == obj_name][0]
+        d = KeyPathDict(self.main_dict['GEOMETRY'][configuration].copy(), keypath_separator='.')
+        for x in d.keypaths():
+            f = "['" + "']['".join(x.split('.')) + "']"
+            k = eval("d" + f)
+            if k == obj_name:
+                return x.replace('.', '-')
+
+        #return [x.replace('.', '-') for x in d.keypaths() if eval("d['" + "']['".join(x.split('.')) + "']") == obj_name][0]
 
     
-    def _flatten_and_fill(self, config_dict, objid=0):
+    def _flatten_and_fill(self, config_dict, cosmo, objid=0):
         """
         Flatten input dictionary, and sample from any specified distributions
         
         :param config_dict: dictionary built up by self.breakup()
+        :param cosmo: an astropy.cosmology instance
         :return: flattened_and_filled dictionary: dict ready for individual image sim
         """
         bands = config_dict['SURVEY_DICT']['BANDS'].split(',')
@@ -273,10 +333,19 @@ class Organizer():
             for k_param, v_param in self.main_dict['GEOMETRY'][geometry_key]['PLANE_{0}'.format(plane_num)]['PARAMETERS'].items():
                 if isinstance(v_param, dict):
                     draws = self._draw(v_param['DISTRIBUTION'], bands)
+
+                    # Set the PLANE's redshift in the config_dict
+                    if k_param == 'REDSHIFT':
+                        config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)] = draws[0]
+                    
                     for band, draw in zip(bands, draws):
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, k_param)] = draw
                 else:
+                    # Set the PLANE's redshift in the config_dict
+                    if k_param == 'REDSHIFT':
+                        config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)]	= v_param
+                    
                     for band in bands:
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, k_param)] = v_param
@@ -302,19 +371,30 @@ class Organizer():
                         
                         # Determine location of point source in image
                         if 'sep' in self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS'].keys():
+                            sep_unit = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep_unit']
                             if isinstance(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep'], dict):
                                 draws = self._draw(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep']['DISTRIBUTION'], bands)
                                 sep = draws[0]
                             else:
                                 sep = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['sep']
 
+                            if 'angle' in self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS'].keys():    
+                                if isinstance(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['angle'], dict):
+                                    draws = self._draw(self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['angle']['DISTRIBUTION'], bands)
+                                    angle = draws[0]
+                                else:
+                                    angle = self.main_dict['SPECIES'][self._species_map[obj_name]]['PARAMETERS']['angle']
+                            else:
+                                angle = None
+                                
                             ##convert image separation into ra and dec
-                            ra, dec = self._choose_position(ra_host, dec_host, sep)
+                            ra, dec = self._choose_position(ra_host, dec_host, sep, sep_unit, cosmo, config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)], angle)
 
                         else:
                             #set ra and dec to host center
                             ra, dec = ra_host, dec_host
                             sep = 0.0
+                            sep_unit = 'arcsec'
 
                         for band in bands:
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-HOST'.format(plane_num, obj_num)] = self.main_dict['SPECIES'][self._species_map[obj_name]]['HOST']
@@ -322,6 +402,7 @@ class Organizer():
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-ra'.format(plane_num, obj_num)] = ra
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-dec'.format(plane_num, obj_num)] = dec
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-sep'.format(plane_num, obj_num)] = sep
+                            output_dict[band]['PLANE_{0}-OBJECT_{1}-sep_unit'.format(plane_num, obj_num)] = sep_unit
                     else:
                         #foreground, choose position randomly
                         im_size = self.main_dict['IMAGE']['PARAMETERS']['numPix'] * self.main_dict['IMAGE']['PARAMETERS']['pixel_scale'] / 2
@@ -407,7 +488,7 @@ class Organizer():
         return output_dict
 
 
-    def _flatten_and_fill_time_series(self, config_dict, configuration, obj_strings, objid):
+    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid):
         """
         Generate an image info dictionary for each step in the time series
 
@@ -419,7 +500,7 @@ class Organizer():
         output_dicts = []
         bands = self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
         # Get flattened and filled dictionary
-        base_output_dict = self._flatten_and_fill(config_dict, objid)
+        base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
 
         closest_redshift_lcs = []
         for obj_name, obj_string in zip(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['OBJECTS'], obj_strings):
@@ -450,6 +531,18 @@ class Organizer():
                     output_dict[band][obj_string + '-type'] = closest_redshift_lc['obj_type']
 
                     noise_idx += 1
+
+                # Use independent observing conditions for each nite if conditions are drawn from distributions
+                # seeing
+                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"], dict):
+                    output_dict[band]["seeing"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"]["DISTRIBUTION"], bands=band)[0]
+                # sky_brightness
+                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"], dict):
+                    output_dict[band]["sky_brightness"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"]["DISTRIBUTION"], bands=band)[0]
+                # magnitude_zero_point
+                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"], dict):
+                    output_dict[band]["magnitude_zero_point"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"]["DISTRIBUTION"], bands=band)[0]
+
                     
             output_dicts.append(copy.deepcopy(output_dict))
             del output_dict
@@ -485,7 +578,7 @@ class Organizer():
                     lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)'.format(model_info[0])))
             else:
                 for redshift in redshifts:
-                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, sed_filename={1}, cosmo=cosmo)'.format(model_info[0], model_info[1])))
+                    lc_library.append(eval('lc_gen.gen_{0}(redshift, nites, sed_filename="{1}", cosmo=cosmo)'.format(model_info[0], model_info[1])))
             
             setattr(self, configuration + '_' + obj + '_' + 'lightcurves', {'library': lc_library, 'redshifts': redshifts})
         
@@ -546,6 +639,10 @@ class Organizer():
         #cosmo_dict['NAME'] = self.main_dict['COSMOLOGY']['NAME']
         for k in configurations.keys():
             configurations[k]['COSMOLOGY_DICT'] = cosmo_dict
+
+        # Set cosmology information
+        cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+        cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
             
         # Add noise metadata
         for k in configurations.keys():
@@ -556,15 +653,19 @@ class Organizer():
                 noise_source_num = noise_source_idx + 1
                 noise_dict['NOISE_SOURCE_{0}-NAME'.format(noise_source_num)] = self.main_dict['GEOMETRY'][k]['NOISE_SOURCE_{0}'.format(noise_source_num)]
             configurations[k]['NOISE_DICT'] = noise_dict
-
+            
         # Check for timeseries metadata
         for k in configurations.keys():
             setattr(self, k + '_time_series', False)
             if 'TIMESERIES' in self.main_dict['GEOMETRY'][k].keys():
                 
                 # Make a directory to store light curve data
-                if not os.path.exists('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])): os.mkdir('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']))
-                
+                if not os.path.exists(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']):
+                    os.mkdir(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])
+                    
+                if not os.path.exists('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'])):
+                    os.mkdir('{0}/lightcurves'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR']))
+
                 # Find the plane of the ojects and save the redshift sub-dict
                 redshift_dicts = []
                 for obj_name in self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS']:
@@ -578,19 +679,17 @@ class Organizer():
                                         else:
                                             redshift_dicts.append(self.main_dict['GEOMETRY'][k][sub_k]['PARAMETERS']['REDSHIFT'] + 0.0)
 
-                #set the cosmology for luminosity distance calculations
-                cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
-                cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
-
                 if verbose: print("Generating time series data for {0}".format(k))
 
                 # If light curves already exist, skip generation
-                if os.path.exists('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])):
-                    setattr(self, k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), np.load('lightcurves/{0}_{1}.npy'.format(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])).item()) 
-                else:
-                    self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
-                    np.save('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), eval('self.' + k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])))
+                #if os.path.exists('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])):
+                #    setattr(self, k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), np.load('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True) 
+                #else:
+                #    self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
+                #    np.save('{0}/lightcurves/{1}_{2}.npy'.format(self.main_dict['DATASET']['PARAMETERS']['OUTDIR'], k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0]), eval('self.' + k + '_{0}_lightcurves'.format(self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'][0])), allow_pickle=True)
 
+                # Generate the time-series data
+                self.generate_time_series(k, self.main_dict['GEOMETRY'][k]['TIMESERIES']['NITES'], self.main_dict['GEOMETRY'][k]['TIMESERIES']['OBJECTS'], redshift_dicts, cosmo)
                 setattr(self, k + '_time_series', True)
 
                 
@@ -609,11 +708,11 @@ class Organizer():
             for objid in range(v['SIZE']):
 
                 if time_series:
-                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), k, obj_strings, objid)
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
-                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy()))    
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, objid))    
 
         self.configuration_sim_dicts = configuration_sim_dicts
 

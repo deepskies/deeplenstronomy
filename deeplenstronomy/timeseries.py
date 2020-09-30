@@ -1,10 +1,15 @@
+# Class for light curve generation from time-series spectral energy distributions
+
+import glob
+import os
+import random
+import warnings
+warnings.filterwarnings("ignore")
+
 from astropy.cosmology import FlatLambdaCDM
 import astropy.units as u
-import glob
 import numpy as np
-import os
 import pandas as pd
-import random
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
 
@@ -48,6 +53,9 @@ class LCGen():
         if not os.path.exists('seds/cc'):
             os.system('svn checkout https://github.com/rmorgan10/deeplenstronomy_data/trunk/seds/cc')
             os.system('mv cc seds')
+        if not os.path.exists('seds/kn'):
+            os.system('svn checkout https://github.com/rmorgan10/deeplenstronomy_data/trunk/seds/kn')
+            os.system('mv kn seds')
         if not os.path.exists('filters'):
             os.system('svn checkout https://github.com/rmorgan10/deeplenstronomy_data/trunk/filters')
     
@@ -271,6 +279,44 @@ class LCGen():
         noiseless_lc_dict['sed'] = 'FlatNoise'
         return noiseless_lc_dict
         
+    def gen_user(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        """
+        Generate a light curve from a user-specidied SED
+
+        :param redshfit: the redshift of the source 
+        :param nites: a list of night relative to peak you want to obtain a magnitude for  
+        :param sed: (optional) a dataframe containing the sed of the SN
+        :param cosmo: (optional) an astropy.cosmology instance 
+        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+            - 'lc' contains a dataframe of the light from the object
+            - 'obj_type' contains a string for the type of object. Will always be <sed_filename> here 
+            - 'sed' contains the filename of the sed used  
+        """
+        if not sed:
+            sed = self._read_sed('seds/user/' + sed_filename)
+
+        return self.gen_lc_from_sed(redshift, nites, sed, sed_filename, sed_filename, cosmo=cosmo)
+
+    def gen_kn(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        """
+        Generate a GW170817-like light curve
+
+        :param redshfit: the redshift of the source   
+        :param nites: a list of night relative to peak you want to obtain a magnitude for  
+        :param sed: (optional) a dataframe containing the sed of the SN 
+        :param cosmo: (optional) an astropy.cosmology instance       
+        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed'] 
+            - 'lc' contains a dataframe of the light from the object
+            - 'obj_type' contains a string for the type of object. Will always be 'KN' here 
+            - 'sed' contains the filename of the sed used  
+        """
+
+        sed_filename = 'seds/kn/kn.SED'
+        if not sed:
+            sed = self._read_sed(sed_filename)
+
+        return self.gen_lc_from_sed(redshift, nites, sed, 'KN', sed_filename, cosmo=cosmo)
+    
     def gen_ia(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a SN-Ia light curve
@@ -289,7 +335,7 @@ class LCGen():
         # Read rest-frame sed if not supplied as argument
         if not sed:
             if sed_filename:
-                sed = self._read_sed(sed_filename)
+                sed = self._read_sed('seds/ia/' + sed_filename)
             else:
                 sed_filename = random.choice(self.ia_sed_files)
                 sed = self._read_sed(sed_filename)
@@ -311,11 +357,13 @@ class LCGen():
             - 'obj_type' contains a string for the type of object. Will be 'II', 'Ibc', etc.
             - 'sed' contains the filename of the sed used
         """
+
+        print(sed_filename)
         
         # If sed not specified, choose sed based on weight map
         if not sed:
             if sed_filename:
-                sed = self._read_sed(sed_filename)
+                sed = self._read_sed('seds/cc/' + sed_filename)
             else:
                 sed_filename = random.choices(self.cc_sed_files, weights=self.cc_weights, k=1)[0]
                 sed = self._read_sed(sed_filename)
