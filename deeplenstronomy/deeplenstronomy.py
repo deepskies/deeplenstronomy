@@ -1,11 +1,12 @@
 # Outer shell to do everything for you
 
-import h5py
-import numpy as np
 import os
-import pandas as pd
 import sys
 import time
+
+import h5py
+import numpy as np
+import pandas as pd
 
 from deeplenstronomy.input_reader import Organizer, Parser
 from deeplenstronomy.image_generator import ImageGenerator
@@ -189,13 +190,6 @@ def _check_survey(survey):
     else:
         return survey in dir(surveys)   
 
-def _graceful_exit(err):
-    """
-    Clost the program with a neat error message.
-    """
-    print(err)
-    return
-
 def _format_time(elapsed_time):
     """
     Format a number of seconds as a HHMMSS string
@@ -229,23 +223,6 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     :param solve_lens_equation: bool, if true, calculate the source positions
     :return: dataset: instance of dataset class
     """
-
-    return _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
-                         image_file_format, survey, return_planes, skip_image_generation,
-                         solve_lens_equation)
-    
-    #try:
-    #    return _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
-    #                         image_file_format, survey, return_planes, skip_image_generation,
-    #                         solve_lens_equation)
-    #except Exception as err:
-    #    _graceful_exit(err)
-
-    #return
-
-def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store_sample,
-                  image_file_format, survey, return_planes, skip_image_generation,	
-                  solve_lens_equation):
 
     if solve_lens_equation and skip_image_generation:
         raise RuntimeError("You cannot skip image generation and solve the lens equation")
@@ -457,10 +434,6 @@ def _make_dataset(config, dataset, save_to_disk, store_in_memory, verbose, store
                 
     return dataset
 
-
-
-
     
 if __name__ == "__main__":
-    #make_dataset('configs/fake_config.yaml', store=False, save=False)
     pass
