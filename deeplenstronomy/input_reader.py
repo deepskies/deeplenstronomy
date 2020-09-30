@@ -54,7 +54,14 @@ class Parser():
         """
         Writes survey information to config file
         """
-        outfile = survey + '_' + config
+        # set new config file name
+        config_basename = config.split('/')
+        if len(config_basename) == 1:
+            outfile = survey + '_' + config
+        else:
+            outfile = '/'.join(config_basename[0:-1]) + '/' + survey + '_' + config_basename[-1]
+
+        # write new config file
         with open(config, 'r') as old, open(outfile, 'w+') as new:
             new.writelines(old.readlines())
             new.writelines(eval("surveys.{}()".format(survey)))
