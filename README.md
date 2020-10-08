@@ -1,91 +1,51 @@
-# DeepLenstronomy
+# Welcome to `deeplenstronomy`!
 
+`deeplenstronomy` is a tool for simulating large datasets for applying deep learning to strong gravitational lensing. 
+It works by wrapping the functionalities of [`lenstronomy`](https://github.com/sibirrer/lenstronomy) in a convenient yaml-style interface, allowing users to embrace the astronomer part of their brain rather than their programmer part when generating training datasets.
 
-![](bad_logo_small.png)
+## Installation
 
-> Welcome to DeepLenstronomy, a wrapper that enables pipelining of the lenstronomy package for efficient and fast simulations of strong gravitational lensing systems. 
+- Step 0: Set up an environment. This can be done straightforwardly with a `conda` installation:
 
-# Table of Contents 
+```
+conda create -n deeplens python=3.7 jupyter scipy pandas numpy matplotlib astropy h5py PyYAML mpmath future
+conda activate deeplens
+```
 
-- [Installation](#installation)
-- [Features](#features)
-- [Contributing](#contributing)
-- [Team](#team)
+- Step 1: `pip install lenstronomy`
+- Step 2: `pip install deeplenstronomy`
 
----
+## Documentation
 
-# Installation
+Start by reading the [Getting Started Guide](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/GettingStarted.ipynb) to familiarize yourself with the `deeplenstronomy` style.
 
+After that, check out the example notebooks below:
 
-- you can use pip to install the code
-- you will need to install lenstronomy, which has requirements: link to requirments
+### Notebooks for `deeplenstronomy` Utilities
+- [Creating `deeplenstronomy` Configuration Files](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/ConfigFiles.md)
+- [Generating Datasets](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/DeepLenstronomyDemo.ipynb)
+- [Visualizing `deeplenstronomy` Images](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/Visualization.ipynb)
+- [Utilizing Astronomical Surveys](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/Surveys.ipynb)
+- [Defining Your Own Probability Distributions](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/UserDistributions.ipynb)
+- [Using Your Own Images as Backgrounds](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/BackgroundsDemo.ipynb)
+- [Simulating Time-Series Datasets](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/TimeSeriesDemo.ipynb)
 
-## Requirement
+### Notebooks for Applying `deeplenstronomy` to Machine Learning Analyses
+- [Using `deeplenstronomy` for Active Learning](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/ActiveUpdateDemo.ipynb)
+- [Using `deeplenstronomy` for Classification and Regression](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/Metrics.ipynb)
 
-1. python 3.x
-2. lenstronomy 1.3.0 (https://github.com/sibirrer/lenstronomy)
+### Notebooks for Suggested Science Cases
+- [A Walkthrough of Using `deeplenstronomy` for Science](https://github.com/rmorgan10/deeplenstronomy/blob/master/Notebooks/FullExample.ipynb)
 
+## Contact
 
----
+If you have any questions or run into any errors with the beta release of `deeplenstronomy`, please don't hesitate to reach out:
 
-# Features
+Rob Morgan 
+<br>
+robert [dot] morgan [at] wisc.edu
 
-## Pipeline Structure
-
-
-The structure of the pipeline is as follows:
-
-1. Inputs 
-   1. YAML file
-2. Generate objects
-   1. with some population samplnig
-   2. with some instrument/experiment characteristics
-   3. of a given type or species
-3. Run Diagnostics over sets of objects
-   1. Display distributions of object parameters
-   2. Show examples of objects
-
-
-The primary elements of the simulated objects are
-
-1. Survey Model (noise and data fidelity): seeing (dist, per band), sky-brightness (dist; corr with seeing; per band?), zero-point (const; per band?), exp time (per band), num exposures, pixel scale (const), read noise, filter set
-2. Expected population distribution 
-3. Injection simulations into real data for the given survey or model
-4. Sky noise: poisson (from lens, source, uniform sky bkg)
-5. A wide selection of strong lens species including gal-gal, gal-qso, gal-sn, multi-plane, cluster
-
-
-# Contributing
-
-> To get started install the code!
-
-## Options for contributions
-
-We now have a good structure to the code, and all the pieces are pulled together, so the next stages of the development will be more clearly planned out. 
-
-We see the set of tasks below as the next things we need to do
-
-* bayeseisan hierachical models for efficient sampling
-* distribution sampling
-* use tensor 2 tensor or gal 2 gal for data structures and as a way to track data sets
-* unit tests
-* documentation
-* conda install
-
-If you'd like to sign up to work on one of these elements, please contact Morgan or Nord.
-
-Aside from those, the most important thing you can do is **try to break the alpha version!**
-
-
----
-
-# Team
-
-* Simon Birrer 
-* Joshua Yao-Yu Lin 
-* Rob Morgan
-* Brian Nord
-* Jason Poh 
+You can also message me on the DES, DELVE, LSSTC, deepskies, or lenstronomers Slack workspaces
 
 
 
