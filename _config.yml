@@ -1,1 +1,5 @@
 theme: jekyll-theme-minimal
+minimal_mistakes_skin: "contrast"
+
+url : http://deepskies.github.io
+baseurl : /deeplenstronomy
