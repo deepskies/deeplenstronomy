@@ -1,6 +1,7 @@
 # Outer shell to do everything for you
 
 import os
+import random
 import sys
 import time
 
@@ -63,6 +64,49 @@ class Dataset():
                 exec("self.config_dict" + location + "['DISTRIBUTION']['PARAMETERS'][new_dist_param] = new_dist_param_value")
 
         return
+
+    def search(self, param_name):
+    
+        """
+        Find all USERDIST column headers for a parameter
+        
+        :param param_name: str, the parameter name to search for
+        :return: output_dict: dict,
+            keys: object names
+            values: list of all possible USERDIST column headers
+        """
+        obj_paths = ['["' + x[9:].replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("GEOMETRY") and x.find("OBJECT_") != -1]
+        obj_names = [eval('self.config_dict["GEOMETRY"]' + x) for x in obj_paths]
+        species_paths = ['["' + x.replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("SPECIES") and x.endswith("NAME") and x.find("LIGHT_PROFILE_") == -1 and x.find("MASS_PROFILE_") == -1 and x.find("SHEAR_PROFILE_") == -1]
+        species_names = [eval('self.config_dict' + x) for x in species_paths]
+
+        paths = []
+        for obj_idx, obj_name in enumerate(obj_names):
+            for species_idx, species_name in enumerate(species_names):
+                if obj_name == species_name:
+                    paths.append({'name': obj_name,
+                                  'obj_path': obj_paths[obj_idx].replace('"]["', '.')[2:-2],
+                                  'spe_path': species_paths[species_idx].replace('"]["', '.')[2:-6]})
+    
+        output_dict = {} 
+        for p in paths:
+
+            hr_paths = [p['obj_path'] + '.' + x.replace('.PARAMETERS.', '.')[len(p['spe_path']):] for x in self.config_dict.keypaths() if x.startswith(p['spe_path']) and x.find(param_name) != -1]
+            output_paths = []
+            for hr_path in hr_paths:
+                for band in self.bands:
+                    output_paths.append(hr_path.replace('.', '-') + '-' + band)
+                    
+            if len(output_paths) == 0:
+                continue
+
+            if p['name'] in output_dict.keys():
+                output_dict[p['name']] += output_paths
+            else:
+                output_dict[p['name']] = output_paths
+            
+        return output_dict
+
     
     def _locate(self, param, configuration):
         """
@@ -252,6 +296,12 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     dataset.size = dataset.config_dict['DATASET']['PARAMETERS']['SIZE']
     dataset.outdir = dataset.config_dict['DATASET']['PARAMETERS']['OUTDIR']
     dataset.bands = dataset.config_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
+    try:
+        dataset.seed = int(dataset.config_dict['DATASET']['PARAMETERS']["SEED"])
+    except KeyError:
+        dataset.seed = random.randint(0, 100)
+    np.random.seed(dataset.seed)
+    random.seed(dataset.seed)
 
     # Make the output directory if it doesn't exist already
     if save_to_disk:

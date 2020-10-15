@@ -197,6 +197,17 @@ class AllChecks():
                 errs.append("Missing {0} section from config file".format(name))
         return errs
 
+    def check_random_seed(self):
+        errs = []
+        try:
+            seed = int(self.config["DATASET"]["PARAMETERS"]["SEED"])
+        except KeyError:
+            return [] # random seed not specified
+        except ValueError:
+            errs.append("DATASET.PARAMETERS.SEED was not able to be converted to an integer")
+
+        return errs
+            
     def check_low_level_existence(self):
         errs = []
         param_names = {"DATASET.NAME",
@@ -269,7 +280,7 @@ class AllChecks():
                     errs.append(path + "." + distribution_dict["NAME"] +  " is not a valid distribution name")
                     return errs
 
-            allowed_params = list(set(getfullargspec(eval("distributions." + distribution_dict["NAME"]))[0]) - set(['bands']))
+            allowed_params = list(set(getfullargspec(eval("distributions." + distribution_dict["NAME"]))[0]) - set(['bands', 'seed']))
             remaining_params = allowed_params.copy()
             if len(set(allowed_params) - set(["bands"])) != 0:
                 # the requested distribution requires parameters so config dict must have parameter key
