@@ -91,7 +91,9 @@ class ImageGenerator():
                                 kwargs_model['point_source_model_list'].append('LENSED_POSITION')
                                 ps_info = ['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, x) for x in ['ra', 'dec', 'magnitude']]
                                 ps_dict_info = dict_select(sim_dict, ps_info)
-                                kwargs_point_source_list.append({'ra_image': [ps_dict_info['ra']], 'dec_image': [ps_dict_info['dec']], 'magnitude': [ps_dict_info['magnitude']]})
+                                kwargs_point_source_list.append({'ra_image': [ps_dict_info[prefix + 'ra']],
+                                                                 'dec_image': [ps_dict_info[prefix + 'dec']],
+                                                                 'magnitude': [ps_dict_info[prefix + 'magnitude']]})
                             elif plane_num == sim_dict['NUMBER_OF_PLANES']:
                                 # point sources in the source plane
                                 kwargs_model['point_source_model_list'].append('SOURCE_POSITION')
