@@ -358,8 +358,6 @@ class LCGen():
             - 'sed' contains the filename of the sed used
         """
 
-        print(sed_filename)
-        
         # If sed not specified, choose sed based on weight map
         if not sed:
             if sed_filename:
