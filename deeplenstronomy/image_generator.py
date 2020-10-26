@@ -31,6 +31,7 @@ class ImageGenerator():
         output_image = []
         if self.return_planes:
             output_source, output_lens, output_point_source, output_noise = [], [], [], []
+        output_metadata = []
         
         #set the cosmology
         cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
@@ -119,10 +120,15 @@ class ImageGenerator():
                         for mass_profile_num in range(1, sim_dict[prefix + 'NUMBER_OF_MASS_PROFILES'] +1):
                             kwargs_model['lens_model_list'].append(sim_dict[prefix + 'MASS_PROFILE_{0}-NAME'.format(mass_profile_num)])
                             kwargs_model['lens_redshift_list'].append(sim_dict[prefix + 'REDSHIFT'])
-                            kwargs_lens_model_list.append(select_params(sim_dict, prefix + 'MASS_PROFILE_{0}-'.format(mass_profile_num)))
+                            mass_params = select_params(sim_dict, prefix + 'MASS_PROFILE_{0}-'.format(mass_profile_num))
+                            kwargs_lens_model_list.append(mass_params)
+                            if 'sigma_v' in mass_params.keys(): # save simga_v locations so that we can calculate theta_E for the metadata
+                                output_metadata.append({'PARAM_NAME':  prefix + 'MASS_PROFILE_{0}-sigma_v-{1}'.format(mass_profile_num, band),
+                                                        'LENS_MODEL_IDX': len(kwargs_lens_model_list) - 1})
                         for shear_profile_num in range(1, sim_dict[prefix + 'NUMBER_OF_SHEAR_PROFILES'] +1):
                             kwargs_model['lens_model_list'].append(sim_dict[prefix + 'SHEAR_PROFILE_{0}-NAME'.format(shear_profile_num)])
                             kwargs_model['lens_redshift_list'].append(sim_dict[prefix + 'REDSHIFT'])
+                            mass_params = select_params(sim_dict, prefix + 'SHEAR_PROFILE_{0}-'.format(shear_profile_num))
                             kwargs_lens_model_list.append(select_params(sim_dict, prefix + 'SHEAR_PROFILE_{0}-'.format(shear_profile_num)))
                                                    
                     # Last Plane - treat as source
@@ -149,6 +155,8 @@ class ImageGenerator():
                                                                                                            kwargs_ps_mag=kwargs_point_source_list)
             
             kwargs_lens_model_list = sim.physical2lensing_conversion(kwargs_mass=kwargs_lens_model_list)
+            for out_md in output_metadata:
+                out_md['PARAM_VALUE'] = kwargs_lens_model_list[out_md['LENS_MODEL_IDX']]['theta_E']
                                                                                                   
             image = imSim.image(kwargs_lens=kwargs_lens_model_list,
                                 kwargs_lens_light=kwargs_lens_light_list,
@@ -182,15 +190,15 @@ class ImageGenerator():
                 output_noise.append(image_noise)
         
         # Return the desired information in a dictionary
-        return_dict = {'output_image': None,
+        return_dict = {'output_image': np.array(output_image),
                        'output_lens_plane': None,
                        'output_source_plane': None,
                        'output_point_source_plane': None,
                        'output_noise_plane': None,
                        'x_mins': None,
                        'y_mins': None,
-                       'num_source_images': None}
-        return_dict['output_image'] = np.array(output_image)
+                       'num_source_images': None,
+                       'additional_metadata': output_metadata}
         if self.return_planes:
             return_dict['output_lens_plane'] = np.array(output_lens)
             return_dict['output_source_plane'] = np.array(output_source)

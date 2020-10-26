@@ -224,7 +224,15 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts):
         df = pd.read_csv(im_dir + '/' + 'map.txt', delim_whitespace=True)
 
         # Trim to just the columns in the config dict
-        map_columns = [x for x in df.columns if x in config_dicts[0].keys()]
+        map_columns, bad_columns = [], []
+        for x in df.columns:
+            if x in config_dicts[0].keys():
+                map_columns.append(x)
+            else:
+                bad_columns.append(x)
+
+        if len(bad_columns) != 0:
+            print("WARNING " + ', '.join(bad_columns) + " are not found in the simulated dataset. Use the dataset.search(<param_name>) function to find the correct column names.")
         
     if len(map_columns) == 0:
         # Sort randomly

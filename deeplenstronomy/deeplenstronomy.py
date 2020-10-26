@@ -65,48 +65,6 @@ class Dataset():
 
         return
 
-    def search(self, param_name):
-    
-        """
-        Find all USERDIST column headers for a parameter
-        
-        :param param_name: str, the parameter name to search for
-        :return: output_dict: dict,
-            keys: object names
-            values: list of all possible USERDIST column headers
-        """
-        obj_paths = ['["' + x[9:].replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("GEOMETRY") and x.find("OBJECT_") != -1]
-        obj_names = [eval('self.config_dict["GEOMETRY"]' + x) for x in obj_paths]
-        species_paths = ['["' + x.replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("SPECIES") and x.endswith("NAME") and x.find("LIGHT_PROFILE_") == -1 and x.find("MASS_PROFILE_") == -1 and x.find("SHEAR_PROFILE_") == -1]
-        species_names = [eval('self.config_dict' + x) for x in species_paths]
-
-        paths = []
-        for obj_idx, obj_name in enumerate(obj_names):
-            for species_idx, species_name in enumerate(species_names):
-                if obj_name == species_name:
-                    paths.append({'name': obj_name,
-                                  'obj_path': obj_paths[obj_idx].replace('"]["', '.')[2:-2],
-                                  'spe_path': species_paths[species_idx].replace('"]["', '.')[2:-6]})
-    
-        output_dict = {} 
-        for p in paths:
-
-            hr_paths = [p['obj_path'] + '.' + x.replace('.PARAMETERS.', '.')[len(p['spe_path']):] for x in self.config_dict.keypaths() if x.startswith(p['spe_path']) and x.find(param_name) != -1]
-            output_paths = []
-            for hr_path in hr_paths:
-                for band in self.bands:
-                    output_paths.append(hr_path.replace('.', '-') + '-' + band)
-                    
-            if len(output_paths) == 0:
-                continue
-
-            if p['name'] in output_dict.keys():
-                output_dict[p['name']] += output_paths
-            else:
-                output_dict[p['name']] = output_paths
-            
-        return output_dict
-
     
     def _locate(self, param, configuration):
         """
@@ -177,6 +135,54 @@ class Dataset():
         make_dataset(**params)
         return
 
+
+    def search(self, param_name):
+        """
+        Find all USERDIST column headers for a parameter
+        
+        :param param_name: str, the parameter name to search for
+        :return: output_dict: dict,
+            keys: object names
+            values: list of all possible USERDIST column headers
+        """
+        obj_paths = ['["' + x[9:].replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("GEOMETRY") and x.find("OBJECT_") != -1]
+        obj_names = []
+        for x in obj_paths:
+            obj_names.append(eval('self.config_dict["GEOMETRY"]' + x))
+        species_paths = ['["' + x.replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("SPECIES") and x.endswith("NAME") and x.find("LIGHT_PROFILE_") == -1 and x.find("MASS_PROFILE_") == -1 and x.find("SHEAR_PROFILE_") == -1]
+        species_names = []
+        for x in species_paths:
+            species_names.append(eval('self.config_dict' + x))
+    
+        paths = []
+        for obj_idx, obj_name in enumerate(obj_names):
+            for species_idx, species_name in enumerate(species_names):
+                if obj_name == species_name:
+                    paths.append({'name': obj_name,
+                                  'obj_path': obj_paths[obj_idx].replace('"]["', '.')[2:-2],
+                                  'spe_path': species_paths[species_idx].replace('"]["', '.')[2:-6]})
+                    
+        output_dict = {} 
+        for p in paths:
+
+            hr_paths = [p['obj_path'] + '.' + x.replace('.PARAMETERS.', '.')[len(p['spe_path']):] for x in self.config_dict.keypaths() if x.startswith(p['spe_path']) and x.find(param_name) != -1]
+            output_paths = []
+            for hr_path in hr_paths:
+                for band in self.bands:
+                    output_paths.append(hr_path.replace('.', '-') + '-' + band)
+                    
+            if len(output_paths) == 0:
+                continue
+
+            if p['name'] in output_dict.keys():
+                output_dict[p['name']] += output_paths
+            else:
+                output_dict[p['name']] = output_paths
+            
+        return output_dict
+
+
+    
 def flatten_image_info(sim_dict):
     """
     Sim dict will have structure 
@@ -337,7 +343,10 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
         sim_inputs = organizer.configuration_sim_dicts[configuration]
         for sim_input, val in zip(sim_inputs, values):
-            sim_input[band][param_name] = val
+            if param_name in sim_input[band].keys():
+                sim_input[band][param_name] = val
+            else:
+                print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name> to find all expected names")
 
     # Skip image generation if desired
     if skip_image_generation:
@@ -405,6 +414,13 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                                         simulated_image_data['output_source_plane'],
                                         simulated_image_data['output_point_source_plane'],
                                         simulated_image_data['output_noise_plane']]))
+
+            # Add any additional metadata to the image info
+            if len(simulated_image_data['additional_metadata']) != 0:
+                for info in simulated_image_data['additional_metadata']:
+                    band = info['PARAM_NAME'].split('-')[-1]
+                    param = '-'.join(info['PARAM_NAME'].split('-')[0:-1])
+                    image_info[band][param] = info['PARAM_VALUE']
 
             if solve_lens_equation:
                 for band in dataset.bands:
