@@ -355,49 +355,71 @@ class AllChecks():
     def check_image_backgrounds(self):
         errs = []
         if "BACKGROUNDS" in self.config.keys():
-            # value must be a single value
-            if not isinstance(self.config["BACKGROUNDS"], str):
-                errs.append("BACKGROUNDS must be a single value")
+            # value must be a dict
+            if not isinstance(self.config["BACKGROUNDS"], dict):
+                errs.append("BACKGROUNDS must be a dict with keys PATH and CONFIGURATIONS")
             else:
-                # directory must exist
-                if not os.path.exists(self.config["BACKGROUNDS"]):
-                    errs.append("BACKGROUNDS directory '" + self.config["BACKGROUNDS"] + "' not found")
+                if not "PATH" in self.config["BACKGROUNDS"].keys():
+                    errs.append("BACKGROUNDS.PATH is missing from configuration file")
+                    return errs
                 else:
-                    dimensions = {}
-                    # one file must exist per band
-                    for band in self.config["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
-                        if not os.path.exists(self.config["BACKGROUNDS"] + "/" + band + ".fits"):
-                            errs.append("BACKGROUNDS: " + self.config["BACKGROUNDS"] + '/' + band + ".fits is missing")
-                        else:
-                            # must be able to open file
-                            hdu, data = None, None
+                    # directory must exist
+                    if not os.path.exists(self.config["BACKGROUNDS"]["PATH"]):
+                        errs.append("BACKGROUNDS.PATH directory '" + self.config["BACKGROUNDS"]["PATH"] + "' not found")
+                    else:
+                        
+                        dimensions = {}
+                        # one file must exist per band
+                        for band in self.config["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
+                            if not os.path.exists(self.config["BACKGROUNDS"]["PATH"] + "/" + band + ".fits"):
+                                errs.append("BACKGROUNDS: " + self.config["BACKGROUNDS"]["PATH"] + '/' + band + ".fits is missing")
+                            else:
+                                # must be able to open file
+                                hdu, data = None, None
+                                try:
+                                    hdu = fits.open(self.config["BACKGROUNDS"]["PATH"] + '/' + band + '.fits')
+                                    data = hdu[0].data
+                                    if len(data.shape) != 3:
+                                        errs.append("image data in " + self.config["BACKGROUNDS"]["PATH"] + '/' + band + '.fits is formatted incorrectly')
+                                    dimensions[band] = data.shape[0]
+                                except Exception:
+                                    errs.append("Error reading " + self.config["BACKGROUNDS"]["PATH"] + '/' + band + '.fits')
+                                finally:
+                                    if hdu is not None:
+                                        hdu.close()
+                                    del data
+
+                        # map.txt file is formatted correctly
+                        if os.path.exists(self.config["BACKGROUNDS"]["PATH"] + '/map.txt'):
+                            df = None
                             try:
-                                hdu = fits.open(self.config["BACKGROUNDS"] + '/' + band + '.fits')
-                                data = hdu[0].data
-                                if len(data.shape) != 3:
-                                    errs.append("image data in " + self.config["BACKGROUNDS"] + '/' + band + '.fits is formatted incorrectly')
-                                dimensions[band] = data.shape[0]
+                                df = pd.read_csv(self.config["BACKGROUNDS"]["PATH"] + '/' + 'map.txt', delim_whitespace=True)
+                                dimensions["map"] = df.shape[0]
                             except Exception:
-                                errs.append("Error reading " + self.config["BACKGROUNDS"] + '/' + band + '.fits')
+                                err.append("Error reading " + self.config["BACKGROUNDS"]["PATH"] + '/map.txt')
                             finally:
-                                if hdu is not None:
-                                    hdu.close()
-                                del data
+                                del df
 
-                    # map.txt file is formatted correctly
-                    if os.path.exists(self.config["BACKGROUNDS"] + '/map.txt'):
-                        df = None
-                        try:
-                            df = pd.read_csv(self.config["BACKGROUNDS"] + '/' + 'map.txt', delim_whitespace=True)
-                            dimensions["map"] = df.shape[0]
-                        except Exception:
-                            err.append("Error reading " + self.config["BACKGROUNDS"] + '/map.txt')
-                        finally:
-                            del df
+                        # dimensions of images and (optional) map must be the same
+                        if len(set(dimensions.values())) != 1:
+                            errs.append("BACKGROUNDS: dimensions of images files and possibly map.txt are inconsistent")
 
-                    # dimensions of images and (optional) map must be the same
-                    if len(set(dimensions.values())) != 1:
-                        errs.append("BACKGROUNDS: dimensions of images files and possibly map.txt are inconsistent")
+
+                if not "CONFIGURATIONS" in self.config["BACKGROUNDS"].keys():
+                    errs.append("BACKGROUNDS.CONFIGURATIONS is missing from the config file")
+                else:
+                    # must be a list
+                    if not isinstance(self.config["BACKGROUNDS"]["CONFIGURATIONS"], list):
+                        errs.append("BACKGROUNDS.CONFIGURATIONS must be a list of configurations like ['CONFIGURATION_1', 'CONFIGURATION_3']")
+                    else:
+                        # list entries must be strings
+                        for entry in self.config["BACKGROUNDS"]["CONFIGURATIONS"]:
+                            if not isinstance(entry, str):
+                                errs.append("BACKGROUNDS.CONFIGURATIONS list entries must be strings like 'CONFIGURATION_1'")
+                            else:
+                                # list entries must be names of configurations in the geometry section
+                                if entry not in self.config["GEOMETRY"].keys():
+                                    errs.append("BACKGROUNDS.CONFIGURATIONS entry {0} is not in the GEOMETRY section".format(entry))
 
         return errs
     

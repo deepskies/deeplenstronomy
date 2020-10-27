@@ -209,13 +209,14 @@ def read_images(im_dir, im_size, bands):
 
     return im_array
 
-def organize_image_backgrounds(im_dir, image_bank_size, config_dicts):
+def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configuration):
     """
     Sort image files based on map. If no map exists, sort randomly.
 
     :param im_dir: path to directory of images
     :param image_bank_size: number of images in user-specified bank
     :param config_dicts: list of config_dicts
+    :param configuration: the configuration currently running
     :return: image_indices: the indices of the images utilized for each config_dict
     """
     map_columns = []
@@ -226,13 +227,28 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts):
         # Trim to just the columns in the config dict
         map_columns, bad_columns = [], []
         for x in df.columns:
-            if x in config_dicts[0].keys():
-                map_columns.append(x)
+            if x.startswith('CONFIGURATION'):
+                split_x = x.split('-')
+                if split_x[0] != configuration:
+                    continue
+                name = '-'.join(split_x[1:])
+
+                if name in config_dicts[0].keys():
+                    map_columns.append(x)
+                else:
+                    bad_columns.append(name)
             else:
-                bad_columns.append(x)
+                # doesn't start with configuration
+                if x in config_dicts[0].keys():
+                    map_columns.append(x)
+                else:
+                    bad_columns.append(x)
+
 
         if len(bad_columns) != 0:
-            print("WARNING " + ', '.join(bad_columns) + " are not found in the simulated dataset. Use the dataset.search(<param_name>) function to find the correct column names.")
+            print(config_dicts[0].keys())
+            print("WARNING {0} are not found in the simulated dataset for {1}".format(', '.join(bad_columns), configuration) +
+                  ". You may see unexpected results. Use the dataset.search(<param_name>) function to find the correct column names.")
         
     if len(map_columns) == 0:
         # Sort randomly
@@ -245,7 +261,7 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts):
         # for each entry in config_dict, set up numpy broadcasting
         im_param_array = []
         for config_dict in config_dicts:
-            im_param_array.append([config_dict[x] for x in map_columns])
+            im_param_array.append([config_dict[x] if not x.startswith('CONFIGURATION') else config_dict['-'.join(x.split('-')[1:])] for x in map_columns])
         im_param_array = np.array(im_param_array)
 
         # divide by stds to put parameters on same footing

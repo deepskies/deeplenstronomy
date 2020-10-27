@@ -168,6 +168,10 @@ class Dataset():
             hr_paths = [p['obj_path'] + '.' + x.replace('.PARAMETERS.', '.')[len(p['spe_path']):] for x in self.config_dict.keypaths() if x.startswith(p['spe_path']) and x.find(param_name) != -1]
             output_paths = []
             for hr_path in hr_paths:
+                if hr_path.find('DISTRIBUTION') != -1:
+                    # not recommended to use this feature to update parameters in distributions
+                    continue
+                
                 for band in self.bands:
                     output_paths.append(hr_path.replace('.', '-') + '-' + band)
                     
@@ -340,14 +344,17 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
     for force_param, values in force_param_inputs.items():
         configuration, param_name, band = force_param
+        warned = False
 
         sim_inputs = organizer.configuration_sim_dicts[configuration]
         for sim_input, val in zip(sim_inputs, values):
             if param_name in sim_input[band].keys():
                 sim_input[band][param_name] = val
             else:
-                print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name> to find all expected names")
-
+                if not warned:
+                    print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
+                    warned = True
+                    
     # Skip image generation if desired
     if skip_image_generation:
         # Handle metadata and return dataset object
@@ -366,7 +373,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
     # Handle image backgrounds if they exist
     if len(parser.image_paths) > 0:
-        im_dir = parser.config_dict['BACKGROUNDS']
+        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
         image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
     else:
         image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
@@ -381,10 +388,13 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             total = len(sim_inputs)
 
         # Handle image backgrounds if they exist
-        if len(parser.image_paths) > 0:
-            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs])
+        if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
+            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
+            additive_image_backgrounds = image_backgrounds[image_indices]
         else:
-            image_indices = np.zeros(len(sim_inputs), dtype=int) 
+            image_indices = np.zeros(len(sim_inputs), dtype=int)
+            temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+            additive_image_backgrounds = temp_array[image_indices]
             
         metadata, images = [], []
         if return_planes:
@@ -447,7 +457,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             configuration_planes = np.array(planes)
 
         # Add image backgrounds -- will just add zeros if no backgrounds have been specified
-        configuration_images += image_backgrounds[image_indices]
+        configuration_images += additive_image_backgrounds
         
         # Convert the metadata to a dataframe
         metadata_df = pd.DataFrame(metadata)

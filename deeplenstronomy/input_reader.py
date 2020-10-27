@@ -99,8 +99,10 @@ class Parser():
 
     def get_image_locations(self):
         file_paths = []
+        image_configurations = []
         if "BACKGROUNDS" in self.full_dict.keys():
-            file_paths.append(self.full_dict['BACKGROUNDS'])
+            file_paths.append(self.full_dict['BACKGROUNDS']['PATH'])
+            self.image_configurations = self.full_dict['BACKGROUNDS']['CONFIGURATIONS'][:]
         self.image_paths = file_paths
 
         return
