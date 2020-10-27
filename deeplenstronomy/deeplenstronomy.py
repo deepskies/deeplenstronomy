@@ -194,9 +194,9 @@ def flatten_image_info(sim_dict):
     :returns out_dict: flattened sim_dict
     """
     out_dict = {}
-    for k, v in sim_dict.items():
+    for band, v in sim_dict.items():
         for sim_param, sim_value in v.items():
-            out_dict[sim_param + '_' + k] = sim_value
+            out_dict[sim_param + '-' + band] = sim_value
 
     return out_dict
     
