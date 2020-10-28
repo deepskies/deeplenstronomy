@@ -108,3 +108,8 @@ venv.bak/
 
 # emacs files
 *~
+
+# Testing
+test/TestResults/
+test/old
+test/*.ipynb
