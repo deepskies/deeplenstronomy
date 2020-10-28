@@ -32,7 +32,7 @@ History
 0.0.0.1 (2020-01-24)
 ++++++++++++++++++++
 
-* Rebrand to yaml-style ocnfiguration file
+* Rebrand to yaml-style configuration file
 
 0.1.0 (2019-01-03)
 ++++++++++++++++++
