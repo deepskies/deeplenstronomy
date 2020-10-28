@@ -1,6 +1,7 @@
 # Outer shell to do everything for you
 
 import os
+import random
 import sys
 import time
 
@@ -63,6 +64,7 @@ class Dataset():
                 exec("self.config_dict" + location + "['DISTRIBUTION']['PARAMETERS'][new_dist_param] = new_dist_param_value")
 
         return
+
     
     def _locate(self, param, configuration):
         """
@@ -133,6 +135,58 @@ class Dataset():
         make_dataset(**params)
         return
 
+
+    def search(self, param_name):
+        """
+        Find all USERDIST column headers for a parameter
+        
+        :param param_name: str, the parameter name to search for
+        :return: output_dict: dict,
+            keys: object names
+            values: list of all possible USERDIST column headers
+        """
+        obj_paths = ['["' + x[9:].replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("GEOMETRY") and x.find("OBJECT_") != -1]
+        obj_names = []
+        for x in obj_paths:
+            obj_names.append(eval('self.config_dict["GEOMETRY"]' + x))
+        species_paths = ['["' + x.replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("SPECIES") and x.endswith("NAME") and x.find("LIGHT_PROFILE_") == -1 and x.find("MASS_PROFILE_") == -1 and x.find("SHEAR_PROFILE_") == -1]
+        species_names = []
+        for x in species_paths:
+            species_names.append(eval('self.config_dict' + x))
+    
+        paths = []
+        for obj_idx, obj_name in enumerate(obj_names):
+            for species_idx, species_name in enumerate(species_names):
+                if obj_name == species_name:
+                    paths.append({'name': obj_name,
+                                  'obj_path': obj_paths[obj_idx].replace('"]["', '.')[2:-2],
+                                  'spe_path': species_paths[species_idx].replace('"]["', '.')[2:-6]})
+                    
+        output_dict = {} 
+        for p in paths:
+
+            hr_paths = [p['obj_path'] + '.' + x.replace('.PARAMETERS.', '.')[len(p['spe_path']):] for x in self.config_dict.keypaths() if x.startswith(p['spe_path']) and x.find(param_name) != -1]
+            output_paths = []
+            for hr_path in hr_paths:
+                if hr_path.find('DISTRIBUTION') != -1:
+                    # not recommended to use this feature to update parameters in distributions
+                    continue
+                
+                for band in self.bands:
+                    output_paths.append(hr_path.replace('.', '-') + '-' + band)
+                    
+            if len(output_paths) == 0:
+                continue
+
+            if p['name'] in output_dict.keys():
+                output_dict[p['name']] += output_paths
+            else:
+                output_dict[p['name']] = output_paths
+            
+        return output_dict
+
+
+    
 def flatten_image_info(sim_dict):
     """
     Sim dict will have structure 
@@ -144,9 +198,9 @@ def flatten_image_info(sim_dict):
     :returns out_dict: flattened sim_dict
     """
     out_dict = {}
-    for k, v in sim_dict.items():
+    for band, v in sim_dict.items():
         for sim_param, sim_value in v.items():
-            out_dict[sim_param + '_' + k] = sim_value
+            out_dict[sim_param + '-' + band] = sim_value
 
     return out_dict
     
@@ -252,6 +306,12 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     dataset.size = dataset.config_dict['DATASET']['PARAMETERS']['SIZE']
     dataset.outdir = dataset.config_dict['DATASET']['PARAMETERS']['OUTDIR']
     dataset.bands = dataset.config_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
+    try:
+        dataset.seed = int(dataset.config_dict['DATASET']['PARAMETERS']["SEED"])
+    except KeyError:
+        dataset.seed = random.randint(0, 100)
+    np.random.seed(dataset.seed)
+    random.seed(dataset.seed)
 
     # Make the output directory if it doesn't exist already
     if save_to_disk:
@@ -284,11 +344,17 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
     for force_param, values in force_param_inputs.items():
         configuration, param_name, band = force_param
+        warned = False
 
         sim_inputs = organizer.configuration_sim_dicts[configuration]
         for sim_input, val in zip(sim_inputs, values):
-            sim_input[band][param_name] = val
-
+            if param_name in sim_input[band].keys():
+                sim_input[band][param_name] = val
+            else:
+                if not warned:
+                    print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
+                    warned = True
+                    
     # Skip image generation if desired
     if skip_image_generation:
         # Handle metadata and return dataset object
@@ -307,7 +373,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
     # Handle image backgrounds if they exist
     if len(parser.image_paths) > 0:
-        im_dir = parser.config_dict['BACKGROUNDS']
+        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
         image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
     else:
         image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
@@ -322,10 +388,13 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             total = len(sim_inputs)
 
         # Handle image backgrounds if they exist
-        if len(parser.image_paths) > 0:
-            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs])
+        if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
+            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
+            additive_image_backgrounds = image_backgrounds[image_indices]
         else:
-            image_indices = np.zeros(len(sim_inputs), dtype=int) 
+            image_indices = np.zeros(len(sim_inputs), dtype=int)
+            temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+            additive_image_backgrounds = temp_array[image_indices]
             
         metadata, images = [], []
         if return_planes:
@@ -356,6 +425,13 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                                         simulated_image_data['output_point_source_plane'],
                                         simulated_image_data['output_noise_plane']]))
 
+            # Add any additional metadata to the image info
+            if len(simulated_image_data['additional_metadata']) != 0:
+                for info in simulated_image_data['additional_metadata']:
+                    band = info['PARAM_NAME'].split('-')[-1]
+                    param = '-'.join(info['PARAM_NAME'].split('-')[0:-1])
+                    image_info[band][param] = info['PARAM_VALUE']
+
             if solve_lens_equation:
                 for band in dataset.bands:
                     image_info[band]['x_mins'] = ';'.join([str(x) for x in simulated_image_data['x_mins']])
@@ -381,7 +457,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             configuration_planes = np.array(planes)
 
         # Add image backgrounds -- will just add zeros if no backgrounds have been specified
-        configuration_images += image_backgrounds[image_indices]
+        configuration_images += additive_image_backgrounds
         
         # Convert the metadata to a dataframe
         metadata_df = pd.DataFrame(metadata)
