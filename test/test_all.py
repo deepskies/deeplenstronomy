@@ -49,8 +49,11 @@ def test_has_top_level_attributes():
                             'species_map']
     assert all([hasattr(dataset, x) for x in top_level_attributes])
 
-def test_arguments_produced_expected_outputs():
-    # store in memory
+"""
+Arguments produce expected outputs
+"""
+    
+def test_store_in_memory():
     has_images = [hasattr(dataset, x + '_images')
                   for x in dataset.configurations]
     has_metadata = [hasattr(dataset, x + '_metadata')
@@ -64,7 +67,7 @@ def test_arguments_produced_expected_outputs():
     else:
         assert not any(has_attributes)
 
-    # save to disk
+def test_save_to_disk():
     images_exist = [os.path.exists(dataset.outdir +'/' + x + '_images.' +
                                    dataset.arguments['image_file_format'])
                     for x in dataset.configurations]
