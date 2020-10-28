@@ -301,6 +301,9 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         parser = Parser(config, survey=survey)
         dataset.config_dict = parser.config_dict
 
+    # store parser
+    dataset.parser = parser
+
     # Store top-level dataset info
     dataset.name = dataset.config_dict['DATASET']['NAME']
     dataset.size = dataset.config_dict['DATASET']['PARAMETERS']['SIZE']
@@ -504,9 +507,6 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             if return_planes:
                 del configuration_planes
 
-    # store parser and organizer as attributes
-    dataset.parser = parser
-    #dataset.organizer = organizer
                 
     return dataset
 
