@@ -1,0 +1,28 @@
+DATASET:
+    NAME: MyDeeplenstronomyDataset
+    PARAMETERS:
+        SIZE: 100
+        OUTDIR: MySimulationResults
+
+COSMOLOGY:
+    PARAMETERS:
+        H0: 70
+        Om0: 0.3
+
+IMAGE:
+    PARAMETERS:
+        exposure_time: 90
+        numPix: 100
+        pixel_scale: 0.263
+        psf_type: 'GAUSSIAN'
+        read_noise:
+            DISTRIBUTION:
+                NAME: uniform
+                PARAMETERS:
+                    minimum: 4.0
+                    maximum: 10.0
+        ccd_gain: 6.083
+
+SURVEY:
+    PARAMETERS:
+        BANDS: g,r,i,z,Y
