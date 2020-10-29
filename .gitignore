@@ -114,3 +114,4 @@ test/TestResults/
 test/old
 test/*.ipynb
 test/status.txt
+test/*_config.yaml
