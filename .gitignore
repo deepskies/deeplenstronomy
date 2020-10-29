@@ -113,3 +113,4 @@ venv.bak/
 test/TestResults/
 test/old
 test/*.ipynb
+test/status.txt
