@@ -19,7 +19,8 @@ kwargs_sets = {0: {}, # default arguments
                4: {'store_in_memory': False},
                5: {'store_sample': True},
                6: {'skip_image_generation': True, 'survey': 'des'},
-               7: {'solve_lens_equation': True}
+               7: {'solve_lens_equation': True},
+               8: {'return_planes': True}
 }
 
 # Run all tests by writing last test to a file
