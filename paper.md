@@ -16,6 +16,7 @@ authors:
     orcid: 0000-0003-3195-5507
     affiliation: 5
   - name: Joshua Yao-Yu Lin
+    orcid: 0000-0003-0680-4838
     affiliation: 6
   - name: Jason Poh
     orcid: 0000-0002-5040-093X
