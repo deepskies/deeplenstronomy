@@ -100,4 +100,4 @@ Tips
 
 To run a subset of tests::
 
-	 $ py.test test/test_deeplenstronomy.py
+	 $ cd test && pytest
