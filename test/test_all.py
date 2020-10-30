@@ -48,6 +48,10 @@ dataset = dl.make_dataset(config_filename, **kwargs_set)
 
 # Begin test functions
 
+"""
+Dataset Existence and Attributes
+"""
+
 def test_correct_return_class():
     assert isinstance(dataset, dl.Dataset)
 
@@ -154,19 +158,120 @@ def test_solve_lens_equation():
                     assert 'num_source_images-' + band in md.columns 
 
 """
-Parsed Config File Produces Expected Behaviors
+Parsed Config File Produces Expected Behaviors - fixed parameters
 """
 
+def test_dataset_section():
+    section = dataset.config_dict['DATASET']['PARAMETERS']
+    assert dataset.size == section['SIZE']
+    assert dataset.outdir == section['OUTDIR']
+    if 'SEED' in section.keys():
+        assert dataset.seed == section['SEED']
 
+def test_cosmology_section():
+    if all(has_metadata):
+        section = dataset.config_dict['COSMOLOGY']['PARAMETERS']
+        for conf in dataset.configurations:
+            for band in dataset.bands:
+                for param, value in section.items():
+                    md = eval(f'dataset.{conf}_metadata["{param}-{band}"]') 
+                    assert all(md.values == value)
+
+def test_image_size():
+    if all(has_images):
+        for conf in dataset.configurations:
+            x = eval(f'dataset.{conf}_images').shape[-2]
+            y = eval(f'dataset.{conf}_images').shape[-1]
+            assert dataset.config_dict['IMAGE']['PARAMETERS']['numPix'] == x
+            assert dataset.config_dict['IMAGE']['PARAMETERS']['numPix'] == y
+            
+def test_bands():
+    config_bands = dataset.config_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
+    assert config_bands == dataset.bands
+
+    if all(has_images):
+        for conf in dataset.configurations:
+            b = eval(f'dataset.{conf}_images').shape[-3]
+            assert len(config_bands) == b
+
+    if all(has_metadata):
+        get_band = lambda col: col.split('-')[-1]
+        for conf in dataset.configurations:
+            md = eval(f'dataset.{conf}_metadata').columns
+            assert all([band in config_bands for band in [get_band(c) for c in md]])
+
+"""
+Parsed Config File Produces Expected Behaviors - configurations
+"""
+
+def test_configuration_existence():
+    for conf in dataset.configurations:
+        assert conf in dataset.config_dict['GEOMETRY'].keys()
+
+def test_configuration_fractions():
+    for conf in dataset.configurations:
+        frac = dataset.config_dict['GEOMETRY'][conf]['FRACTION']
+        simulated_images = int(frac * dataset.size)
+        
+        if all(has_images):
+            assert eval(f'dataset.{conf}_images').shape[0] == simulated_images
+
+        if all(has_metadata):
+            # not time-series
+            if 'TIMESERIES' not in dataset.config_dict['GEOMETRY'][conf].keys():
+                assert len(eval(f'dataset.{conf}_metadata')) == simulated_images
+
+            # time-series
+            else:
+                nites = dataset.config_dict['GEOMETRY'][conf]['TIMESERIES']['NITES']
+                md_rows = len(nites) * simulated_images
+                assert md_rows == len(eval(f'dataset.{conf}_metadata'))
+
+def test_timeseries():
+    for conf in dataset.configurations:
+        if 'TIMESERIES' in dataset.config_dict['GEOMETRY'][conf].keys():
+            if all(has_images):
+                assert len(eval(f'dataset.{conf}_images').shape) == 5
+
+def test_planes_and_objects():
+    for conf in dataset.configurations:
+
+        if all(has_metadata):
+            md = eval(f'dataset.{conf}_metadata')
+        else:
+            # this test requires metadata
+            return
+        
+        number_of_planes = 0
+        for plane in dataset.config_dict['GEOMETRY'][conf].keys():
+
+            if plane.startswith('PLANE_'):
+                number_of_planes += 1
+                number_of_objects = 0
+
+                for obj in dataset.config_dict['GEOMETRY'][conf][plane].keys():
+
+                    if obj.startswith('OBJECT_'):
+                        number_of_objects += 1
+
+                        if all(has_metadata):
+                            for band in dataset.bands:
+                                num_md_cols = 0
+                                for col in md.columns:
+                                    if (col.startswith(f'{plane}-{obj}') and
+                                        col.endswith(band)):
+                                        num_md_cols += 1
+
+                                # Plane and obj info in metadata for band
+                                assert num_md_cols > 0
+
+                # expected number of objects in plane
+                for band in dataset.bands:
+                    md_objects = md[plane + '-NUMBER_OF_OBJECTS-' + band].values 
+                    assert all(md_objects == number_of_objects)
+
+        # expected number of planes in configuration
+        for band in dataset.bands:
+            md_planes = md['NUMBER_OF_PLANES-' + band].values
+            assert all(md_planes == number_of_planes)
                     
-def test_parser_to_dataset_map():
-    # configurations matches parser
-    # bands matches parser
-    # outdir matches parser
-    # 
-
-    pass
-
-def test_input_to_parser_map():
-    pass
-

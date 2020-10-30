@@ -3,6 +3,7 @@ DATASET:
     PARAMETERS:
         SIZE: 10
         OUTDIR: TestResults
+        SEED: 6
 
 COSMOLOGY:
     PARAMETERS:
