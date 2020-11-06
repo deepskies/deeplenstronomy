@@ -70,9 +70,9 @@ The configuration files can easily be shared, enabling users to easily reproduce
 
 `deeplenstronomy` also contains built-in features to help astronomers make their training datasets as realistic as possible. 
 These features include the following functionalities: use any stellar light profile or mass profile in `lenstronomy`; simulate a variety of astronomical systems such as single galaxies, foreground stars, galaxy clusters, supernovae, and kilonovae, as well as any combination of those systems; fully control the placements of objects in the simulations; use observing conditions of real astronomical surveys; draw any parameter from any probability distribution; introduce any correlation; inspect and visualize the simulation outputs; incorporate real images into the simulation; and simulate time series data. 
-These features and the path from configuration file to full data set are shown in Figure \autoref{fig:flowchart}.
+These features and the path from configuration file to full data set are shown in \autoref{fig:flowchart}.
 
-![Generating full data sets with `deeplenstronomy`.\label{fig:flowchart}](flowchart.png)
+![The `deeplenstronomy` process. Data set properties, camera and telescope properties, observing conditions, object properties, and the geometry of the SL systems are specified in the main configurations file. `deeplenstronomy` then intreprets the configuration file, calls `lenstronomy` simulation functionalities, and organizes the resulting images and metadata.\label{fig:flowchart}](flowchart.png)
 
 
 `deeplenstronomy` makes use of multiple open-source software packages: `lenstronomy` is used for all gravitational lensing calculations and image simulation; `numpy` [@numpy] arrays are used internally to store image data and perform vectorized calculations; `pandas` [@pandas] dataframes are utilized for storing simulation metadata and file reading and writing; `scipy` [@scipy] is used for integration and interpolation; `matplotlib` [@matplotlib] functions are used for image visualization; `astropy` [@astropy] is used for cosmological calculations and color image production; `h5py` [@h5py] is utilized for saving images; and `PyYAML` [@pyyaml] is used to manage the configuration file. 
