@@ -229,10 +229,8 @@ def test_configuration_fractions():
                 assert md_rows == len(eval(f'dataset.{conf}_metadata'))
 
 def test_timeseries():
-    for conf in dataset.configurations:
-        if 'TIMESERIES' in dataset.config_dict['GEOMETRY'][conf].keys():
-            if all(has_images):
-                assert len(eval(f'dataset.{conf}_images').shape) == 5
+    # already tested in test_configuration_fractions()
+    pass
 
 def test_planes_and_objects():
     for conf in dataset.configurations:
