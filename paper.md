@@ -45,7 +45,7 @@ These systems are of great scientific interest, because they provide information
 They also provided critical evidence during tests of the theory of General Relativity. 
 
 Traditional searches have involved time- and effort-intensive visual or manual inspection of images by humans to identify characteristic features  --- like arcs, particular color combinations, and  object orientations ---  of SL systems. 
-However, a comprehensive search using the traditional approach is prohibitively expensive for large numbers of images, like those in cosmological surveys --- e.g., SDSS, DES, and LSST. 
+However, a comprehensive search using the traditional approach is prohibitively expensive for large numbers of images, like those in cosmological surveys --- e.g., SDSS [@2000AJ....120.1579Y], DES, and LSST. 
 To automate the SL detection process, techniques based in machine learning (ML) are beginning to overtake traditional approaches for scanning  astronomical images. 
 In particular, deep learning techniques, like two-dimensional convolutional neural networks have been the focus, but they require large sets of labeled images to train these models. 
 Because of the relatively low number of observed SL systems, simulated datasets of images are often needed. 
