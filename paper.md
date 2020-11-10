@@ -44,19 +44,19 @@ Astronomical observations and statistical modeling permit the high-fidelity anal
 These systems are of great scientific interest, because they provide information about multiple astrophysical and cosmological phenomena, including the nature of dark matter, the expansion rate of the Universe, and characteristics of galaxy populations. 
 They also provided critical evidence during tests of the theory of General Relativity. 
 
-Traditional searches have involved time- and effort-intensive visual or manual inspection of images by humans to identify characteristic features  --- like arcs, particular color combinations, and  object orientations ---  of SL systems. 
+Traditional searches for SL systems have involved time- and effort-intensive visual or manual inspection of images by humans to identify characteristic features --- like arcs, particular color combinations, and  object orientations. 
 However, a comprehensive search using the traditional approach is prohibitively expensive for large numbers of images, like those in cosmological surveys --- e.g., SDSS [@sdss], DES [@des], and LSST [@lsst]. 
-To automate the SL detection process, techniques based in machine learning (ML) are beginning to overtake traditional approaches for scanning  astronomical images. 
-In particular, deep learning techniques, like two-dimensional convolutional neural networks have been the focus, but they require large sets of labeled images to train these models. 
+To automate the SL detection process, techniques based on machine learning (ML) are beginning to overtake traditional approaches for scanning  astronomical images. 
+In particular, deep learning techniques --- like two-dimensional convolutional neural networks --- have been the focus, but they require large sets of labeled images to train these models. 
 Because of the relatively low number of observed SL systems, simulated datasets of images are often needed. 
-Thus, the composition and production of these simulated datasets has become an integral part of the field.
+Thus, the composition and production of these simulated datasets have become an integral parts of the SL detection process.
 
-One of the premier tools for simulating and analyzing SL systems, `lenstronomy` [@lenstronomy], works by the user specifying the properties of the physical systems, as well as how they’re observed (e.g., telescope and camera) through a `python`-based application programming interface (API) to generate a single image. 
-To generate populations of SL systems that are fit for neural network training requires additional infrastructure. 
+One of the premier tools for simulating and analyzing SL systems, `lenstronomy` [@lenstronomy], works by the user specifying the properties of the physical systems, as well as how they are observed (e.g., telescope and camera) through a `python`-based application programming interface (API) to generate a single image. 
+Generating populations of SL systems that are fit for neural network training requires additional infrastructure. 
 
 # Statement of need 
 
-Due to the inherent dependence of the performance of ML approaches on the training data, the 2D-CNN approach to SL detection is in tension with scientific reproducibility without a clear prescription for the simulation of the training data. 
+Due to the inherent dependence of the performance of ML approaches on their training data, the 2D-CNN approach to SL detection is in tension with scientific reproducibility without a clear prescription for the simulation of the training data. 
 There is a critical need for a tool that simulates full datasets in an efficient and reproducible manner, while enabling the use of all the features of the `lenstronomy` simulation API. 
 Additionally, this tool should  simplify user interaction with `lenstronomy` and organize the simulations and associated metadata into convenient data structures for deep learning problems.
 
@@ -76,7 +76,7 @@ These features and the path from configuration file to full data set are shown i
 
 
 `deeplenstronomy` makes use of multiple open-source software packages: `lenstronomy` is used for all gravitational lensing calculations and image simulation; `numpy` [@numpy] arrays are used internally to store image data and perform vectorized calculations; `pandas` [@pandas] dataframes are utilized for storing simulation metadata and file reading and writing; `scipy` [@scipy] is used for integration and interpolation; `matplotlib` [@matplotlib] functions are used for image visualization; `astropy` [@astropy] is used for cosmological calculations and color image production; `h5py` [@h5py] is utilized for saving images; and `PyYAML` [@pyyaml] is used to manage the configuration file. 
-While not used directly, some `python-benedict` [@benedict] functionalities helped to create `deeplenstronomy`s data structures and internal search algorithms. 
+While not used directly, some `python-benedict` [@benedict] functionalities helped to create `deeplenstronomy`'s data structures and internal search algorithms. 
 
 `deeplenstronomy` is packaged and disseminated via [PyPI](https://pypi.org/project/deeplenstronomy/). 
 Documentation and example notebooks are available on the [`deeplenstronomy` website](https://deepskies.github.io/deeplenstronomy/). 
