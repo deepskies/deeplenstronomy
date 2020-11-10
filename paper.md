@@ -87,10 +87,10 @@ repository](https://github.com/deepskies/deeplenstronomy/issues) [@deeplenstrono
 
 R. Morgan thanks the LSSTC Data Science Fellowship Program, which is funded by LSSTC, NSF Cybertraining Grant #1829740, the Brinson Foundation, and the Moore Foundation; his participation in the program has benefited this work. 
 R. Morgan also thanks the Universities Research Association Fermilab Visiting Scholar Program for funding his work on this project.
-We acknowledge contributions from Joao Caldeira during the early stages of this project.
 
 We acknowledge the Deep Skies Lab as a community of multi-domain experts and collaborators who’ve facilitated an environment of open discussion, idea-generation, and collaboration. 
 This community was important for the development of this project.
+We acknowledge contributions from Joao Caldeira during the early stages of this project.
 
 Work supported by the Fermi National Accelerator Laboratory, managed and operated by Fermi Research Alliance, LLC under Contract No. DE-AC02-07CH11359 with the U.S. Department of Energy. 
 The U.S. Government retains and the publisher, by accepting the article for publication, acknowledges that the U.S. Government retains a non-exclusive, paid-up, irrevocable, world-wide license to publish or reproduce the published form of this manuscript, or allow others to do so, for U.S. Government purposes.
