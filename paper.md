@@ -6,7 +6,7 @@ tags:
   - strong lensing
   - simulation
 authors:
-  - name: Robert Morgan
+  - name: Robert Morgan^['Corresponding author email: robert.morgan@wisc.edu']
     orcid: 0000-0002-7016-5471
     affiliation: "1, 2" 
   - name: Brian Nord
