@@ -35,8 +35,9 @@ DATASET:
     PARAMETERS:
         SIZE: 100
         OUTDIR: MySimulationResults
+	SEED: 6     # optional
 ```
-This block will set the name of the dataset to `MyDeeplenstronomyDataset`, specify that the dataset will contain 100 images, and specify that the simulated images and associated metadata will be saved in a directory named `MySimulationResults`. 
+This block will set the name of the dataset to `MyDeeplenstronomyDataset`, specify that the dataset will contain 100 images, set a random seed for the simulation, and specify that the simulated images and associated metadata will be saved in a directory named `MySimulationResults`. 
 If this directory does not already exist on your system, `deeplenstronomy` will create it automatically.
 
 ### The COSMOLOGY Section
@@ -77,7 +78,7 @@ IMAGE:
 
 ### The SURVEY Section
 
-This section specifies the properties of the survey that collected the dataset you are seeking to simulate. This could be DES, LSST, SDSS, ZTF, etc. The parameters `deeplenstronomy` needs in this section are:
+This section specifies the properties of the survey that collected the dataset you are seeking to simulate. This could be the characteristics of DES, LSST, SDSS, ZTF, etc. The parameters `deeplenstronomy` needs in this section are:
 
 - `BANDS`: a comma-separated list of the optical filters used
 - `seeing`: the FWHM in arcseconds of the measured PSF from the observations
@@ -108,6 +109,7 @@ DATASET:
     PARAMETERS:
         SIZE: 100
         OUTDIR: MySimulationResults
+	SEED: 6
 
 COSMOLOGY:
     PARAMETERS:
@@ -688,9 +690,11 @@ The properties of the file `distribution_file.txt` are described in the "UserDis
 You may find it useful to include real astronomical images in your simulations, either to have real-data like noise or to use actual object pictures in your dataset.
 In the configuration file, you can add an entry (at the same level as `IMAGE`, `SURVEY`, `GEOMETRY`, etc.) like this:
 ```
-BACKGROUNDS: images_directory
+BACKGROUNDS: 
+    PATH: <path/to/image_directory_name> #(no trailing '/')
+    CONFIGURATIONS: <configuration list, e.g. ['CONFIGURATION_1'] or ['CONFIGURATION_1', 'CONFIGURATION_3']>
 ```
-The properties of the directory `image_directory` are described in the "UserImages" Notebook.
+The `PATH` and `CONFIGURATIONS` keys are described in detail in the "UserImages" Notebook.
 
 ### Supplemental Input Files
 
