@@ -60,3 +60,4 @@ You can also message me on the DES, DELVE, LSSTC, deepskies, or lenstronomers Sl
 --->
 
 
+[![status](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1/status.svg)](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1)
