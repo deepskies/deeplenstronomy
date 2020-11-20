@@ -1,5 +1,7 @@
 # Welcome to `deeplenstronomy`!
 
+[![status](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1/status.svg)](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1)
+
 `deeplenstronomy` is a tool for simulating large datasets for applying deep learning to strong gravitational lensing. 
 It works by wrapping the functionalities of [`lenstronomy`](https://github.com/sibirrer/lenstronomy) in a convenient yaml-style interface, allowing users to embrace the astronomer part of their brain rather than their programmer part when generating training datasets.
 
@@ -60,4 +62,4 @@ You can also message me on the DES, DELVE, LSSTC, deepskies, or lenstronomers Sl
 --->
 
 
-[![status](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1/status.svg)](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1)
+
