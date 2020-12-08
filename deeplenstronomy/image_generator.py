@@ -124,6 +124,7 @@ class ImageGenerator():
                             kwargs_lens_model_list.append(mass_params)
                             if 'sigma_v' in mass_params.keys(): # save simga_v locations so that we can calculate theta_E for the metadata
                                 output_metadata.append({'PARAM_NAME':  prefix + 'MASS_PROFILE_{0}-sigma_v-{1}'.format(mass_profile_num, band),
+                                                        'PARAM_VALUE': mass_params['sigma_v'],
                                                         'LENS_MODEL_IDX': len(kwargs_lens_model_list) - 1})
                         for shear_profile_num in range(1, sim_dict[prefix + 'NUMBER_OF_SHEAR_PROFILES'] +1):
                             kwargs_model['lens_model_list'].append(sim_dict[prefix + 'SHEAR_PROFILE_{0}-NAME'.format(shear_profile_num)])
@@ -155,13 +156,27 @@ class ImageGenerator():
                                                                                                            kwargs_ps_mag=kwargs_point_source_list)
             
             kwargs_lens_model_list = sim.physical2lensing_conversion(kwargs_mass=kwargs_lens_model_list)
-            for out_md in output_metadata:
-                out_md['PARAM_VALUE'] = kwargs_lens_model_list[out_md['LENS_MODEL_IDX']]['theta_E']
-                                                                                                  
-            image = imSim.image(kwargs_lens=kwargs_lens_model_list,
-                                kwargs_lens_light=kwargs_lens_light_list,
-                                kwargs_source=kwargs_source_list,
-                                kwargs_ps=kwargs_point_source_list)
+            # Save theta_E (and sigma_v if used)
+            for ii in range(len(output_metadata)):
+                output_metadata.append({'PARAM_NAME': output_metadata[ii]['PARAM_NAME'].replace('sigma_v', 'theta_E'),
+                                        'PARAM_VALUE': kwargs_lens_model_list[output_metadata[ii]['LENS_MODEL_IDX']]['theta_E'],
+                                        'LENS_MODEL_IDX': output_metadata[ii]['LENS_MODEL_IDX']})
+                
+            try:
+                image = imSim.image(kwargs_lens=kwargs_lens_model_list,
+                                    kwargs_lens_light=kwargs_lens_light_list,
+                                    kwargs_source=kwargs_source_list,
+                                    kwargs_ps=kwargs_point_source_list)
+            except Exception:
+                # Some sort of lenstronomy error
+                print("kwargs_numerics", kwargs_numerics)
+                print("kwargs_single_band", kwargs_single_band)
+                print("kwargs_model", kwargs_model)
+                print("kwargs_lens_model_list", kwargs_lens_model_list)
+                print("kwargs_lens_light_list", kwargs_lens_light_list)
+                print("kwargs_source_list", kwargs_source_list)
+                print("kwargs_point_source_list", kwargs_point_source_list)
+                assert False
                                 
             # Solve lens equation if desired
             if self.solve_lens_equation:
