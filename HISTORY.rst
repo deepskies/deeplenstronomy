@@ -3,6 +3,13 @@
 History
 -------
 
+0.0.1.1 (In development)
++++++++++++++++++++++
+
+* Fix bug in saving both sigma_v and theta_E 
+
+* Minor updates to documentation
+
 0.0.1.0 (2020-11-09)
 +++++++++++++++++++++
 
