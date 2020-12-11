@@ -680,8 +680,8 @@ In the configuration file, you can add an entry (at the same level as `IMAGE`, `
 ```
 DISTRIBUTIONS:
     USERDIST_1:
-        name: distribution_file.txt
-        mode: interpolate
+        FILENAME: distribution_file.txt
+        MODE: interpolate
 ```
 The properties of the file `distribution_file.txt` are described in the "UserDistributions" Notebook.
 
