@@ -7,6 +7,8 @@ It works by wrapping the functionalities of [`lenstronomy`](https://github.com/s
 
 ## Installation
 
+**With conda (Recommended)**
+
 - Step 0: Set up an environment. This can be done straightforwardly with a `conda` installation:
 
 ```
@@ -16,6 +18,10 @@ conda activate deeplens
 
 - Step 1: `pip install lenstronomy`
 - Step 2: `pip install deeplenstronomy`
+
+**With pip**
+
+- Step 1: `pip install deeplenstronomy`
 
 ## Documentation
 
@@ -38,6 +44,33 @@ After that, check out the example notebooks below:
 
 ### Notebooks for Suggested Science Cases
 - [A Walkthrough of Using `deeplenstronomy` for Science](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/FullExample.ipynb)
+
+## Citation
+
+If you use `deeplenstronomy` in your work, please include the following citations:
+```
+@online{deeplenstronomy,
+    author    =   "Robert Morgan and Brian Nord and Simon Birrer and Joshua Yao-Yu Lin and Jason Poh",
+    title     =   "deeplenstronomy: A data set simualtion package for strong gravitational lensing",
+    year      =   "2020",
+    url       =   "https://github.com/deepskies/deeplenstronomy",
+    urldate   =   "2020-12-14"
+    keywords  =   "Python, astronomy, strong lensing, simulation"
+}
+
+@article{lenstronomy,
+    title     =   "lenstronomy: Multi-purpose gravitational lens modelling software package",
+    journal   =   "Physics of the Dark Universe",
+    volume    =   "22",
+    pages     =   "189 - 201",
+    year      =   "2018",
+    issn      =   "2212-6864",
+    doi       =   "10.1016/j.dark.2018.11.002",
+    url       =   "http://www.sciencedirect.com/science/article/pii/S2212686418301869",
+    author    =   "Simon Birrer and Adam Amara",
+    keywords  =   "Gravitational lensing, Software, Image simulations"
+}
+```
 
 ## Contact
 
