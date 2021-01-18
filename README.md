@@ -23,7 +23,7 @@ conda activate deeplens
 
 - Step 1: `pip install deeplenstronomy`
 
-## Documentation
+## Getting Started and Example Notebooks
 
 Start by reading the [Getting Started Guide](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/GettingStarted.ipynb) to familiarize yourself with the `deeplenstronomy` style.
 
@@ -44,6 +44,12 @@ After that, check out the example notebooks below:
 
 ### Notebooks for Suggested Science Cases
 - [A Walkthrough of Using `deeplenstronomy` for Science](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/FullExample.ipynb)
+
+
+## API Documentation
+
+`deeplenstronomy` is designed so that users only need to work with their personal configuration files and the dataset generatation and image visualization functions.
+However, if you would like to view the full API documentation, you can visit the [docs](https://deepskies.github.io/deeplenstronomy/docs/) page.
 
 ## Citation
 
