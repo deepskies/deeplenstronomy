@@ -117,3 +117,6 @@ test/*_config.yaml
 
 # Binary release files
 deeplenstronomy_v0.0.1.0.tar.gz
+
+# documentation staging directory
+html/
