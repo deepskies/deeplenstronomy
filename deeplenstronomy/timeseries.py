@@ -1,4 +1,4 @@
-# Class for light curve generation from time-series spectral energy distributions
+"""Generate light curves from time-series spectral energy distributions"""
 
 import glob
 import os
@@ -17,9 +17,11 @@ class LCGen():
     """Light Curve Generation"""    
     def __init__(self, bands=''):
         """
-        Initialize the LCGen object
+        Initialize the LCGen object, download data if necessary, collect 
+        necessary filter and sed information.
         
-        :param bands: comma-separated string of bands, i.e. 'g,r,i,z'
+        Args:
+            bands (str): comma-separated string of bands, i.e. 'g,r,i,z'
         """
         # Check for filtes / seds and download if necessary
         self.__download_data()
@@ -191,14 +193,17 @@ class LCGen():
         """
         Generate a random variable light curve
 
-        :param redshift (ignored)  
-        :param nites: a list of night relative to peak you want to obtain a magnitude for 
-        :param sed_filename: (ignored)  
-        :param cosmo: (ignored)   
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
-            - 'lc' contains a dataframe of the light from the object     
-            - 'obj_type' contains a string for the type of object. Will always be 'Variable' here
-            - 'sed' contains the filename of the sed used. Will always be 'Variable' here  
+        Args:
+            redshift (float): ignored 
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for    
+            sed_filename (str): ignored
+            cosmo (astropy.cosmology): ignored
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object     
+              - 'obj_type' contains a string for the type of object. Will always be 'Variable' here
+              - 'sed' contains the filename of the sed used. Will always be 'Variable' here  
         """
         output_data_cols = ['NITE', 'BAND', 'MAG']
         output_data = []
@@ -215,16 +220,19 @@ class LCGen():
     
     def gen_flat(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         """
-        Generate a random flat light curve
+        Generate a random flat light curve.
         
-        :param redshift (ignored)
-        :param nites: a list of night relative to peak you want to obtain a magnitude for
-        :param sed_filename: (ignored) 
-        :param cosmo: (ignored)  
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed'] 
-            - 'lc' contains a dataframe of the light from the object 
-            - 'obj_type' contains a string for the type of object. Will always be 'Flat' here 
-            - 'sed' contains the filename of the sed used. Will always be 'Flat' here            
+        Args:
+            redshift (float): ignored
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            sed_filename (str): ignored
+            cosmo (astropy.cosmology): ignored
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will always be 'Flat' here
+              - 'sed' contains the filename of the sed used. Will always be 'Flat' here      
         """
         output_data_cols = ['NITE', 'BAND', 'MAG']
         central_mag = random.uniform(12.0, 23.0)
@@ -237,19 +245,22 @@ class LCGen():
         return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
                 'obj_type': 'Flat',
                 'sed': 'Flat'}
-    
+
     def gen_variablenoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         """ 
         Generate a variable light curve with small random noise
-        
-        :param redshift (ignored)
-        :param nites: a list of night relative to peak you want to obtain a magnitude for 
-        :param sed_filename: (ignored) 
-        :param cosmo: (ignored) 
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
-            - 'lc' contains a dataframe of the light from the object  
-            - 'obj_type' contains a string for the type of object. Will always be 'VariableNoise' here   
-            - 'sed' contains the filename of the sed used. Will always be 'VariableNoise' here       
+
+        Args:
+            redshift (float): ignored
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            sed_filename (str): ignored
+            cosmo (astropy.cosmology): ignored
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will always be 'VariableNoise' here
+              - 'sed' contains the filename of the sed used. Will always be 'VariableNoise' here              
         """
         noiseless_lc_dict = self.gen_variable(redshift, nites)
         noise = np.random.normal(loc=0, scale=0.25, size=noiseless_lc_dict['lc'].shape[0])
@@ -263,14 +274,17 @@ class LCGen():
         """
         Generate a flat light curve will small random noise
 
-        :param redshift (ignored)
-        :param nites: a list of night relative to peak you want to obtain a magnitude for 
-        :param sed_filename: (ignored) 
-        :param cosmo: (ignored)  
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed'] 
-            - 'lc' contains a dataframe of the light from the object  
-            - 'obj_type' contains a string for the type of object. Will always be 'FlatNoise' here
-            - 'sed' contains the filename of the sed used. Will always be 'FlatNoise' here     
+        Args:
+            redshift (float): ignored
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            sed_filename (str): ignored
+            cosmo (astropy.cosmology): ignored
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will always be 'FlatNoise' here
+              - 'sed' contains the filename of the sed used. Will always be 'FlatNoise' here              
         """
         noiseless_lc_dict = self.gen_flat(redshift, nites)
         noise = np.random.normal(loc=0, scale=0.25, size=noiseless_lc_dict['lc'].shape[0])
@@ -283,14 +297,18 @@ class LCGen():
         """
         Generate a light curve from a user-specidied SED
 
-        :param redshfit: the redshift of the source 
-        :param nites: a list of night relative to peak you want to obtain a magnitude for  
-        :param sed: (optional) a dataframe containing the sed of the SN
-        :param cosmo: (optional) an astropy.cosmology instance 
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
-            - 'lc' contains a dataframe of the light from the object
-            - 'obj_type' contains a string for the type of object. Will always be <sed_filename> here 
-            - 'sed' contains the filename of the sed used  
+        Args:
+            redshift (float): the redshift of the source
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
+            sed_filename (str): filename containing the time-series sed you want to use 
+            cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will always be <sed_filename> here 
+              - 'sed' contains the filename of the sed used  
         """
         if not sed:
             sed = self._read_sed('seds/user/' + sed_filename)
@@ -299,16 +317,20 @@ class LCGen():
 
     def gen_kn(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         """
-        Generate a GW170817-like light curve
+        Generate a GW170817-like light curve.
 
-        :param redshfit: the redshift of the source   
-        :param nites: a list of night relative to peak you want to obtain a magnitude for  
-        :param sed: (optional) a dataframe containing the sed of the SN 
-        :param cosmo: (optional) an astropy.cosmology instance       
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed'] 
-            - 'lc' contains a dataframe of the light from the object
-            - 'obj_type' contains a string for the type of object. Will always be 'KN' here 
-            - 'sed' contains the filename of the sed used  
+        Args:
+            redshift (float): the redshift of the source
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
+            sed_filename (str): filename containing the time-series sed you want to use 
+            cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will always be KN here 
+              - 'sed' contains the filename of the sed used  
         """
 
         sed_filename = 'seds/kn/kn.SED'
@@ -319,17 +341,21 @@ class LCGen():
     
     def gen_ia(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         """
-        Generate a SN-Ia light curve
+        Generate a SN-Ia light curve.
         
-        :param redshfit: the redshift of the source
-        :param nites: a list of night relative to peak you want to obtain a magnitude for
-        :param sed: (optional) a dataframe containing the sed of the SN
-        :param sed_filename: (optional) the filename of the sed of the SN
-        :param cosmo: (optional) an astropy.cosmology instance
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
-            - 'lc' contains a dataframe of the light from the object
-            - 'obj_type' contains a string for the type of object. Will always be 'Ia' here
-            - 'sed' contains the filename of the sed used
+
+        Args:
+            redshift (float): the redshift of the source
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
+            sed_filename (str): filename containing the time-series sed you want to use 
+            cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will always be Ia here 
+              - 'sed' contains the filename of the sed used  
         """
         
         # Read rest-frame sed if not supplied as argument
@@ -347,15 +373,18 @@ class LCGen():
         """
         Generate a SN-CC light curve
         
-        :param redshfit: the redshift of the source
-        :param nites: a list of night relative to peak you want to obtain a magnitude for
-        :param sed: (optional) a dataframe containing the sed of the SN
-        :param sed_filename: (optional) the filename of the sed of the SN
-        :param cosmo: (optional) an astropy.cosmology instance
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
-            - 'lc' contains a dataframe of the light from the object
-            - 'obj_type' contains a string for the type of object. Will be 'II', 'Ibc', etc.
-            - 'sed' contains the filename of the sed used
+        Args:
+            redshift (float): the redshift of the source
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
+            sed_filename (str): filename containing the time-series sed you want to use 
+            cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will be 'II', 'Ibc, etc. 
+              - 'sed' contains the filename of the sed used  
         """
 
         # If sed not specified, choose sed based on weight map
@@ -374,18 +403,20 @@ class LCGen():
                 
     def gen_lc_from_sed(self, redshift, nites, sed, obj_type, sed_filename, cosmo=None):
         """
-        Generate a light curve based on a time-series sed
+        Generate a light curve based on a time-series sed.
         
-        :param redshfit: the redshift of the source
-        :param nites: a list of night relative to peak you want to obtain a magnitude for
-        :param sed: a dataframe containing the sed of the object
-        :param obj_type: a string for the type of object. Will be 'II', 'Ibc', Ia, etc.
-        :param sed_filename: the filename of the sed of the object
-        :param cosmo: (optional) an astropy.cosmology instance
-        :return: lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
-            - 'lc' contains a dataframe of the light from the object
-            - 'obj_type' contains a string for the type of object. Will be 'II', 'Ibc', etc.
-            - 'sed' contains the filename of the sed used
+        Args:
+            redshift (float): the redshift of the source
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
+            sed_filename (str): filename containing the time-series sed you want to use 
+            cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
+
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. 
+              - 'sed' contains the filename of the sed used  
         """
         
         # If nite not in the sed, set nite to the closest nite in the sed

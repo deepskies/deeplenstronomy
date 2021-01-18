@@ -1,4 +1,4 @@
-# Outer shell to do everything for you
+"""The main module for dataset generation."""
 
 import os
 import random
@@ -19,10 +19,11 @@ class Dataset():
         """
         Create a dataset. If config file or config dict is supplied, generate it.
 
-        :param config: yaml file specifying dataset characteristics 
-                       OR                                                                                                                                                                                                                                                                                                                                                                                                                                       pre-parsed y                       yaml file as a dictionary 
-        :param store: If true, the generated data is stored as attributes of this object
-        :param save: If true, the generated data is written to disk
+        Args:
+            config (str or dict, optional, default=None): name of yaml configuration file
+                specifying dataset characteristics or a pre-parsed yaml file as a dictionary 
+            store (bool, optional, default=True): store the generated data as attributes of this object
+            save (bool, optional, default=False): save the generated data to disk
         """
         
         if config:
@@ -31,10 +32,11 @@ class Dataset():
 
     def update_param(self, new_param_dict, configuration):
         """
-        Update single parameters to new values
+        Update single parameters to new values.
 
-        :param new_param_dict: {'param_1_name': new_value_1, 'param_2_name': new_value_2, ...}
-        :param configuration: like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...
+        Args:
+            new_param_dict (dict): {'param_1_name': new_value_1, 'param_2_name': new_value_2, ...}
+            configuration (str): like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...     
         """
         # Put in the updated values
         for new_param, new_value in new_param_dict.items():
@@ -44,16 +46,20 @@ class Dataset():
 
     def update_param_dist(self, new_param_dist_dict, configuration):
         """
-        Update the distribution from which a parameter is drawn
+        Update the distribution from which a parameter is drawn.
 
-        :param new_param_dist_dict: should look like this:
-            {'param_1_name': {'name': 'uniform', 
-                              'parameters': {'minimum': new_value_1, 
-                                             'maximum': new_value_2}},
-             'param_2_name': {'name': 'uniform', 
-                              'parameters': {'minimum': new_value_3, 
-                                             'maximum': new_value_4}}, ...}
-        :param configuration: like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...   
+        Args:
+            new_param_dist_dict (dict): 
+              Should look like this
+              
+                  {'param_1_name': {'name': 'uniform',
+                                  'parameters': {'minimum': new_value_1,
+                                                 'maximum': new_value_2}},
+                  'param_2_name': {'name': 'uniform',
+                                  'parameters': {'minimum': new_value_3,
+                                                 'maximum': new_value_4}}, ...}   
+            
+            configuration (str):  like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...
         """
         # Put in the updated distributions
         for new_param, new_dist_info in new_param_dist_dict.items():
@@ -127,7 +133,8 @@ class Dataset():
         """
         Using the dictionary stored in self.config_dict, make a new dataset
         
-        :param make_dataset_args: dict, arguments supplied to make_dataset when original dataset was generated
+        Args:
+            make_dataset_args (dict): arguments supplied to make_dataset when original dataset was generated
         """
         params = dict(**make_dataset_args)
         params['config'] = self.config_dict
@@ -138,12 +145,13 @@ class Dataset():
 
     def search(self, param_name):
         """
-        Find all USERDIST column headers for a parameter
+        Find all USERDIST column headers for a parameter.
         
-        :param param_name: str, the parameter name to search for
-        :return: output_dict: dict,
-            keys: object names
-            values: list of all possible USERDIST column headers
+        Args:
+            param_name (str): the parameter name to search for
+            
+        Returns:
+            dict: keys contain object names, values contain a list of all possible USERDIST column headers
         """
         obj_paths = ['["' + x[9:].replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("GEOMETRY") and x.find("OBJECT_") != -1]
         obj_names = []
@@ -187,7 +195,7 @@ class Dataset():
 
 
     
-def flatten_image_info(sim_dict):
+def _flatten_image_info(sim_dict):
     """
     Sim dict will have structure 
         {'g': {'param1': value1}, 'r': {'param1': value2} ...}
@@ -204,7 +212,7 @@ def flatten_image_info(sim_dict):
 
     return out_dict
     
-def get_forced_sim_inputs(forced_inputs, configurations, bands):
+def _get_forced_sim_inputs(forced_inputs, configurations, bands):
 
     force_param_inputs = {}
     for force_params in forced_inputs.values():
@@ -261,21 +269,27 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                  survey=None, return_planes=False, skip_image_generation=False,
                  solve_lens_equation=False):
     """
-    Generate a dataset from a config file
+    Generate a dataset from a config file.
 
-    :param config: yaml file specifying dataset characteristics
-                   OR
-                   pre-parsed yaml file as a dictionary
-    :param verbose: if true, print status updates
-    :param store_in_memory: save images and metadata as attributes
-    :param save_to_disk: save images and metadata to disk
-    :param store_sample: save five images and metadata as attribute
-    :param image_file_format: outfile format type (npy, h5)
-    :param survey: str, a default astronomical survey to use
-    :param return_planes: bool, if true, return the separate planes of simulated images
-    :param skip_image_generation: bool, if true, skip image generation
-    :param solve_lens_equation: bool, if true, calculate the source positions
-    :return: dataset: instance of dataset class
+    Args:
+        config (str or dict): name of yaml file specifying dataset characteristics or pre-parsed yaml file as dictionary
+        verbose (bool, optional, default=False): print progress and status  updates at runtime
+        store_in_memory (bool, optional, default=True): save images and metadata as attributes 
+        save_to_disk (bool, optional, default=False): save images and metadata to disk   
+        store_sample (bool, optional, default=False): save five images and metadata as attribute 
+        image_file_format (str, optional, default='npy'): outfile format type, options include ('npy', 'h5')
+        survey (str or None, optional, default=None): a default astronomical survey to use 
+        return_planes (bool, optional, default=False): return the lens, source, noise, and point source planes of the simulated images
+        skip_image_generation (bool, optional, default=False): skip image generation
+        solve_lens_equation (bool, optional, default=False): calculate the source positions
+        
+    Returns:
+        dataset (Dataset): and instance of the Dataset class
+
+    Raises:
+        RuntimeError: If `skip_image_generation == True` and `solve_lens_equation == True`
+        RuntimeError: If `survey` is not a valid survey name
+        
     """
 
     if solve_lens_equation and skip_image_generation:
@@ -343,7 +357,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
     
     # Overwrite the configuration dict with any forced values from user distribtuions
-    force_param_inputs = get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
+    force_param_inputs = _get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
 
     for force_param, values in force_param_inputs.items():
         configuration, param_name, band = force_param
@@ -362,7 +376,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     if skip_image_generation:
         # Handle metadata and return dataset object
         for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
-            metadata = [flatten_image_info(image_info) for image_info in sim_inputs]
+            metadata = [_flatten_image_info(image_info) for image_info in sim_inputs]
             metadata_df = pd.DataFrame(metadata)
             del metadata
             if save_to_disk:
@@ -392,7 +406,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
         # Handle image backgrounds if they exist
         if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
-            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
+            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
             additive_image_backgrounds = image_backgrounds[image_indices]
         else:
             image_indices = np.zeros(len(sim_inputs), dtype=int)
@@ -442,7 +456,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                     image_info[band]['num_source_images'] = simulated_image_data['num_source_images']
                               
             # Save metadata for each simulated image 
-            metadata.append(flatten_image_info(image_info))
+            metadata.append(_flatten_image_info(image_info))
 
             # update the progress if in verbose mode
             if verbose:

@@ -1,4 +1,7 @@
-# Special functions, useful for implementing correlations in sampled parameters
+"""Special functions, useful for implementing correlations in sampled parameters.
+Utilizing the special keyword is discouraged, but makes it possible to update 
+all values drawn from a distribution prior to image generation.
+"""
 
 import deeplenstronomy.distributions as distributions
 
@@ -9,11 +12,13 @@ def brighten_everything(output_dict, light_profile_mag, bands):
     """
     Brighten everything in a light profile by a given number of mags.
 
-    :param output_dict: flat dictionary being used to simulate images
-    :param light_profile_mag: light profile id to be recolored + '-' + mags to brighten
-                              e.g. 'LIGHT_PROFILE_1-2.5'
-    :param bands: comma-separated string of bands used
-    :return: output_dict: the same dictionary with some overwritten values
+    Args:
+        output_dict (dict): flat dictionary being used to simulate images
+        light_profile_mag (str): light profile id to be recolored + '-' + mags to brighten. E.g. 'LIGHT_PROFILE_1-2.5'
+        bands (str): comma-separated string of bands used
+    
+    Returns:
+        output_dict: the same dictionary with some overwritten values
     """
 
     light_profile = light_profile_mag.split('-')[0]
@@ -31,11 +36,13 @@ def make_blueer(output_dict, light_profile_mag, bands):
     """
     Brighten the blue bands in a survey, using des, delve, and lsst as examples.
 
-    :param output_dict: flat dictionary being used to simulate images
-    :param light_profile_mag: light profile id to be recolored + '-' + mags to brighten
-                              e.g. 'LIGHT_PROFILE_1-2.5'
-    :param bands: comma-separated string of bands used
-    :return: output_dict: the same dictionary with some overwritten values
+    Args:
+        output_dict (dict): flat dictionary being used to simulate images
+        light_profile_mag (str): light profile id to be recolored + '-' + mags to brighten. E.g. 'LIGHT_PROFILE_1-2.5'
+        bands (str): comma-separated string of bands used
+    
+    Returns: 
+        output_dict: the same dictionary with some overwritten values
     """
     # brighten g and r
 
@@ -54,11 +61,13 @@ def make_redder(output_dict, light_profile_mag, bands):
     """
     Brighten the red bands in a survey, using des, delve, and lsst as examples.
 
-    :param output_dict: flat dictionary being used to simulate images
-    :param light_profile_mag: light profile id to be recolored + '-' + mags to brighten
-                              e.g. 'LIGHT_PROFILE_1-2.5'
-    :param bands: comma-separated string of bands used
-    :return: output_dict: the same dictionary with some overwritten values
+    Args:
+        output_dict (dict): flat dictionary being used to simulate images
+        light_profile_mag (str): light profile id to be recolored + '-' + mags to brighten. E.g. 'LIGHT_PROFILE_1-2.5'
+        bands (str): comma-separated string of bands used
+    
+    Returns: 
+        output_dict: the same dictionary with some overwritten values
     """
     # brighten i, z, and Y
     

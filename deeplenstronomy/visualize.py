@@ -1,21 +1,20 @@
-# A collection of image visualization functions
+"""Functions to visualize images."""
 
 from astropy.visualization import make_lupton_rgb
 import matplotlib.pyplot as plt
 import numpy as np
 
-def no_stretch(val):
+def _no_stretch(val):
     return val
 
-def view_image(image, stretch_func=no_stretch, **imshow_kwargs):
+def view_image(image, stretch_func=_no_stretch, **imshow_kwargs):
     """
     Plot an image.
 
-    :param image: a 2-dimensional array of pixel values
-                  OR
-                  a list-like object of 2-dimensional arrays of pixel values
-    :param stretch_func: func, stretching function to apply to pixel values (e.g. np.log10)
-    :param imshow_kwargs: keyword arguments to pass to matplotlib.pyplot.imshow
+    Args:
+        image (array):  a 2-dimensional array of pixel values OR a list-like object of 2-dimensional arrays of pixel values 
+        stretch_func (func, optional, default=pass): stretching function to apply to pixel values (e.g. np.log10)
+        imshow_kwargs (dict): dictionary of keyword arguments and their values to pass to matplotlib.pyplot.imshow 
     """
     if len(np.shape(image)) > 2:
         #multi-band mode
@@ -43,11 +42,11 @@ def view_image(image, stretch_func=no_stretch, **imshow_kwargs):
 def view_image_rgb(images, Q=2.0, stretch=4.0, **imshow_kwargs):
     """
     Merge images into a single RGB image. This function assumes the image array
-    is ordered [g, r, i]
+    is ordered [g, r, i].
 
-    :param images: a list of at least 3 2-dimensional arrays of pixel values
-                   corresponding to different photometric bandpasses
-    :param imshow_kwargs: keyword arguments to pass to matplotlib.pyplot.imshow
+    Args:
+        images (List[np.array]): a list of at least 3 2-dimensional arrays of pixel values corresponding to different photometric bandpasses
+        imshow_kwargs (dict): dictionary of keyword arguments and their values to pass to matplotlib.pyplot.imshow
     """
 
     assert len(images) > 2, "3 images are needed to generate an RGB image"

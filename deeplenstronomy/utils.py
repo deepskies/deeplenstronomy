@@ -1,4 +1,4 @@
-# Helper functions and classes
+"""Helper functions and classes utilized internally."""
 
 import os
 import sys
@@ -10,31 +10,41 @@ from scipy.interpolate import LinearNDInterpolator, interp1d
 
 def dict_select(input_dict, keys):
     """
-    Trim a dictionary down to selected keys
+    Trim a dictionary down to selected keys. Requires presence of keys
+    in input_dict.
     
-    :param input_dict: full dictionary
-    :param keys: list of keys desired in trimmed dict
-    :return: dict: trimmed dictionary
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
     """
     return {k: input_dict[k] for k in keys}
 
 def dict_select_choose(input_dict, keys):
     """
-    Trim a dictionary down to selected keys, if they are in the dictionary
+    Trim a dictionary down to selected keys, if they are in the dictionary.
     
-    :param input_dict: full dictionary
-    :param keys: list of keys desired in trimmed dict
-    :return: dict: trimmed dictionary
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
     """
     return {k: input_dict[k] for k in keys if k in input_dict.keys()}
 
 def select_params(input_dict, profile_prefix):
     """
-    Get just the parameters and values for a given profile prefix
-    
-    :param input_dict: full dictionary
-    :param profile_prefix: i.e. "PLANE_1-OBJECT_2-LIGHT_PROFILE_1-"
-    :return: dict: parameter dictionary for profile
+    Get just the parameters and values for a given profile prefix.
+
+    Args:
+        input_dict (dict): the dictionary to search
+        profile_prefix (str): i.e. "PLANE_1-OBJECT_2-LIGHT_PROFILE_1-"
+
+    Returns:
+        parameter dictionary for profile
     """
     params = [k for k in input_dict.keys() if k[0:len(profile_prefix)] == profile_prefix]
     return {x.split('-')[-1]: input_dict[x] for x in params if x[-4:] != 'NAME'}
@@ -51,8 +61,9 @@ class KeyPathDict(dict):
         Initialize a KeyPathDict by supplying the underlying dict to which 
         adding keypath functionality is desired.
 
-        :param base_dict: dict, the dictionary to add keypaths to
-        :param keypath_separator: str, the character to use to separate keys
+        Args:
+            base_dict (dict): the dictionary to add keypaths to
+            keypath_separator (str, optional, default='.'):, the character to use to separate keys
         """
         # Inherit attributes of the base dict
         super().__init__(base_dict)
@@ -94,7 +105,8 @@ class KeyPathDict(dict):
         """
         Join the keylists using the keypath_separator.
 
-        :return: kps: list, all keypaths in the dictionary as strings
+        Returns: 
+            list of all keypaths in the dictionary as strings
         """
         kps = [self.keypath_separator.join(['{}'.format(key) for key in kl]) for kl in self.kls]
         kps.sort()
@@ -102,10 +114,16 @@ class KeyPathDict(dict):
 
 def read_distribution_file(filename):
     """
-    Load the file information into a dataframe
+    Load the file information into a pandas dataframe
     
-    :param filename: str, the file containing the distribution     
-    :return: df: pandas.DataFrame containing the tabular distribtution
+    Args:
+        filename (str): the file containing the distribution    
+    
+    Returns:
+        pandas.DataFrame containing the tabular distribtution 
+
+    Raises:
+        AssertionError: if "WEIGHT" is not one of the column names
     """
     df = pd.read_csv(filename, delim_whitespace=True)
 
@@ -119,12 +137,18 @@ def draw_from_user_dist(filename, size, mode, step=10):
     Interpolate a user-specified N-dimensional probability distribution and
     sample from it.
 
-    :param filename: str, the file containing the distribution
-    :param size: int, the number of times to sample the probability distribution
-    :param mode: str, choose from ['interpolate', 'sample']
-    :param step: int, the number of steps on the interpolation grid
-    :return: parameters: list, the names of the paramters
-    :return: choices: array with entries as arrays of drawn parameters
+    Args:
+        filename (str): the file containing the distribution 
+        size (int):  the number of times to sample the probability distribution 
+        mode (str): choose from ['interpolate', 'sample'] 
+        step (int): the number of steps on the interpolation grid  
+        
+    Returns:
+        parameters: list, the names of the paramters
+        choices: array with entries as arrays of drawn parameters 
+
+    Raises:
+        NotImplementedError: if a mode other than "sample" or "interpolate" is passed
     """
 
     df = read_distribution_file(filename)
@@ -166,12 +190,15 @@ def draw_from_user_dist(filename, size, mode, step=10):
 
 def read_images(im_dir, im_size, bands):
     """
-    Read images into memory and resize to match simulations
+    Read images into memory and resize to match simulations.
 
-    :param im_dir: path to directory of images 
-    :param im_size: numPix along onle side of an image
-    :param bands: list of bands used in simulation
-    :return: im_array: processed images
+    Args:
+        im_dir (str): path to directory of images 
+        im_size (int): numPix along onle side of an image 
+        bands (List[str]): list of bands used in simulation 
+
+    Returns:
+        array of processed images
     """
     # Load images into an array
     im_array = []
@@ -213,11 +240,14 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
     """
     Sort image files based on map. If no map exists, sort randomly.
 
-    :param im_dir: path to directory of images
-    :param image_bank_size: number of images in user-specified bank
-    :param config_dicts: list of config_dicts
-    :param configuration: the configuration currently running
-    :return: image_indices: the indices of the images utilized for each config_dict
+    Args:
+        im_dir (str): path to directory of images
+        image_bank_size (int): number of images in user-specified bank
+        config_dicts (List[dict]): list of config_dicts    
+        configuration (str): the configuration currently running
+    
+    Returns:
+        the indices of the images utilized for each config_dict 
     """
     map_columns = []
     if os.path.exists(im_dir + '/' + 'map.txt'):

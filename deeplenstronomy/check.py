@@ -1,4 +1,5 @@
-# A module to check for user errors in the main config file
+"""This is an internal class. It identifies mistakes in the
+configuration file before dataset generation begins."""
 
 import glob
 from inspect import getfullargspec
@@ -29,15 +30,15 @@ class LenstronomyWarning(Exception): pass
 
 class AllChecks():
     """
-    Define new checks as methods starting with 'check_'
+    Define checks as methods starting with 'check_'
     Methods must return a list of err_message where
     an empty list means success and a nonempty list means failure
-    If failure, the err_messages are printed and sys.exit() is called
+    If failure, the err_messages are printed and sys.exit() is called.
     """
     
     def __init__(self, full_dict, config_dict):
         """
-        Trigger the running of all checks
+        All check methods are run at instantiation.
         """
         # flag for already checked timeseries files
         self.checked_ts_bands = False
@@ -75,16 +76,11 @@ class AllChecks():
         for check in self.checks:
 
             err_messages = eval('self.' + check + '()') 
-            #try:
-            #    err_messages = eval('self.' + check + '()')
-            #except Exception:
-            #    err_messages = ["CheckFunctionError: " + check] 
-
             total_errs += err_messages
 
         # report errors to user
         if len(total_errs) != 0:
-            kind_output(total_errs)
+            _kind_output(total_errs)
             raise ConfigFileError
 
         return
@@ -876,21 +872,25 @@ class AllChecks():
     
     # End check functions
 
-def kind_output(errs):
+def _kind_output(errs):
     """
     Print all detected errors in the configuration file to the screen
+
+    Args:
+        errs (List[str]): A list of error messages as strings
     """
     for err in errs:
         print(err)
     return
 
 
-def run_checks(full_dict, config_dict):
+def _run_checks(full_dict, config_dict):
     """
     Instantiate an AllChecks object to run checks
 
-    :param full_dict: a Parser.full_dict object
-    :param config_dict: a Parser.config_dict object
+    Args:
+        full_dict (dict): a Parser.full_dict object 
+        config_dict (dict): a Parser.config_dict object 
     """
     try:
         check_runner = AllChecks(full_dict, config_dict)

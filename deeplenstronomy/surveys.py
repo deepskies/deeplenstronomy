@@ -1,4 +1,4 @@
-# Configuration Dicts for large astronomical surveys
+"""Pre-defined settings for large astronomical surveys"""
 
 def des():
     info = """

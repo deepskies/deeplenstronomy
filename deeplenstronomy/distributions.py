@@ -1,4 +1,4 @@
-# A module listing all available distribtuions
+"""Contains all available distributions."""
 
 import numpy as np
 import random

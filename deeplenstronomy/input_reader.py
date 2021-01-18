@@ -1,4 +1,4 @@
-# Classes to parse inpAut yaml files and organize user settings
+"""Parse a user configuration file."""
 
 import copy
 import random
@@ -7,7 +7,6 @@ import sys
 import yaml
 
 from astropy.cosmology import FlatLambdaCDM
-#from astropy.cosmology import arcsec_per_kpc_comoving
 import numpy as np
 
 import deeplenstronomy.timeseries as timeseries
@@ -19,15 +18,19 @@ import deeplenstronomy.check as big_check
 
 class Parser():
     """ 
-    Load yaml inputs into a single dictionary. Check for user errors
+    Load yaml inputs into a single dictionary and trigger automatic checks for user errors.
 
-    :param config: main yaml file name
     """
 
     def __init__(self, config, survey=None):
-
+        """
+        Args: 
+            config (str): name of yaml configuration file
+            survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args
+        """
+        
         # Check for annoying tabs - there's probably a better way to do this
-        self.parse_for_tabs(config)
+        self._parse_for_tabs(config)
 
         # Fill in sections of the configuration file for a specific survey
         if survey is not None:
@@ -37,12 +40,12 @@ class Parser():
         self.full_dict = self.read(config)
         
         # If the main file points to any input files, read those too
-        self.get_input_locations()
-        self.include_inputs()
+        self._get_input_locations()
+        self._include_inputs()
 
         # Check for user-specifed probability distributions and backgrounds
-        self.get_file_locations()
-        self.get_image_locations()
+        self._get_file_locations()
+        self._get_image_locations()
         
         # Check for user errors in inputs
         self.check()
@@ -52,7 +55,17 @@ class Parser():
 
     def write_survey(self, config, survey):
         """
-        Writes survey information to config file
+        Writes survey information to config file. Creates a new file named {survey}_{config}
+        by copying the contents of {config} and appending the IMAGE and SURVEY sections for 
+        a desired survey. The yaml parser will automatically overwrite the IMAGE and SURVEY
+        dictionary keys.
+
+        Args:
+            config (str): name of yaml configuration file
+            survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args
+
+        Returns:
+            outfile (str): name of survey-specific configuration file
         """
         # set new config file name
         config_basename = config.split('/')
@@ -67,9 +80,9 @@ class Parser():
             new.writelines(eval("surveys.{}()".format(survey)))
         return outfile
     
-    def include_inputs(self):
+    def _include_inputs(self):
         """
-        Adds any input yaml files to config dict and assigns to self.
+        Searches for uses of the keyword INPUT and adds the file contents to the main configuration dictionary.
         """
         config_dict = KeyPathDict(self.full_dict.copy(), keypath_separator='.')
         
@@ -81,14 +94,12 @@ class Parser():
         self.config_dict = config_dict
         return    
 
-    def get_input_locations(self):
+    def _get_input_locations(self):
         input_paths = self._get_kw_locations("INPUT")
         self.input_paths = input_paths
         return
 
-    def get_file_locations(self):
-        #file_paths = self._get_kw_locations("USERDIST")
-        
+    def _get_file_locations(self):        
         file_paths = []
         if "DISTRIBUTIONS" in self.full_dict.keys():
             for k in self.full_dict['DISTRIBUTIONS'].keys():
@@ -97,7 +108,7 @@ class Parser():
 
         return
 
-    def get_image_locations(self):
+    def _get_image_locations(self):
         file_paths = []
         image_configurations = []
         if "BACKGROUNDS" in self.full_dict.keys():
@@ -124,8 +135,11 @@ class Parser():
         """
         Reads config file into a dictionary and returns it.
         
-        :param config: Name of config file.
-        :return: config_dict: Dictionary containing config information.
+        Args:
+            config (str): Name of config file.
+        
+        Returns:
+            config_dict (dict): Dictionary containing config information.
         """
 
         with open(config, 'r') as config_file_obj:
@@ -134,7 +148,7 @@ class Parser():
         return config_dict
 
 
-    def parse_for_tabs(self, config):
+    def _parse_for_tabs(self, config):
         """
         Check for the existence of tab characters that might break yaml
         """
@@ -156,9 +170,9 @@ class Parser():
     
     def check(self):
         """
-        Check configurations for possible user errors.
+        Check configuration file for possible user errors.
         """
-        big_check.run_checks(self.full_dict, self.config_dict)
+        big_check._run_checks(self.full_dict, self.config_dict)
         
         return
     
@@ -168,8 +182,9 @@ class Organizer():
         """
         Break up config dict into individual simulation dicts.
         
-        :param config_dict: Parser.config_dict
-        :param verbose: if true, status updates are printed
+        Args:
+            config_dict (dict): an instance of Parser.config_dict
+            verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args
         """
         self.main_dict = config_dict.copy()
         
@@ -555,9 +570,12 @@ class Organizer():
         """
         Generate a light curve bank for each configuration with timeseries info
 
-        :param nites: a list of nites to get a photometric measurement
-        :param objects: a list of object names
-        :param redshift_dicts: a list of redshift information about the objects
+        Args:
+            configuration (str): like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...
+            nites (List[int]): a list of nites relative to explosion to get a photometric measurement  
+            objects (List[str]):  a list of object names   
+            redshift_dicts (List[dict]): a list of redshift information about the objects
+            cosmo (astropy.cosmology): An astropy.cosmology instance for distance calculations
         """
 
         # instantiate an LCGen object
@@ -590,7 +608,8 @@ class Organizer():
         """
         Based on configurations and dataset size, build list of simulation dicts.
 
-        :param verbose: if true, print status update
+        Args:
+            verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args.
         """
         # Determine number of images to simulate for each configuration
         global_size = self.main_dict['DATASET']['PARAMETERS']['SIZE']

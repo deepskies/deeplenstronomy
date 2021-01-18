@@ -1,4 +1,4 @@
-# Generate images from the organized user inputs
+"""Generate images from the organized user inputs."""
 
 from astropy.cosmology import FlatLambdaCDM
 from lenstronomy.SimulationAPI.sim_api import SimAPI
@@ -13,10 +13,12 @@ from deeplenstronomy.utils import dict_select, dict_select_choose, select_params
 class ImageGenerator():
     def __init__(self, return_planes=False, solve_lens_equation=False):
         """
-        Pipe simulated inputs into Lenstronomy.
+        This is an internal class which calls lenstronomy functions based on parsed user inputs.
+        
+        Args:
+            return_planes (bool): Automatically passed from deeplenstronomy.make_dataset args
+            solve_lens_equation (bool): Automatically passed from deeplenstronomy.make_dataset args
 
-        :param return_planes: bool, if True, also return separated source, lens, and point_source profiles
-        :param solve_lens_equation: bool, if True, solve lens equation for source positions
         """
         self.return_planes = return_planes
         self.solve_lens_equation = solve_lens_equation
@@ -26,7 +28,9 @@ class ImageGenerator():
         """
         Simulate an image based on specifications in sim_dict
         
-        :param info_dict: A single element of the output form Organizer.breakup()
+        Args:
+            info_dict (dict): A single element from the list produced interanlly by input_reader.Organizer.breakup(). 
+                Contains all the properties of a single image to generate.
         """
         output_image = []
         if self.return_planes:
@@ -189,9 +193,9 @@ class ImageGenerator():
             # Add noise
             image_noise = np.zeros(np.shape(image))
             for noise_source_num in range(1, sim_dict['NUMBER_OF_NOISE_SOURCES'] + 1):
-                image_noise += self.generate_noise(sim_dict['NOISE_SOURCE_{0}-NAME'.format(noise_source_num)],
-                                                   np.shape(image),
-                                                   select_params(sim_dict, 'NOISE_SOURCE_{0}-'.format(noise_source_num)))
+                image_noise += self._generate_noise(sim_dict['NOISE_SOURCE_{0}-NAME'.format(noise_source_num)],
+                                                    np.shape(image),
+                                                    select_params(sim_dict, 'NOISE_SOURCE_{0}-'.format(noise_source_num)))
             image += image_noise
                 
             # Combine with other bands
@@ -226,9 +230,9 @@ class ImageGenerator():
 
         return return_dict
 
-    def generate_noise(self, name, shape, params):
+    def _generate_noise(self, name, shape, params):
         """
-        Add noise to image based on input yaml by targeting specified distribution
+        Add noise to image based on input yaml by targeting specified distribution.
         
         :param name: name of the distribution to target
         :param shape: shape of image to add noise to

@@ -1,0 +1,1892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>deeplenstronomy.input_reader API documentation</title>
+<meta name="description" content="Parse a user configuration file." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>deeplenstronomy.input_reader</code></h1>
+</header>
+<section id="section-intro">
+<p>Parse a user configuration file.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Parse a user configuration file.&#34;&#34;&#34;
+
+import copy
+import random
+import os
+import sys
+import yaml
+
+from astropy.cosmology import FlatLambdaCDM
+import numpy as np
+
+import deeplenstronomy.timeseries as timeseries
+from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_user_dist, KeyPathDict
+import deeplenstronomy.distributions as distributions
+import deeplenstronomy.special as special
+import deeplenstronomy.surveys as surveys
+import deeplenstronomy.check as big_check
+
+class Parser():
+    &#34;&#34;&#34; 
+    Load yaml inputs into a single dictionary and trigger automatic checks for user errors.
+
+    &#34;&#34;&#34;
+
+    def __init__(self, config, survey=None):
+        &#34;&#34;&#34;
+        Args: 
+            config (str): name of yaml configuration file
+            survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args
+        &#34;&#34;&#34;
+        
+        # Check for annoying tabs - there&#39;s probably a better way to do this
+        self._parse_for_tabs(config)
+
+        # Fill in sections of the configuration file for a specific survey
+        if survey is not None:
+            config = self.write_survey(config, survey)
+        
+        # Read main configuration file
+        self.full_dict = self.read(config)
+        
+        # If the main file points to any input files, read those too
+        self._get_input_locations()
+        self._include_inputs()
+
+        # Check for user-specifed probability distributions and backgrounds
+        self._get_file_locations()
+        self._get_image_locations()
+        
+        # Check for user errors in inputs
+        self.check()
+
+        return
+
+
+    def write_survey(self, config, survey):
+        &#34;&#34;&#34;
+        Writes survey information to config file. Creates a new file named {survey}_{config}
+        by copying the contents of {config} and appending the IMAGE and SURVEY sections for 
+        a desired survey. The yaml parser will automatically overwrite the IMAGE and SURVEY
+        dictionary keys.
+
+        Args:
+            config (str): name of yaml configuration file
+            survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args
+
+        Returns:
+            outfile (str): name of survey-specific configuration file
+        &#34;&#34;&#34;
+        # set new config file name
+        config_basename = config.split(&#39;/&#39;)
+        if len(config_basename) == 1:
+            outfile = survey + &#39;_&#39; + config
+        else:
+            outfile = &#39;/&#39;.join(config_basename[0:-1]) + &#39;/&#39; + survey + &#39;_&#39; + config_basename[-1]
+
+        # write new config file
+        with open(config, &#39;r&#39;) as old, open(outfile, &#39;w+&#39;) as new:
+            new.writelines(old.readlines())
+            new.writelines(eval(&#34;surveys.{}()&#34;.format(survey)))
+        return outfile
+    
+    def _include_inputs(self):
+        &#34;&#34;&#34;
+        Searches for uses of the keyword INPUT and adds the file contents to the main configuration dictionary.
+        &#34;&#34;&#34;
+        config_dict = KeyPathDict(self.full_dict.copy(), keypath_separator=&#39;.&#39;)
+        
+        for input_path in self.input_paths:
+            input_dict = self.read(eval(&#39;config_dict[&#34;&#39; + input_path.replace(&#39;.&#39;, &#39;&#34;][&#34;&#39;) + &#39;&#34;][&#34;INPUT&#34;]&#39;))
+            for k, v in input_dict.items():
+                exec(&#39;config_dict[&#34;&#39; + input_path.replace(&#39;.&#39;, &#39;&#34;][&#34;&#39;) + &#39;&#34;][k] = v&#39;)
+
+        self.config_dict = config_dict
+        return    
+
+    def _get_input_locations(self):
+        input_paths = self._get_kw_locations(&#34;INPUT&#34;)
+        self.input_paths = input_paths
+        return
+
+    def _get_file_locations(self):        
+        file_paths = []
+        if &#34;DISTRIBUTIONS&#34; in self.full_dict.keys():
+            for k in self.full_dict[&#39;DISTRIBUTIONS&#39;].keys():
+                file_paths.append(&#39;DISTRIBUTIONS.&#39; + k)
+        self.file_paths = file_paths
+
+        return
+
+    def _get_image_locations(self):
+        file_paths = []
+        image_configurations = []
+        if &#34;BACKGROUNDS&#34; in self.full_dict.keys():
+            file_paths.append(self.full_dict[&#39;BACKGROUNDS&#39;][&#39;PATH&#39;])
+            self.image_configurations = self.full_dict[&#39;BACKGROUNDS&#39;][&#39;CONFIGURATIONS&#39;][:]
+        self.image_paths = file_paths
+
+        return
+    
+    def _get_kw_locations(self, kw):
+        &#34;&#34;&#34;
+        Find locations in main dictionary where a keyword is used
+
+        :param kw: str, a keyword to search the dict keys for
+        :return: paths: list, the keypaths to all occurances of kw
+        &#34;&#34;&#34;
+        d = KeyPathDict(self.full_dict, keypath_separator=&#39;.&#39;)
+        locs = [x.find(kw) for x in d.keypaths()]
+        paths = [y for y in [x[0:k-1] if k != -1 else &#39;&#39; for x, k in zip(d.keypaths(), locs)] if y != &#39;&#39;]
+        return paths
+
+
+    def read(self, config):
+        &#34;&#34;&#34;
+        Reads config file into a dictionary and returns it.
+        
+        Args:
+            config (str): Name of config file.
+        
+        Returns:
+            config_dict (dict): Dictionary containing config information.
+        &#34;&#34;&#34;
+
+        with open(config, &#39;r&#39;) as config_file_obj:
+            config_dict = yaml.safe_load(config_file_obj)
+                        
+        return config_dict
+
+
+    def _parse_for_tabs(self, config):
+        &#34;&#34;&#34;
+        Check for the existence of tab characters that might break yaml
+        &#34;&#34;&#34;
+        stream = open(config, &#39;r&#39;)
+        lines = stream.readlines()
+        stream.close()
+
+        bad_line_numbers = []
+        for index, line in enumerate(lines):
+            if line.find(&#39;\t&#39;) != -1:
+                bad_line_numbers.append(str(index + 1))
+
+        if len(bad_line_numbers) != 0:
+            print(&#34;Tab characters detected on the following lines:&#34;)
+            print(&#34;    &#34; + &#39;, &#39;.join(bad_line_numbers))
+            print(&#34;Please correct the tabs and restart&#34;)
+            sys.exit()
+        return
+    
+    def check(self):
+        &#34;&#34;&#34;
+        Check configuration file for possible user errors.
+        &#34;&#34;&#34;
+        big_check._run_checks(self.full_dict, self.config_dict)
+        
+        return
+    
+
+class Organizer():
+    def __init__(self, config_dict, verbose=False):
+        &#34;&#34;&#34;
+        Break up config dict into individual simulation dicts.
+        
+        Args:
+            config_dict (dict): an instance of Parser.config_dict
+            verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args
+        &#34;&#34;&#34;
+        self.main_dict = config_dict.copy()
+        
+        self.__track_species_keys()
+        
+        self.breakup(verbose=verbose)
+        
+        return
+
+    def __track_species_keys(self):
+        &#34;&#34;&#34;Create a map of object name to species keys&#34;&#34;&#34;
+        species_map = {}
+        for k, v in self.main_dict[&#39;SPECIES&#39;].items():
+            species_map[v[&#39;NAME&#39;]] = k
+        self._species_map = species_map
+        return
+
+    def _convert_to_string(self, distribution_dict, bands):
+        &#34;&#34;&#34;
+        Convert distribution dict into callable method
+        
+        :param distribution_dict: dicitonary containing pdf info
+        :return: method: callable method as string
+        &#34;&#34;&#34;
+        #this some magic
+        if isinstance(distribution_dict[&#39;PARAMETERS&#39;], dict):
+            return distribution_dict[&#39;NAME&#39;] + &#39;(&#39; + &#39;, &#39;.join([&#39;{0}={1}&#39;.format(k, v) for k, v in distribution_dict[&#39;PARAMETERS&#39;].items()]) + &#39;, bands=&#34;{0}&#34;&#39;.format(&#39;,&#39;.join(bands)) + &#39;)&#39;
+        else:
+            return distribution_dict[&#39;NAME&#39;] + &#39;(bands=&#34;{0}&#34;)&#39;.format(&#39;,&#39;.join(bands))
+        
+
+    def _draw(self, distribution_dict, bands):
+        &#34;&#34;&#34;
+        Draw a random value from the specified distribution
+        
+        :param distribution_dict: dicitonary containing pdf info
+        :return: value: sampled value from distribution
+        &#34;&#34;&#34;
+        draw_command = &#39;distributions.{0}&#39;.format(self._convert_to_string(distribution_dict, bands))
+        return eval(draw_command)
+
+    def _choose_position(self, ra_host, dec_host, sep, sep_unit, cosmo, redshift=None, angle=None):
+        &#34;&#34;&#34;
+        Select an ra and dec that will be sep away from the host
+        
+        :param ra_host: x-coord of point source host
+        :param dec_host: y-coord of point source host
+        :param sep: angular separation between point source and host
+        :param sep_unit: either &#39;kpc&#39; or &#39;arcsec&#39;
+        :param redshift: cosmological redshift, required if units are in kpc
+        :param angle: desired position of point source in radians, random if None
+        :return: chosen_ra: x-coord of chosen point sep away from host
+        :return: chosen_dec: y-coord of chosen point sep away from host
+        &#34;&#34;&#34;
+        if angle is None:
+            angle = random.uniform(0.0, 2 * np.pi)
+
+        if sep_unit == &#39;arcsec&#39;:            
+            chosen_ra = np.cos(angle) * sep + ra_host
+            chosen_dec = np.sin(angle) * sep + dec_host
+        elif sep_unit == &#39;kpc&#39;:
+            kpc_to_arcsec = cosmo.arcsec_per_kpc_comoving(redshift).value / (1. + redshift)
+            chosen_ra = np.cos(angle) * sep * kpc_to_arcsec + ra_host
+            chosen_dec = np.sin(angle) * sep * kpc_to_arcsec + dec_host
+        else:
+            raise NotImplementedError(&#34;unexpected sep_unit&#34;)
+        
+        return chosen_ra, chosen_dec
+
+    def _find_obj_string(self, obj_name, configuration):
+        &#34;&#34;&#34;
+        Return the location of an object in the flattened dictionary
+        
+        :param obj_name: the name of the object
+        :param configuration: &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc.
+        :return: obj_string: the location of the object in the flattened dictionary
+        &#34;&#34;&#34;
+
+        d = KeyPathDict(self.main_dict[&#39;GEOMETRY&#39;][configuration].copy(), keypath_separator=&#39;.&#39;)
+        for x in d.keypaths():
+            f = &#34;[&#39;&#34; + &#34;&#39;][&#39;&#34;.join(x.split(&#39;.&#39;)) + &#34;&#39;]&#34;
+            k = eval(&#34;d&#34; + f)
+            if k == obj_name:
+                return x.replace(&#39;.&#39;, &#39;-&#39;)
+
+        #return [x.replace(&#39;.&#39;, &#39;-&#39;) for x in d.keypaths() if eval(&#34;d[&#39;&#34; + &#34;&#39;][&#39;&#34;.join(x.split(&#39;.&#39;)) + &#34;&#39;]&#34;) == obj_name][0]
+
+    
+    def _flatten_and_fill(self, config_dict, cosmo, objid=0):
+        &#34;&#34;&#34;
+        Flatten input dictionary, and sample from any specified distributions
+        
+        :param config_dict: dictionary built up by self.breakup()
+        :param cosmo: an astropy.cosmology instance
+        :return: flattened_and_filled dictionary: dict ready for individual image sim
+        &#34;&#34;&#34;
+        bands = config_dict[&#39;SURVEY_DICT&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)
+        output_dict = {x: {} for x in bands}
+
+        #Object IDs
+        for band in bands:
+            output_dict[band][&#39;OBJID&#39;] = objid
+        
+        #COSMOLOGY
+        for k, v in config_dict[&#39;COSMOLOGY_DICT&#39;].items():
+            if v != &#39;DISTRIBUTION&#39;:
+                for band in bands:
+                    output_dict[band][k] = v
+            else:
+                draws = self._draw(self.main_dict[&#39;COSMOLOGY&#39;][&#39;PARAMETERS&#39;][k][&#39;DISTRIBUTION&#39;], bands)
+                for band, draw in zip(bands, draws):
+                    output_dict[band][k] = draw
+
+        #IMAGE
+        for k, v in config_dict[&#39;IMAGE_DICT&#39;].items():
+            if v != &#39;DISTRIBUTION&#39;:
+                for band in bands:
+                    output_dict[band][k] = v
+            else:
+                draws = self._draw(self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;][k][&#39;DISTRIBUTION&#39;], bands)
+                for band, draw in zip(bands, draws):
+                    output_dict[band][k] = draw
+
+        #SURVEY
+        for k, v in config_dict[&#39;SURVEY_DICT&#39;].items():
+            if k == &#39;BANDS&#39;: 
+                continue
+            if v != &#39;DISTRIBUTION&#39;:
+                for band in bands:
+                    output_dict[band][k] = v
+            else:
+                draws = self._draw(self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][k][&#39;DISTRIBUTION&#39;], bands)
+                for band, draw in zip(bands, draws):
+                    output_dict[band][k] = draw
+
+        #NOISE
+        for band in bands:
+            output_dict[band][&#39;NUMBER_OF_NOISE_SOURCES&#39;] = config_dict[&#39;NOISE_DICT&#39;][&#39;NUMBER_OF_NOISE_SOURCES&#39;]
+        for noise_idx in range(config_dict[&#39;NOISE_DICT&#39;][&#39;NUMBER_OF_NOISE_SOURCES&#39;]):
+            noise_source_num = noise_idx + 1
+            noise_name = config_dict[&#39;NOISE_DICT&#39;][&#39;NOISE_SOURCE_{0}-NAME&#39;.format(noise_source_num)]
+            for band in bands:
+                output_dict[band][&#39;NOISE_SOURCE_{0}-NAME&#39;.format(noise_source_num)] = noise_name
+            for k, v in self.main_dict[&#39;SPECIES&#39;][self._species_map[noise_name]][&#39;PARAMETERS&#39;].items():
+                if isinstance(v, dict):
+                    draws = self._draw(v[&#39;DISTRIBUTION&#39;], bands)
+                    for band, draw in zip(bands, draws):
+                        output_dict[band][&#39;NOISE_SOURCE_{0}-{1}&#39;.format(noise_source_num, k)] = draw
+                else:
+                    for band in bands:
+                        output_dict[band][&#39;NOISE_SOURCE_{0}-{1}&#39;.format(noise_source_num, k)] = v
+
+        #REAL OBJECTS
+        for k, v in config_dict[&#39;SIM_DICT&#39;].items():
+            for band in bands:
+                output_dict[band][k] = v
+
+        for plane_idx in range(config_dict[&#39;SIM_DICT&#39;][&#39;NUMBER_OF_PLANES&#39;]):
+            geometry_key = config_dict[&#39;SIM_DICT&#39;][&#39;CONFIGURATION_LABEL&#39;]
+            plane_num = plane_idx + 1
+
+            #GEOMETRY
+            for k_param, v_param in self.main_dict[&#39;GEOMETRY&#39;][geometry_key][&#39;PLANE_{0}&#39;.format(plane_num)][&#39;PARAMETERS&#39;].items():
+                if isinstance(v_param, dict):
+                    draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+
+                    # Set the PLANE&#39;s redshift in the config_dict
+                    if k_param == &#39;REDSHIFT&#39;:
+                        config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-REDSHIFT&#39;.format(plane_num)] = draws[0]
+                    
+                    for band, draw in zip(bands, draws):
+                        for obj_num in range(1, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)] + 1):
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = draw
+                else:
+                    # Set the PLANE&#39;s redshift in the config_dict
+                    if k_param == &#39;REDSHIFT&#39;:
+                        config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-REDSHIFT&#39;.format(plane_num)] = v_param
+                    
+                    for band in bands:
+                        for obj_num in range(1, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)] + 1):
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = v_param
+
+            for obj_idx in range(config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)]):
+                obj_num = obj_idx + 1
+                obj_name = config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, obj_num)]
+                
+                #save number of profiles
+                for band in bands:
+                    output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NUMBER_OF_LIGHT_PROFILES&#39;.format(plane_num, obj_num)] = config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_LIGHT_PROFILES&#39;]
+                    output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NUMBER_OF_SHEAR_PROFILES&#39;.format(plane_num, obj_num)] = config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_SHEAR_PROFILES&#39;]
+                    output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NUMBER_OF_MASS_PROFILES&#39;.format(plane_num, obj_num)] = config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_MASS_PROFILES&#39;]
+
+                #SPECIES- Point Sources
+                if &#39;HOST&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]].keys():
+                    host = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;HOST&#39;]
+                    if host != &#39;Foreground&#39;:
+                        # Get host center
+                        possible_hostids = [&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, x) for x in range(1, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)] + 1)]
+                        hostid = [x[0:-5] for x in possible_hostids if config_dict[&#39;SIM_DICT&#39;][x] == host][0]
+                        ra_host, dec_host = output_dict[bands[0]][hostid + &#39;-LIGHT_PROFILE_1-center_x&#39;], output_dict[bands[0]][hostid + &#39;-LIGHT_PROFILE_1-center_y&#39;]
+                        
+                        # Determine location of point source in image
+                        if &#39;sep&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;].keys():
+                            sep_unit = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep_unit&#39;]
+                            if isinstance(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep&#39;], dict):
+                                draws = self._draw(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep&#39;][&#39;DISTRIBUTION&#39;], bands)
+                                sep = draws[0]
+                            else:
+                                sep = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep&#39;]
+
+                            if &#39;angle&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;].keys():    
+                                if isinstance(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;angle&#39;], dict):
+                                    draws = self._draw(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;angle&#39;][&#39;DISTRIBUTION&#39;], bands)
+                                    angle = draws[0]
+                                else:
+                                    angle = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;angle&#39;]
+                            else:
+                                angle = None
+                                
+                            ##convert image separation into ra and dec
+                            ra, dec = self._choose_position(ra_host, dec_host, sep, sep_unit, cosmo, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-REDSHIFT&#39;.format(plane_num)], angle)
+
+                        else:
+                            #set ra and dec to host center
+                            ra, dec = ra_host, dec_host
+                            sep = 0.0
+                            sep_unit = &#39;arcsec&#39;
+
+                        for band in bands:
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-HOST&#39;.format(plane_num, obj_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;HOST&#39;]
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, obj_num)] = obj_name
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-ra&#39;.format(plane_num, obj_num)] = ra
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-dec&#39;.format(plane_num, obj_num)] = dec
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-sep&#39;.format(plane_num, obj_num)] = sep
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-sep_unit&#39;.format(plane_num, obj_num)] = sep_unit
+                    else:
+                        #foreground, choose position randomly
+                        im_size = self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;][&#39;numPix&#39;] * self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;][&#39;pixel_scale&#39;] / 2
+                        ra, dec = random.uniform(-1 * im_size, im_size), random.uniform(-1 * im_size, im_size)
+                        if isinstance(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;magnitude&#39;], dict):
+                            draws = self._draw(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;magnitude&#39;][&#39;DISTRIBUTION&#39;], bands)
+                        else:
+                            draws = [self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;magnitude&#39;]] * len(bands)
+                        for band, magnitude in zip(bands, draws):
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-HOST&#39;.format(plane_num, obj_num)] = &#39;Foreground&#39;
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, obj_num)] = obj_name
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-ra_image&#39;.format(plane_num, obj_num)] = ra
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-dec_image&#39;.format(plane_num, obj_num)] = dec
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-magnitude&#39;.format(plane_num, obj_num)] = magnitude
+                        
+                        
+                else:
+                     for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-HOST&#39;.format(plane_num, obj_num)] = &#39;None&#39;
+
+                #SPECIES- Light Profiles
+                for light_profile_idx in range(config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_LIGHT_PROFILES&#39;]):
+                    light_profile_num = light_profile_idx + 1
+                    for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-LIGHT_PROFILE_{2}-NAME&#39;.format(plane_num, obj_num, light_profile_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;LIGHT_PROFILE_{0}&#39;.format(light_profile_num)][&#39;NAME&#39;]
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;LIGHT_PROFILE_{0}&#39;.format(light_profile_num)][&#39;PARAMETERS&#39;].items():
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-LIGHT_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, light_profile_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-LIGHT_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, light_profile_num, k_param)] = v_param
+
+                #SPECIES- Mass Profiles
+                for mass_profile_idx in range(config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_MASS_PROFILES&#39;]):
+                    mass_profile_num = mass_profile_idx + 1
+                    for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-MASS_PROFILE_{2}-NAME&#39;.format(plane_num, obj_num, mass_profile_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;MASS_PROFILE_{0}&#39;.format(mass_profile_num)][&#39;NAME&#39;]
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;MASS_PROFILE_{0}&#39;.format(mass_profile_num)][&#39;PARAMETERS&#39;].items():
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-MASS_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, mass_profile_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-MASS_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, mass_profile_num, k_param)] = v_param
+
+                #SPECIES- Shear Profiles
+                for shear_profile_idx in range(config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_SHEAR_PROFILES&#39;]):
+                    shear_profile_num = shear_profile_idx + 1
+                    for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-SHEAR_PROFILE_{2}-NAME&#39;.format(plane_num, obj_num, shear_profile_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;SHEAR_PROFILE_{0}&#39;.format(shear_profile_num)][&#39;NAME&#39;]
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;SHEAR_PROFILE_{0}&#39;.format(shear_profile_num)][&#39;PARAMETERS&#39;].items():
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-SHEAR_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, shear_profile_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-SHEAR_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, shear_profile_num, k_param)] = v_param
+
+                #SPECIES- Additional Parameters
+                if &#39;PARAMETERS&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]].keys():
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;].items():
+                        if k_param == &#39;sep&#39;:
+                            #sampling for point source separation is already done, so don&#39;t overwrite it
+                            continue
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = v_param
+
+                #SPECIES- Special
+                if &#39;SPECIAL&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]].keys():
+                    for mode, args in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;SPECIAL&#39;].items():
+                        for arg in args:
+                            output_dict = eval(&#39;special.{0}(output_dict, &#34;{1}&#34;, bands=bands)&#39;.format(mode.lower(), arg))
+                
+        return output_dict
+
+
+    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid):
+        &#34;&#34;&#34;
+        Generate an image info dictionary for each step in the time series
+
+        :param config_dict: dictionary built up by self.breakup()
+        :param configuration: CONFIGURATION_1, CONFIGURATION_2, etc.
+        :param obj_string: list of the strings targetting the object in the flattened dictionary (e.g. [&#39;PLANE_2-OBJECT_2&#39;])
+        :return: flattened_and_filled dictionary: dict ready for individual image sim  
+        &#34;&#34;&#34;
+        output_dicts = []
+        bands = self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)
+        # Get flattened and filled dictionary
+        base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
+
+        closest_redshift_lcs = []
+        for obj_name, obj_string in zip(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], obj_strings):
+            # determine closest lc in library to redshift
+            redshift = base_output_dict[bands[0]][obj_string + &#39;-REDSHIFT&#39;]
+            lcs = eval(&#39;self.{0}_{1}_lightcurves&#39;.format(configuration, obj_name))
+            closest_redshift_lcs.append(lcs[&#39;library&#39;][np.argmin(np.abs(redshift - lcs[&#39;redshifts&#39;]))])
+            
+        # overwrite the image sim dictionary
+        fake_noise = np.random.normal(scale=0.15, loc=0, size=len(obj_strings) * len(bands) * len(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]))
+        noise_idx = 0
+        for nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
+            output_dict = base_output_dict.copy()
+            for band in bands:
+                for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
+
+                    try:
+                        #try using the exact night
+                        output_dict[band][obj_string + &#39;-magnitude&#39;] = closest_redshift_lc[&#39;lc&#39;][&#39;MAG&#39;].values[(closest_redshift_lc[&#39;lc&#39;][&#39;BAND&#39;].values == band) &amp; (closest_redshift_lc[&#39;lc&#39;][&#39;NITE&#39;].values == nite)][0] + fake_noise[noise_idx]
+                    except:
+                        #linearly interpolate between the closest two nights
+                        band_df = closest_redshift_lc[&#39;lc&#39;][closest_redshift_lc[&#39;lc&#39;][&#39;BAND&#39;].values == band].copy().reset_index(drop=True)
+                        closest_nite_indices = np.abs(nite - band_df[&#39;NITE&#39;].values).argsort()[:2]
+                        output_dict[band][obj_string + &#39;-magnitude&#39;] = (band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] - band_df[&#39;MAG&#39;].values[closest_nite_indices[0]]) * (nite - band_df[&#39;NITE&#39;].values[closest_nite_indices[1]]) / (band_df[&#39;NITE&#39;].values[closest_nite_indices[1]] - band_df[&#39;NITE&#39;].values[closest_nite_indices[0]]) + band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] + fake_noise[noise_idx]
+
+                    output_dict[band][obj_string + &#39;-nite&#39;] = nite
+                    output_dict[band][obj_string + &#39;-id&#39;] = closest_redshift_lc[&#39;sed&#39;]
+                    output_dict[band][obj_string + &#39;-type&#39;] = closest_redshift_lc[&#39;obj_type&#39;]
+
+                    noise_idx += 1
+
+                # Use independent observing conditions for each nite if conditions are drawn from distributions
+                # seeing
+                if isinstance(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;seeing&#34;], dict):
+                    output_dict[band][&#34;seeing&#34;] = self._draw(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;seeing&#34;][&#34;DISTRIBUTION&#34;], bands=band)[0]
+                # sky_brightness
+                if isinstance(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;sky_brightness&#34;], dict):
+                    output_dict[band][&#34;sky_brightness&#34;] = self._draw(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;sky_brightness&#34;][&#34;DISTRIBUTION&#34;], bands=band)[0]
+                # magnitude_zero_point
+                if isinstance(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;magnitude_zero_point&#34;], dict):
+                    output_dict[band][&#34;magnitude_zero_point&#34;] = self._draw(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;magnitude_zero_point&#34;][&#34;DISTRIBUTION&#34;], bands=band)[0]
+
+                    
+            output_dicts.append(copy.deepcopy(output_dict))
+            del output_dict
+                    
+        return output_dicts
+
+    def generate_time_series(self, configuration, nites, objects, redshift_dicts, cosmo):
+        &#34;&#34;&#34;
+        Generate a light curve bank for each configuration with timeseries info
+
+        Args:
+            configuration (str): like &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc...
+            nites (List[int]): a list of nites relative to explosion to get a photometric measurement  
+            objects (List[str]):  a list of object names   
+            redshift_dicts (List[dict]): a list of redshift information about the objects
+            cosmo (astropy.cosmology): An astropy.cosmology instance for distance calculations
+        &#34;&#34;&#34;
+
+        # instantiate an LCGen object
+        lc_gen = timeseries.LCGen(bands=self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;])
+
+        for obj, redshift_dict in zip(objects, redshift_dicts):
+            lc_library = []
+
+            # get redshifts to simulate light curves at
+            if isinstance(redshift_dict, dict):
+                drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
+                redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
+            else:
+                redshifts = np.array([redshift_dict])
+
+            # get model to simulate
+            model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
+            if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
+                for redshift in redshifts:
+                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)&#39;.format(model_info[0])))
+            else:
+                for redshift in redshifts:
+                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+            
+            setattr(self, configuration + &#39;_&#39; + obj + &#39;_&#39; + &#39;lightcurves&#39;, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
+        
+        return
+    
+    def breakup(self, verbose=False):
+        &#34;&#34;&#34;
+        Based on configurations and dataset size, build list of simulation dicts.
+
+        Args:
+            verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args.
+        &#34;&#34;&#34;
+        # Determine number of images to simulate for each configuration
+        global_size = self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;SIZE&#39;]
+        configurations = {}
+        for k, v in self.main_dict[&#39;GEOMETRY&#39;].items():
+            configurations[k] = v
+            configurations[k][&#39;SIZE&#39;] = int(global_size * v[&#39;FRACTION&#39;])
+
+        # Determine objects and their planes, store in SIM_DICT key
+        for k, v in configurations.items():
+            sim_dict = {}
+            
+            sim_dict[&#39;CONFIGURATION_LABEL&#39;] = k
+            sim_dict[&#39;CONFIGURATION_NAME&#39;] = v[&#39;NAME&#39;]
+            sim_dict[&#39;NUMBER_OF_PLANES&#39;] = len([x for x in v.keys() if x.find(&#39;PLANE&#39;) != -1])
+            
+            for config_key, config_dict in v.items():
+                if config_key.find(&#39;PLANE&#39;) != -1:
+                    sim_dict[&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(config_key.split(&#39;_&#39;)[-1])] = len([y for y in config_dict.keys() if y.find(&#39;OBJECT&#39;) != -1])
+                    for obj_index in [x.split(&#39;_&#39;)[-1] for x in [y for y in config_dict.keys() if y.find(&#39;OBJECT&#39;) != -1]]:
+                        sim_dict[config_key + &#39;-&#39; + &#39;OBJECT_{0}-NAME&#39;.format(obj_index)] = config_dict[&#39;OBJECT_{0}&#39;.format(obj_index)]
+                    
+            configurations[k][&#39;SIM_DICT&#39;] = sim_dict
+            configurations[k] = dict_select(configurations[k], [&#39;NAME&#39;, &#39;SIZE&#39;, &#39;SIM_DICT&#39;])
+            
+        # Determine number of profiles for each object
+        species_dict = {}
+        for k, v in self.main_dict[&#39;SPECIES&#39;].items():
+            species_dict[v[&#39;NAME&#39;]] = {&#39;NUMBER_OF_LIGHT_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;LIGHT_PROFILE&#39;) != -1]),
+                                       &#39;NUMBER_OF_MASS_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;MASS_PROFILE&#39;) != -1]),
+                                       &#39;NUMBER_OF_SHEAR_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;SHEAR_PROFILE&#39;) != -1])}
+        for k in configurations.keys():
+            configurations[k][&#39;SPECIES_DICT&#39;] = species_dict
+
+        # Add image metadata
+        image_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;].items()}
+        for k in configurations.keys():
+            configurations[k][&#39;IMAGE_DICT&#39;] = image_dict
+        
+        # Add survey metadata
+        survey_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;].items()}
+        #survey_dict[&#39;NAME&#39;] = self.main_dict[&#39;SURVEY&#39;][&#39;NAME&#39;]
+        for k in configurations.keys():
+            configurations[k][&#39;SURVEY_DICT&#39;] = survey_dict
+            
+        # Add cosmology metadata
+        cosmo_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;COSMOLOGY&#39;][&#39;PARAMETERS&#39;].items()}
+        #cosmo_dict[&#39;NAME&#39;] = self.main_dict[&#39;COSMOLOGY&#39;][&#39;NAME&#39;]
+        for k in configurations.keys():
+            configurations[k][&#39;COSMOLOGY_DICT&#39;] = cosmo_dict
+
+        # Set cosmology information
+        cosmology_info = [&#39;H0&#39;, &#39;Om0&#39;, &#39;Tcmb0&#39;, &#39;Neff&#39;, &#39;m_nu&#39;, &#39;Ob0&#39;]
+        cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k][&#39;COSMOLOGY_DICT&#39;], cosmology_info))
+            
+        # Add noise metadata
+        for k in configurations.keys():
+            noise_dict = {}
+            number_of_noise_sources = len([x for x in self.main_dict[&#39;GEOMETRY&#39;][k].keys() if x.find(&#39;NOISE_SOURCE&#39;) != -1])
+            noise_dict[&#39;NUMBER_OF_NOISE_SOURCES&#39;] = number_of_noise_sources
+            for noise_source_idx in range(number_of_noise_sources):
+                noise_source_num = noise_source_idx + 1
+                noise_dict[&#39;NOISE_SOURCE_{0}-NAME&#39;.format(noise_source_num)] = self.main_dict[&#39;GEOMETRY&#39;][k][&#39;NOISE_SOURCE_{0}&#39;.format(noise_source_num)]
+            configurations[k][&#39;NOISE_DICT&#39;] = noise_dict
+            
+        # Check for timeseries metadata
+        for k in configurations.keys():
+            setattr(self, k + &#39;_time_series&#39;, False)
+            if &#39;TIMESERIES&#39; in self.main_dict[&#39;GEOMETRY&#39;][k].keys():
+                
+                # Make a directory to store light curve data
+                if not os.path.exists(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;]):
+                    os.mkdir(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;])
+                    
+                if not os.path.exists(&#39;{0}/lightcurves&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;])):
+                    os.mkdir(&#39;{0}/lightcurves&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;]))
+
+                # Find the plane of the ojects and save the redshift sub-dict
+                redshift_dicts = []
+                for obj_name in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]:
+                    for sub_k in self.main_dict[&#39;GEOMETRY&#39;][k].keys():
+                        if sub_k[0:5] == &#39;PLANE&#39;:
+                            for sub_sub_k in self.main_dict[&#39;GEOMETRY&#39;][k][sub_k].keys():
+                                if sub_sub_k[0:6] == &#39;OBJECT&#39;:
+                                    if self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][sub_sub_k] == obj_name:
+                                        if isinstance(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;], dict):
+                                            redshift_dicts.append(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;].copy())
+                                        else:
+                                            redshift_dicts.append(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;] + 0.0)
+
+                if verbose: print(&#34;Generating time series data for {0}&#34;.format(k))
+
+                # If light curves already exist, skip generation
+                #if os.path.exists(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])):
+                #    setattr(self, k + &#39;_{0}_lightcurves&#39;.format(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0]), np.load(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])), allow_pickle=True) 
+                #else:
+                #    self.generate_time_series(k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;NITES&#39;], self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], redshift_dicts, cosmo)
+                #    np.save(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0]), eval(&#39;self.&#39; + k + &#39;_{0}_lightcurves&#39;.format(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])), allow_pickle=True)
+
+                # Generate the time-series data
+                self.generate_time_series(k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;NITES&#39;], self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], redshift_dicts, cosmo)
+                setattr(self, k + &#39;_time_series&#39;, True)
+
+                
+        # For each configuration, generate full sim info for as many objects as user specified
+        configuration_sim_dicts = {}
+        if verbose: print(&#34;Entering main organization loop&#34;)
+        for k, v in configurations.items():
+            if verbose: print(&#34;Organizing {0}&#34;.format(k))
+            configuration_sim_dicts[k] = []
+
+            time_series = eval(&#39;self.{0}_time_series&#39;.format(k))
+            if time_series:
+                # Get string referencing the varaible object
+                obj_strings = [self._find_obj_string(x, k) for x in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]]
+
+            for objid in range(v[&#39;SIZE&#39;]):
+
+                if time_series:
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
+                    for flattened_image_info in flattened_image_infos:
+                        configuration_sim_dicts[k].append(flattened_image_info)
+                else:
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, objid))    
+
+        self.configuration_sim_dicts = configuration_sim_dicts
+
+
+
+        </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="deeplenstronomy.input_reader.Organizer"><code class="flex name class">
+<span>class <span class="ident">Organizer</span></span>
+<span>(</span><span>config_dict, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Break up config dict into individual simulation dicts.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config_dict</code></strong> :&ensp;<code>dict</code></dt>
+<dd>an instance of Parser.config_dict</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool</code>, optional, default=<code>False</code></dt>
+<dd>Automatically passed from deeplenstronomy.make_dataset() args</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Organizer():
+    def __init__(self, config_dict, verbose=False):
+        &#34;&#34;&#34;
+        Break up config dict into individual simulation dicts.
+        
+        Args:
+            config_dict (dict): an instance of Parser.config_dict
+            verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args
+        &#34;&#34;&#34;
+        self.main_dict = config_dict.copy()
+        
+        self.__track_species_keys()
+        
+        self.breakup(verbose=verbose)
+        
+        return
+
+    def __track_species_keys(self):
+        &#34;&#34;&#34;Create a map of object name to species keys&#34;&#34;&#34;
+        species_map = {}
+        for k, v in self.main_dict[&#39;SPECIES&#39;].items():
+            species_map[v[&#39;NAME&#39;]] = k
+        self._species_map = species_map
+        return
+
+    def _convert_to_string(self, distribution_dict, bands):
+        &#34;&#34;&#34;
+        Convert distribution dict into callable method
+        
+        :param distribution_dict: dicitonary containing pdf info
+        :return: method: callable method as string
+        &#34;&#34;&#34;
+        #this some magic
+        if isinstance(distribution_dict[&#39;PARAMETERS&#39;], dict):
+            return distribution_dict[&#39;NAME&#39;] + &#39;(&#39; + &#39;, &#39;.join([&#39;{0}={1}&#39;.format(k, v) for k, v in distribution_dict[&#39;PARAMETERS&#39;].items()]) + &#39;, bands=&#34;{0}&#34;&#39;.format(&#39;,&#39;.join(bands)) + &#39;)&#39;
+        else:
+            return distribution_dict[&#39;NAME&#39;] + &#39;(bands=&#34;{0}&#34;)&#39;.format(&#39;,&#39;.join(bands))
+        
+
+    def _draw(self, distribution_dict, bands):
+        &#34;&#34;&#34;
+        Draw a random value from the specified distribution
+        
+        :param distribution_dict: dicitonary containing pdf info
+        :return: value: sampled value from distribution
+        &#34;&#34;&#34;
+        draw_command = &#39;distributions.{0}&#39;.format(self._convert_to_string(distribution_dict, bands))
+        return eval(draw_command)
+
+    def _choose_position(self, ra_host, dec_host, sep, sep_unit, cosmo, redshift=None, angle=None):
+        &#34;&#34;&#34;
+        Select an ra and dec that will be sep away from the host
+        
+        :param ra_host: x-coord of point source host
+        :param dec_host: y-coord of point source host
+        :param sep: angular separation between point source and host
+        :param sep_unit: either &#39;kpc&#39; or &#39;arcsec&#39;
+        :param redshift: cosmological redshift, required if units are in kpc
+        :param angle: desired position of point source in radians, random if None
+        :return: chosen_ra: x-coord of chosen point sep away from host
+        :return: chosen_dec: y-coord of chosen point sep away from host
+        &#34;&#34;&#34;
+        if angle is None:
+            angle = random.uniform(0.0, 2 * np.pi)
+
+        if sep_unit == &#39;arcsec&#39;:            
+            chosen_ra = np.cos(angle) * sep + ra_host
+            chosen_dec = np.sin(angle) * sep + dec_host
+        elif sep_unit == &#39;kpc&#39;:
+            kpc_to_arcsec = cosmo.arcsec_per_kpc_comoving(redshift).value / (1. + redshift)
+            chosen_ra = np.cos(angle) * sep * kpc_to_arcsec + ra_host
+            chosen_dec = np.sin(angle) * sep * kpc_to_arcsec + dec_host
+        else:
+            raise NotImplementedError(&#34;unexpected sep_unit&#34;)
+        
+        return chosen_ra, chosen_dec
+
+    def _find_obj_string(self, obj_name, configuration):
+        &#34;&#34;&#34;
+        Return the location of an object in the flattened dictionary
+        
+        :param obj_name: the name of the object
+        :param configuration: &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc.
+        :return: obj_string: the location of the object in the flattened dictionary
+        &#34;&#34;&#34;
+
+        d = KeyPathDict(self.main_dict[&#39;GEOMETRY&#39;][configuration].copy(), keypath_separator=&#39;.&#39;)
+        for x in d.keypaths():
+            f = &#34;[&#39;&#34; + &#34;&#39;][&#39;&#34;.join(x.split(&#39;.&#39;)) + &#34;&#39;]&#34;
+            k = eval(&#34;d&#34; + f)
+            if k == obj_name:
+                return x.replace(&#39;.&#39;, &#39;-&#39;)
+
+        #return [x.replace(&#39;.&#39;, &#39;-&#39;) for x in d.keypaths() if eval(&#34;d[&#39;&#34; + &#34;&#39;][&#39;&#34;.join(x.split(&#39;.&#39;)) + &#34;&#39;]&#34;) == obj_name][0]
+
+    
+    def _flatten_and_fill(self, config_dict, cosmo, objid=0):
+        &#34;&#34;&#34;
+        Flatten input dictionary, and sample from any specified distributions
+        
+        :param config_dict: dictionary built up by self.breakup()
+        :param cosmo: an astropy.cosmology instance
+        :return: flattened_and_filled dictionary: dict ready for individual image sim
+        &#34;&#34;&#34;
+        bands = config_dict[&#39;SURVEY_DICT&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)
+        output_dict = {x: {} for x in bands}
+
+        #Object IDs
+        for band in bands:
+            output_dict[band][&#39;OBJID&#39;] = objid
+        
+        #COSMOLOGY
+        for k, v in config_dict[&#39;COSMOLOGY_DICT&#39;].items():
+            if v != &#39;DISTRIBUTION&#39;:
+                for band in bands:
+                    output_dict[band][k] = v
+            else:
+                draws = self._draw(self.main_dict[&#39;COSMOLOGY&#39;][&#39;PARAMETERS&#39;][k][&#39;DISTRIBUTION&#39;], bands)
+                for band, draw in zip(bands, draws):
+                    output_dict[band][k] = draw
+
+        #IMAGE
+        for k, v in config_dict[&#39;IMAGE_DICT&#39;].items():
+            if v != &#39;DISTRIBUTION&#39;:
+                for band in bands:
+                    output_dict[band][k] = v
+            else:
+                draws = self._draw(self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;][k][&#39;DISTRIBUTION&#39;], bands)
+                for band, draw in zip(bands, draws):
+                    output_dict[band][k] = draw
+
+        #SURVEY
+        for k, v in config_dict[&#39;SURVEY_DICT&#39;].items():
+            if k == &#39;BANDS&#39;: 
+                continue
+            if v != &#39;DISTRIBUTION&#39;:
+                for band in bands:
+                    output_dict[band][k] = v
+            else:
+                draws = self._draw(self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][k][&#39;DISTRIBUTION&#39;], bands)
+                for band, draw in zip(bands, draws):
+                    output_dict[band][k] = draw
+
+        #NOISE
+        for band in bands:
+            output_dict[band][&#39;NUMBER_OF_NOISE_SOURCES&#39;] = config_dict[&#39;NOISE_DICT&#39;][&#39;NUMBER_OF_NOISE_SOURCES&#39;]
+        for noise_idx in range(config_dict[&#39;NOISE_DICT&#39;][&#39;NUMBER_OF_NOISE_SOURCES&#39;]):
+            noise_source_num = noise_idx + 1
+            noise_name = config_dict[&#39;NOISE_DICT&#39;][&#39;NOISE_SOURCE_{0}-NAME&#39;.format(noise_source_num)]
+            for band in bands:
+                output_dict[band][&#39;NOISE_SOURCE_{0}-NAME&#39;.format(noise_source_num)] = noise_name
+            for k, v in self.main_dict[&#39;SPECIES&#39;][self._species_map[noise_name]][&#39;PARAMETERS&#39;].items():
+                if isinstance(v, dict):
+                    draws = self._draw(v[&#39;DISTRIBUTION&#39;], bands)
+                    for band, draw in zip(bands, draws):
+                        output_dict[band][&#39;NOISE_SOURCE_{0}-{1}&#39;.format(noise_source_num, k)] = draw
+                else:
+                    for band in bands:
+                        output_dict[band][&#39;NOISE_SOURCE_{0}-{1}&#39;.format(noise_source_num, k)] = v
+
+        #REAL OBJECTS
+        for k, v in config_dict[&#39;SIM_DICT&#39;].items():
+            for band in bands:
+                output_dict[band][k] = v
+
+        for plane_idx in range(config_dict[&#39;SIM_DICT&#39;][&#39;NUMBER_OF_PLANES&#39;]):
+            geometry_key = config_dict[&#39;SIM_DICT&#39;][&#39;CONFIGURATION_LABEL&#39;]
+            plane_num = plane_idx + 1
+
+            #GEOMETRY
+            for k_param, v_param in self.main_dict[&#39;GEOMETRY&#39;][geometry_key][&#39;PLANE_{0}&#39;.format(plane_num)][&#39;PARAMETERS&#39;].items():
+                if isinstance(v_param, dict):
+                    draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+
+                    # Set the PLANE&#39;s redshift in the config_dict
+                    if k_param == &#39;REDSHIFT&#39;:
+                        config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-REDSHIFT&#39;.format(plane_num)] = draws[0]
+                    
+                    for band, draw in zip(bands, draws):
+                        for obj_num in range(1, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)] + 1):
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = draw
+                else:
+                    # Set the PLANE&#39;s redshift in the config_dict
+                    if k_param == &#39;REDSHIFT&#39;:
+                        config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-REDSHIFT&#39;.format(plane_num)] = v_param
+                    
+                    for band in bands:
+                        for obj_num in range(1, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)] + 1):
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = v_param
+
+            for obj_idx in range(config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)]):
+                obj_num = obj_idx + 1
+                obj_name = config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, obj_num)]
+                
+                #save number of profiles
+                for band in bands:
+                    output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NUMBER_OF_LIGHT_PROFILES&#39;.format(plane_num, obj_num)] = config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_LIGHT_PROFILES&#39;]
+                    output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NUMBER_OF_SHEAR_PROFILES&#39;.format(plane_num, obj_num)] = config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_SHEAR_PROFILES&#39;]
+                    output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NUMBER_OF_MASS_PROFILES&#39;.format(plane_num, obj_num)] = config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_MASS_PROFILES&#39;]
+
+                #SPECIES- Point Sources
+                if &#39;HOST&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]].keys():
+                    host = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;HOST&#39;]
+                    if host != &#39;Foreground&#39;:
+                        # Get host center
+                        possible_hostids = [&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, x) for x in range(1, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(plane_num)] + 1)]
+                        hostid = [x[0:-5] for x in possible_hostids if config_dict[&#39;SIM_DICT&#39;][x] == host][0]
+                        ra_host, dec_host = output_dict[bands[0]][hostid + &#39;-LIGHT_PROFILE_1-center_x&#39;], output_dict[bands[0]][hostid + &#39;-LIGHT_PROFILE_1-center_y&#39;]
+                        
+                        # Determine location of point source in image
+                        if &#39;sep&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;].keys():
+                            sep_unit = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep_unit&#39;]
+                            if isinstance(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep&#39;], dict):
+                                draws = self._draw(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep&#39;][&#39;DISTRIBUTION&#39;], bands)
+                                sep = draws[0]
+                            else:
+                                sep = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;sep&#39;]
+
+                            if &#39;angle&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;].keys():    
+                                if isinstance(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;angle&#39;], dict):
+                                    draws = self._draw(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;angle&#39;][&#39;DISTRIBUTION&#39;], bands)
+                                    angle = draws[0]
+                                else:
+                                    angle = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;angle&#39;]
+                            else:
+                                angle = None
+                                
+                            ##convert image separation into ra and dec
+                            ra, dec = self._choose_position(ra_host, dec_host, sep, sep_unit, cosmo, config_dict[&#39;SIM_DICT&#39;][&#39;PLANE_{0}-REDSHIFT&#39;.format(plane_num)], angle)
+
+                        else:
+                            #set ra and dec to host center
+                            ra, dec = ra_host, dec_host
+                            sep = 0.0
+                            sep_unit = &#39;arcsec&#39;
+
+                        for band in bands:
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-HOST&#39;.format(plane_num, obj_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;HOST&#39;]
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, obj_num)] = obj_name
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-ra&#39;.format(plane_num, obj_num)] = ra
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-dec&#39;.format(plane_num, obj_num)] = dec
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-sep&#39;.format(plane_num, obj_num)] = sep
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-sep_unit&#39;.format(plane_num, obj_num)] = sep_unit
+                    else:
+                        #foreground, choose position randomly
+                        im_size = self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;][&#39;numPix&#39;] * self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;][&#39;pixel_scale&#39;] / 2
+                        ra, dec = random.uniform(-1 * im_size, im_size), random.uniform(-1 * im_size, im_size)
+                        if isinstance(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;magnitude&#39;], dict):
+                            draws = self._draw(self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;magnitude&#39;][&#39;DISTRIBUTION&#39;], bands)
+                        else:
+                            draws = [self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;][&#39;magnitude&#39;]] * len(bands)
+                        for band, magnitude in zip(bands, draws):
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-HOST&#39;.format(plane_num, obj_num)] = &#39;Foreground&#39;
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-NAME&#39;.format(plane_num, obj_num)] = obj_name
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-ra_image&#39;.format(plane_num, obj_num)] = ra
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-dec_image&#39;.format(plane_num, obj_num)] = dec
+                            output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-magnitude&#39;.format(plane_num, obj_num)] = magnitude
+                        
+                        
+                else:
+                     for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-HOST&#39;.format(plane_num, obj_num)] = &#39;None&#39;
+
+                #SPECIES- Light Profiles
+                for light_profile_idx in range(config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_LIGHT_PROFILES&#39;]):
+                    light_profile_num = light_profile_idx + 1
+                    for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-LIGHT_PROFILE_{2}-NAME&#39;.format(plane_num, obj_num, light_profile_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;LIGHT_PROFILE_{0}&#39;.format(light_profile_num)][&#39;NAME&#39;]
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;LIGHT_PROFILE_{0}&#39;.format(light_profile_num)][&#39;PARAMETERS&#39;].items():
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-LIGHT_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, light_profile_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-LIGHT_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, light_profile_num, k_param)] = v_param
+
+                #SPECIES- Mass Profiles
+                for mass_profile_idx in range(config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_MASS_PROFILES&#39;]):
+                    mass_profile_num = mass_profile_idx + 1
+                    for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-MASS_PROFILE_{2}-NAME&#39;.format(plane_num, obj_num, mass_profile_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;MASS_PROFILE_{0}&#39;.format(mass_profile_num)][&#39;NAME&#39;]
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;MASS_PROFILE_{0}&#39;.format(mass_profile_num)][&#39;PARAMETERS&#39;].items():
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-MASS_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, mass_profile_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-MASS_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, mass_profile_num, k_param)] = v_param
+
+                #SPECIES- Shear Profiles
+                for shear_profile_idx in range(config_dict[&#39;SPECIES_DICT&#39;][obj_name][&#39;NUMBER_OF_SHEAR_PROFILES&#39;]):
+                    shear_profile_num = shear_profile_idx + 1
+                    for band in bands:
+                        output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-SHEAR_PROFILE_{2}-NAME&#39;.format(plane_num, obj_num, shear_profile_num)] = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;SHEAR_PROFILE_{0}&#39;.format(shear_profile_num)][&#39;NAME&#39;]
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;SHEAR_PROFILE_{0}&#39;.format(shear_profile_num)][&#39;PARAMETERS&#39;].items():
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-SHEAR_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, shear_profile_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-SHEAR_PROFILE_{2}-{3}&#39;.format(plane_num, obj_num, shear_profile_num, k_param)] = v_param
+
+                #SPECIES- Additional Parameters
+                if &#39;PARAMETERS&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]].keys():
+                    for k_param, v_param in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;PARAMETERS&#39;].items():
+                        if k_param == &#39;sep&#39;:
+                            #sampling for point source separation is already done, so don&#39;t overwrite it
+                            continue
+                        if isinstance(v_param, dict):
+                            draws = self._draw(v_param[&#39;DISTRIBUTION&#39;], bands)
+                            for band, draw in zip(bands, draws):
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = draw
+                        else:
+                            for band in bands:
+                                output_dict[band][&#39;PLANE_{0}-OBJECT_{1}-{2}&#39;.format(plane_num, obj_num, k_param)] = v_param
+
+                #SPECIES- Special
+                if &#39;SPECIAL&#39; in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]].keys():
+                    for mode, args in self.main_dict[&#39;SPECIES&#39;][self._species_map[obj_name]][&#39;SPECIAL&#39;].items():
+                        for arg in args:
+                            output_dict = eval(&#39;special.{0}(output_dict, &#34;{1}&#34;, bands=bands)&#39;.format(mode.lower(), arg))
+                
+        return output_dict
+
+
+    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid):
+        &#34;&#34;&#34;
+        Generate an image info dictionary for each step in the time series
+
+        :param config_dict: dictionary built up by self.breakup()
+        :param configuration: CONFIGURATION_1, CONFIGURATION_2, etc.
+        :param obj_string: list of the strings targetting the object in the flattened dictionary (e.g. [&#39;PLANE_2-OBJECT_2&#39;])
+        :return: flattened_and_filled dictionary: dict ready for individual image sim  
+        &#34;&#34;&#34;
+        output_dicts = []
+        bands = self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)
+        # Get flattened and filled dictionary
+        base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
+
+        closest_redshift_lcs = []
+        for obj_name, obj_string in zip(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], obj_strings):
+            # determine closest lc in library to redshift
+            redshift = base_output_dict[bands[0]][obj_string + &#39;-REDSHIFT&#39;]
+            lcs = eval(&#39;self.{0}_{1}_lightcurves&#39;.format(configuration, obj_name))
+            closest_redshift_lcs.append(lcs[&#39;library&#39;][np.argmin(np.abs(redshift - lcs[&#39;redshifts&#39;]))])
+            
+        # overwrite the image sim dictionary
+        fake_noise = np.random.normal(scale=0.15, loc=0, size=len(obj_strings) * len(bands) * len(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]))
+        noise_idx = 0
+        for nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
+            output_dict = base_output_dict.copy()
+            for band in bands:
+                for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
+
+                    try:
+                        #try using the exact night
+                        output_dict[band][obj_string + &#39;-magnitude&#39;] = closest_redshift_lc[&#39;lc&#39;][&#39;MAG&#39;].values[(closest_redshift_lc[&#39;lc&#39;][&#39;BAND&#39;].values == band) &amp; (closest_redshift_lc[&#39;lc&#39;][&#39;NITE&#39;].values == nite)][0] + fake_noise[noise_idx]
+                    except:
+                        #linearly interpolate between the closest two nights
+                        band_df = closest_redshift_lc[&#39;lc&#39;][closest_redshift_lc[&#39;lc&#39;][&#39;BAND&#39;].values == band].copy().reset_index(drop=True)
+                        closest_nite_indices = np.abs(nite - band_df[&#39;NITE&#39;].values).argsort()[:2]
+                        output_dict[band][obj_string + &#39;-magnitude&#39;] = (band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] - band_df[&#39;MAG&#39;].values[closest_nite_indices[0]]) * (nite - band_df[&#39;NITE&#39;].values[closest_nite_indices[1]]) / (band_df[&#39;NITE&#39;].values[closest_nite_indices[1]] - band_df[&#39;NITE&#39;].values[closest_nite_indices[0]]) + band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] + fake_noise[noise_idx]
+
+                    output_dict[band][obj_string + &#39;-nite&#39;] = nite
+                    output_dict[band][obj_string + &#39;-id&#39;] = closest_redshift_lc[&#39;sed&#39;]
+                    output_dict[band][obj_string + &#39;-type&#39;] = closest_redshift_lc[&#39;obj_type&#39;]
+
+                    noise_idx += 1
+
+                # Use independent observing conditions for each nite if conditions are drawn from distributions
+                # seeing
+                if isinstance(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;seeing&#34;], dict):
+                    output_dict[band][&#34;seeing&#34;] = self._draw(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;seeing&#34;][&#34;DISTRIBUTION&#34;], bands=band)[0]
+                # sky_brightness
+                if isinstance(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;sky_brightness&#34;], dict):
+                    output_dict[band][&#34;sky_brightness&#34;] = self._draw(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;sky_brightness&#34;][&#34;DISTRIBUTION&#34;], bands=band)[0]
+                # magnitude_zero_point
+                if isinstance(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;magnitude_zero_point&#34;], dict):
+                    output_dict[band][&#34;magnitude_zero_point&#34;] = self._draw(self.main_dict[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;magnitude_zero_point&#34;][&#34;DISTRIBUTION&#34;], bands=band)[0]
+
+                    
+            output_dicts.append(copy.deepcopy(output_dict))
+            del output_dict
+                    
+        return output_dicts
+
+    def generate_time_series(self, configuration, nites, objects, redshift_dicts, cosmo):
+        &#34;&#34;&#34;
+        Generate a light curve bank for each configuration with timeseries info
+
+        Args:
+            configuration (str): like &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc...
+            nites (List[int]): a list of nites relative to explosion to get a photometric measurement  
+            objects (List[str]):  a list of object names   
+            redshift_dicts (List[dict]): a list of redshift information about the objects
+            cosmo (astropy.cosmology): An astropy.cosmology instance for distance calculations
+        &#34;&#34;&#34;
+
+        # instantiate an LCGen object
+        lc_gen = timeseries.LCGen(bands=self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;])
+
+        for obj, redshift_dict in zip(objects, redshift_dicts):
+            lc_library = []
+
+            # get redshifts to simulate light curves at
+            if isinstance(redshift_dict, dict):
+                drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
+                redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
+            else:
+                redshifts = np.array([redshift_dict])
+
+            # get model to simulate
+            model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
+            if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
+                for redshift in redshifts:
+                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)&#39;.format(model_info[0])))
+            else:
+                for redshift in redshifts:
+                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+            
+            setattr(self, configuration + &#39;_&#39; + obj + &#39;_&#39; + &#39;lightcurves&#39;, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
+        
+        return
+    
+    def breakup(self, verbose=False):
+        &#34;&#34;&#34;
+        Based on configurations and dataset size, build list of simulation dicts.
+
+        Args:
+            verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args.
+        &#34;&#34;&#34;
+        # Determine number of images to simulate for each configuration
+        global_size = self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;SIZE&#39;]
+        configurations = {}
+        for k, v in self.main_dict[&#39;GEOMETRY&#39;].items():
+            configurations[k] = v
+            configurations[k][&#39;SIZE&#39;] = int(global_size * v[&#39;FRACTION&#39;])
+
+        # Determine objects and their planes, store in SIM_DICT key
+        for k, v in configurations.items():
+            sim_dict = {}
+            
+            sim_dict[&#39;CONFIGURATION_LABEL&#39;] = k
+            sim_dict[&#39;CONFIGURATION_NAME&#39;] = v[&#39;NAME&#39;]
+            sim_dict[&#39;NUMBER_OF_PLANES&#39;] = len([x for x in v.keys() if x.find(&#39;PLANE&#39;) != -1])
+            
+            for config_key, config_dict in v.items():
+                if config_key.find(&#39;PLANE&#39;) != -1:
+                    sim_dict[&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(config_key.split(&#39;_&#39;)[-1])] = len([y for y in config_dict.keys() if y.find(&#39;OBJECT&#39;) != -1])
+                    for obj_index in [x.split(&#39;_&#39;)[-1] for x in [y for y in config_dict.keys() if y.find(&#39;OBJECT&#39;) != -1]]:
+                        sim_dict[config_key + &#39;-&#39; + &#39;OBJECT_{0}-NAME&#39;.format(obj_index)] = config_dict[&#39;OBJECT_{0}&#39;.format(obj_index)]
+                    
+            configurations[k][&#39;SIM_DICT&#39;] = sim_dict
+            configurations[k] = dict_select(configurations[k], [&#39;NAME&#39;, &#39;SIZE&#39;, &#39;SIM_DICT&#39;])
+            
+        # Determine number of profiles for each object
+        species_dict = {}
+        for k, v in self.main_dict[&#39;SPECIES&#39;].items():
+            species_dict[v[&#39;NAME&#39;]] = {&#39;NUMBER_OF_LIGHT_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;LIGHT_PROFILE&#39;) != -1]),
+                                       &#39;NUMBER_OF_MASS_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;MASS_PROFILE&#39;) != -1]),
+                                       &#39;NUMBER_OF_SHEAR_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;SHEAR_PROFILE&#39;) != -1])}
+        for k in configurations.keys():
+            configurations[k][&#39;SPECIES_DICT&#39;] = species_dict
+
+        # Add image metadata
+        image_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;].items()}
+        for k in configurations.keys():
+            configurations[k][&#39;IMAGE_DICT&#39;] = image_dict
+        
+        # Add survey metadata
+        survey_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;].items()}
+        #survey_dict[&#39;NAME&#39;] = self.main_dict[&#39;SURVEY&#39;][&#39;NAME&#39;]
+        for k in configurations.keys():
+            configurations[k][&#39;SURVEY_DICT&#39;] = survey_dict
+            
+        # Add cosmology metadata
+        cosmo_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;COSMOLOGY&#39;][&#39;PARAMETERS&#39;].items()}
+        #cosmo_dict[&#39;NAME&#39;] = self.main_dict[&#39;COSMOLOGY&#39;][&#39;NAME&#39;]
+        for k in configurations.keys():
+            configurations[k][&#39;COSMOLOGY_DICT&#39;] = cosmo_dict
+
+        # Set cosmology information
+        cosmology_info = [&#39;H0&#39;, &#39;Om0&#39;, &#39;Tcmb0&#39;, &#39;Neff&#39;, &#39;m_nu&#39;, &#39;Ob0&#39;]
+        cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k][&#39;COSMOLOGY_DICT&#39;], cosmology_info))
+            
+        # Add noise metadata
+        for k in configurations.keys():
+            noise_dict = {}
+            number_of_noise_sources = len([x for x in self.main_dict[&#39;GEOMETRY&#39;][k].keys() if x.find(&#39;NOISE_SOURCE&#39;) != -1])
+            noise_dict[&#39;NUMBER_OF_NOISE_SOURCES&#39;] = number_of_noise_sources
+            for noise_source_idx in range(number_of_noise_sources):
+                noise_source_num = noise_source_idx + 1
+                noise_dict[&#39;NOISE_SOURCE_{0}-NAME&#39;.format(noise_source_num)] = self.main_dict[&#39;GEOMETRY&#39;][k][&#39;NOISE_SOURCE_{0}&#39;.format(noise_source_num)]
+            configurations[k][&#39;NOISE_DICT&#39;] = noise_dict
+            
+        # Check for timeseries metadata
+        for k in configurations.keys():
+            setattr(self, k + &#39;_time_series&#39;, False)
+            if &#39;TIMESERIES&#39; in self.main_dict[&#39;GEOMETRY&#39;][k].keys():
+                
+                # Make a directory to store light curve data
+                if not os.path.exists(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;]):
+                    os.mkdir(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;])
+                    
+                if not os.path.exists(&#39;{0}/lightcurves&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;])):
+                    os.mkdir(&#39;{0}/lightcurves&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;]))
+
+                # Find the plane of the ojects and save the redshift sub-dict
+                redshift_dicts = []
+                for obj_name in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]:
+                    for sub_k in self.main_dict[&#39;GEOMETRY&#39;][k].keys():
+                        if sub_k[0:5] == &#39;PLANE&#39;:
+                            for sub_sub_k in self.main_dict[&#39;GEOMETRY&#39;][k][sub_k].keys():
+                                if sub_sub_k[0:6] == &#39;OBJECT&#39;:
+                                    if self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][sub_sub_k] == obj_name:
+                                        if isinstance(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;], dict):
+                                            redshift_dicts.append(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;].copy())
+                                        else:
+                                            redshift_dicts.append(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;] + 0.0)
+
+                if verbose: print(&#34;Generating time series data for {0}&#34;.format(k))
+
+                # If light curves already exist, skip generation
+                #if os.path.exists(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])):
+                #    setattr(self, k + &#39;_{0}_lightcurves&#39;.format(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0]), np.load(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])), allow_pickle=True) 
+                #else:
+                #    self.generate_time_series(k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;NITES&#39;], self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], redshift_dicts, cosmo)
+                #    np.save(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0]), eval(&#39;self.&#39; + k + &#39;_{0}_lightcurves&#39;.format(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])), allow_pickle=True)
+
+                # Generate the time-series data
+                self.generate_time_series(k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;NITES&#39;], self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], redshift_dicts, cosmo)
+                setattr(self, k + &#39;_time_series&#39;, True)
+
+                
+        # For each configuration, generate full sim info for as many objects as user specified
+        configuration_sim_dicts = {}
+        if verbose: print(&#34;Entering main organization loop&#34;)
+        for k, v in configurations.items():
+            if verbose: print(&#34;Organizing {0}&#34;.format(k))
+            configuration_sim_dicts[k] = []
+
+            time_series = eval(&#39;self.{0}_time_series&#39;.format(k))
+            if time_series:
+                # Get string referencing the varaible object
+                obj_strings = [self._find_obj_string(x, k) for x in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]]
+
+            for objid in range(v[&#39;SIZE&#39;]):
+
+                if time_series:
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
+                    for flattened_image_info in flattened_image_infos:
+                        configuration_sim_dicts[k].append(flattened_image_info)
+                else:
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, objid))    
+
+        self.configuration_sim_dicts = configuration_sim_dicts</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="deeplenstronomy.input_reader.Organizer.breakup"><code class="name flex">
+<span>def <span class="ident">breakup</span></span>(<span>self, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Based on configurations and dataset size, build list of simulation dicts.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool</code>, optional, default=<code>False</code></dt>
+<dd>Automatically passed from deeplenstronomy.make_dataset() args.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def breakup(self, verbose=False):
+    &#34;&#34;&#34;
+    Based on configurations and dataset size, build list of simulation dicts.
+
+    Args:
+        verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args.
+    &#34;&#34;&#34;
+    # Determine number of images to simulate for each configuration
+    global_size = self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;SIZE&#39;]
+    configurations = {}
+    for k, v in self.main_dict[&#39;GEOMETRY&#39;].items():
+        configurations[k] = v
+        configurations[k][&#39;SIZE&#39;] = int(global_size * v[&#39;FRACTION&#39;])
+
+    # Determine objects and their planes, store in SIM_DICT key
+    for k, v in configurations.items():
+        sim_dict = {}
+        
+        sim_dict[&#39;CONFIGURATION_LABEL&#39;] = k
+        sim_dict[&#39;CONFIGURATION_NAME&#39;] = v[&#39;NAME&#39;]
+        sim_dict[&#39;NUMBER_OF_PLANES&#39;] = len([x for x in v.keys() if x.find(&#39;PLANE&#39;) != -1])
+        
+        for config_key, config_dict in v.items():
+            if config_key.find(&#39;PLANE&#39;) != -1:
+                sim_dict[&#39;PLANE_{0}-NUMBER_OF_OBJECTS&#39;.format(config_key.split(&#39;_&#39;)[-1])] = len([y for y in config_dict.keys() if y.find(&#39;OBJECT&#39;) != -1])
+                for obj_index in [x.split(&#39;_&#39;)[-1] for x in [y for y in config_dict.keys() if y.find(&#39;OBJECT&#39;) != -1]]:
+                    sim_dict[config_key + &#39;-&#39; + &#39;OBJECT_{0}-NAME&#39;.format(obj_index)] = config_dict[&#39;OBJECT_{0}&#39;.format(obj_index)]
+                
+        configurations[k][&#39;SIM_DICT&#39;] = sim_dict
+        configurations[k] = dict_select(configurations[k], [&#39;NAME&#39;, &#39;SIZE&#39;, &#39;SIM_DICT&#39;])
+        
+    # Determine number of profiles for each object
+    species_dict = {}
+    for k, v in self.main_dict[&#39;SPECIES&#39;].items():
+        species_dict[v[&#39;NAME&#39;]] = {&#39;NUMBER_OF_LIGHT_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;LIGHT_PROFILE&#39;) != -1]),
+                                   &#39;NUMBER_OF_MASS_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;MASS_PROFILE&#39;) != -1]),
+                                   &#39;NUMBER_OF_SHEAR_PROFILES&#39;: len([x for x in v.keys() if x.find(&#39;SHEAR_PROFILE&#39;) != -1])}
+    for k in configurations.keys():
+        configurations[k][&#39;SPECIES_DICT&#39;] = species_dict
+
+    # Add image metadata
+    image_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;IMAGE&#39;][&#39;PARAMETERS&#39;].items()}
+    for k in configurations.keys():
+        configurations[k][&#39;IMAGE_DICT&#39;] = image_dict
+    
+    # Add survey metadata
+    survey_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;].items()}
+    #survey_dict[&#39;NAME&#39;] = self.main_dict[&#39;SURVEY&#39;][&#39;NAME&#39;]
+    for k in configurations.keys():
+        configurations[k][&#39;SURVEY_DICT&#39;] = survey_dict
+        
+    # Add cosmology metadata
+    cosmo_dict = {k: v if not isinstance(v, dict) else &#39;DISTRIBUTION&#39; for k, v in self.main_dict[&#39;COSMOLOGY&#39;][&#39;PARAMETERS&#39;].items()}
+    #cosmo_dict[&#39;NAME&#39;] = self.main_dict[&#39;COSMOLOGY&#39;][&#39;NAME&#39;]
+    for k in configurations.keys():
+        configurations[k][&#39;COSMOLOGY_DICT&#39;] = cosmo_dict
+
+    # Set cosmology information
+    cosmology_info = [&#39;H0&#39;, &#39;Om0&#39;, &#39;Tcmb0&#39;, &#39;Neff&#39;, &#39;m_nu&#39;, &#39;Ob0&#39;]
+    cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k][&#39;COSMOLOGY_DICT&#39;], cosmology_info))
+        
+    # Add noise metadata
+    for k in configurations.keys():
+        noise_dict = {}
+        number_of_noise_sources = len([x for x in self.main_dict[&#39;GEOMETRY&#39;][k].keys() if x.find(&#39;NOISE_SOURCE&#39;) != -1])
+        noise_dict[&#39;NUMBER_OF_NOISE_SOURCES&#39;] = number_of_noise_sources
+        for noise_source_idx in range(number_of_noise_sources):
+            noise_source_num = noise_source_idx + 1
+            noise_dict[&#39;NOISE_SOURCE_{0}-NAME&#39;.format(noise_source_num)] = self.main_dict[&#39;GEOMETRY&#39;][k][&#39;NOISE_SOURCE_{0}&#39;.format(noise_source_num)]
+        configurations[k][&#39;NOISE_DICT&#39;] = noise_dict
+        
+    # Check for timeseries metadata
+    for k in configurations.keys():
+        setattr(self, k + &#39;_time_series&#39;, False)
+        if &#39;TIMESERIES&#39; in self.main_dict[&#39;GEOMETRY&#39;][k].keys():
+            
+            # Make a directory to store light curve data
+            if not os.path.exists(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;]):
+                os.mkdir(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;])
+                
+            if not os.path.exists(&#39;{0}/lightcurves&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;])):
+                os.mkdir(&#39;{0}/lightcurves&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;]))
+
+            # Find the plane of the ojects and save the redshift sub-dict
+            redshift_dicts = []
+            for obj_name in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]:
+                for sub_k in self.main_dict[&#39;GEOMETRY&#39;][k].keys():
+                    if sub_k[0:5] == &#39;PLANE&#39;:
+                        for sub_sub_k in self.main_dict[&#39;GEOMETRY&#39;][k][sub_k].keys():
+                            if sub_sub_k[0:6] == &#39;OBJECT&#39;:
+                                if self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][sub_sub_k] == obj_name:
+                                    if isinstance(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;], dict):
+                                        redshift_dicts.append(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;].copy())
+                                    else:
+                                        redshift_dicts.append(self.main_dict[&#39;GEOMETRY&#39;][k][sub_k][&#39;PARAMETERS&#39;][&#39;REDSHIFT&#39;] + 0.0)
+
+            if verbose: print(&#34;Generating time series data for {0}&#34;.format(k))
+
+            # If light curves already exist, skip generation
+            #if os.path.exists(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])):
+            #    setattr(self, k + &#39;_{0}_lightcurves&#39;.format(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0]), np.load(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])), allow_pickle=True) 
+            #else:
+            #    self.generate_time_series(k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;NITES&#39;], self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], redshift_dicts, cosmo)
+            #    np.save(&#39;{0}/lightcurves/{1}_{2}.npy&#39;.format(self.main_dict[&#39;DATASET&#39;][&#39;PARAMETERS&#39;][&#39;OUTDIR&#39;], k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0]), eval(&#39;self.&#39; + k + &#39;_{0}_lightcurves&#39;.format(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;][0])), allow_pickle=True)
+
+            # Generate the time-series data
+            self.generate_time_series(k, self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;NITES&#39;], self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], redshift_dicts, cosmo)
+            setattr(self, k + &#39;_time_series&#39;, True)
+
+            
+    # For each configuration, generate full sim info for as many objects as user specified
+    configuration_sim_dicts = {}
+    if verbose: print(&#34;Entering main organization loop&#34;)
+    for k, v in configurations.items():
+        if verbose: print(&#34;Organizing {0}&#34;.format(k))
+        configuration_sim_dicts[k] = []
+
+        time_series = eval(&#39;self.{0}_time_series&#39;.format(k))
+        if time_series:
+            # Get string referencing the varaible object
+            obj_strings = [self._find_obj_string(x, k) for x in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]]
+
+        for objid in range(v[&#39;SIZE&#39;]):
+
+            if time_series:
+                flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
+                for flattened_image_info in flattened_image_infos:
+                    configuration_sim_dicts[k].append(flattened_image_info)
+            else:
+                configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, objid))    
+
+    self.configuration_sim_dicts = configuration_sim_dicts</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.input_reader.Organizer.generate_time_series"><code class="name flex">
+<span>def <span class="ident">generate_time_series</span></span>(<span>self, configuration, nites, objects, redshift_dicts, cosmo)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a light curve bank for each configuration with timeseries info</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>configuration</code></strong> :&ensp;<code>str</code></dt>
+<dd>like 'CONFIGURATION_1', 'CONFIGURATION_2', etc&hellip;</dd>
+<dt><strong><code>nites</code></strong> :&ensp;<code>List[int]</code></dt>
+<dd>a list of nites relative to explosion to get a photometric measurement
+</dd>
+<dt><strong><code>objects</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>a list of object names
+</dd>
+<dt><strong><code>redshift_dicts</code></strong> :&ensp;<code>List[dict]</code></dt>
+<dd>a list of redshift information about the objects</dd>
+<dt><strong><code>cosmo</code></strong> :&ensp;<code>astropy.cosmology</code></dt>
+<dd>An astropy.cosmology instance for distance calculations</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_time_series(self, configuration, nites, objects, redshift_dicts, cosmo):
+    &#34;&#34;&#34;
+    Generate a light curve bank for each configuration with timeseries info
+
+    Args:
+        configuration (str): like &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc...
+        nites (List[int]): a list of nites relative to explosion to get a photometric measurement  
+        objects (List[str]):  a list of object names   
+        redshift_dicts (List[dict]): a list of redshift information about the objects
+        cosmo (astropy.cosmology): An astropy.cosmology instance for distance calculations
+    &#34;&#34;&#34;
+
+    # instantiate an LCGen object
+    lc_gen = timeseries.LCGen(bands=self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;])
+
+    for obj, redshift_dict in zip(objects, redshift_dicts):
+        lc_library = []
+
+        # get redshifts to simulate light curves at
+        if isinstance(redshift_dict, dict):
+            drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
+            redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
+        else:
+            redshifts = np.array([redshift_dict])
+
+        # get model to simulate
+        model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
+        if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
+            for redshift in redshifts:
+                lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)&#39;.format(model_info[0])))
+        else:
+            for redshift in redshifts:
+                lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+        
+        setattr(self, configuration + &#39;_&#39; + obj + &#39;_&#39; + &#39;lightcurves&#39;, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
+    
+    return</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="deeplenstronomy.input_reader.Parser"><code class="flex name class">
+<span>class <span class="ident">Parser</span></span>
+<span>(</span><span>config, survey=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load yaml inputs into a single dictionary and trigger automatic checks for user errors.</p>
+<p>Args:
+config (str): name of yaml configuration file
+survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Parser():
+    &#34;&#34;&#34; 
+    Load yaml inputs into a single dictionary and trigger automatic checks for user errors.
+
+    &#34;&#34;&#34;
+
+    def __init__(self, config, survey=None):
+        &#34;&#34;&#34;
+        Args: 
+            config (str): name of yaml configuration file
+            survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args
+        &#34;&#34;&#34;
+        
+        # Check for annoying tabs - there&#39;s probably a better way to do this
+        self._parse_for_tabs(config)
+
+        # Fill in sections of the configuration file for a specific survey
+        if survey is not None:
+            config = self.write_survey(config, survey)
+        
+        # Read main configuration file
+        self.full_dict = self.read(config)
+        
+        # If the main file points to any input files, read those too
+        self._get_input_locations()
+        self._include_inputs()
+
+        # Check for user-specifed probability distributions and backgrounds
+        self._get_file_locations()
+        self._get_image_locations()
+        
+        # Check for user errors in inputs
+        self.check()
+
+        return
+
+
+    def write_survey(self, config, survey):
+        &#34;&#34;&#34;
+        Writes survey information to config file. Creates a new file named {survey}_{config}
+        by copying the contents of {config} and appending the IMAGE and SURVEY sections for 
+        a desired survey. The yaml parser will automatically overwrite the IMAGE and SURVEY
+        dictionary keys.
+
+        Args:
+            config (str): name of yaml configuration file
+            survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args
+
+        Returns:
+            outfile (str): name of survey-specific configuration file
+        &#34;&#34;&#34;
+        # set new config file name
+        config_basename = config.split(&#39;/&#39;)
+        if len(config_basename) == 1:
+            outfile = survey + &#39;_&#39; + config
+        else:
+            outfile = &#39;/&#39;.join(config_basename[0:-1]) + &#39;/&#39; + survey + &#39;_&#39; + config_basename[-1]
+
+        # write new config file
+        with open(config, &#39;r&#39;) as old, open(outfile, &#39;w+&#39;) as new:
+            new.writelines(old.readlines())
+            new.writelines(eval(&#34;surveys.{}()&#34;.format(survey)))
+        return outfile
+    
+    def _include_inputs(self):
+        &#34;&#34;&#34;
+        Searches for uses of the keyword INPUT and adds the file contents to the main configuration dictionary.
+        &#34;&#34;&#34;
+        config_dict = KeyPathDict(self.full_dict.copy(), keypath_separator=&#39;.&#39;)
+        
+        for input_path in self.input_paths:
+            input_dict = self.read(eval(&#39;config_dict[&#34;&#39; + input_path.replace(&#39;.&#39;, &#39;&#34;][&#34;&#39;) + &#39;&#34;][&#34;INPUT&#34;]&#39;))
+            for k, v in input_dict.items():
+                exec(&#39;config_dict[&#34;&#39; + input_path.replace(&#39;.&#39;, &#39;&#34;][&#34;&#39;) + &#39;&#34;][k] = v&#39;)
+
+        self.config_dict = config_dict
+        return    
+
+    def _get_input_locations(self):
+        input_paths = self._get_kw_locations(&#34;INPUT&#34;)
+        self.input_paths = input_paths
+        return
+
+    def _get_file_locations(self):        
+        file_paths = []
+        if &#34;DISTRIBUTIONS&#34; in self.full_dict.keys():
+            for k in self.full_dict[&#39;DISTRIBUTIONS&#39;].keys():
+                file_paths.append(&#39;DISTRIBUTIONS.&#39; + k)
+        self.file_paths = file_paths
+
+        return
+
+    def _get_image_locations(self):
+        file_paths = []
+        image_configurations = []
+        if &#34;BACKGROUNDS&#34; in self.full_dict.keys():
+            file_paths.append(self.full_dict[&#39;BACKGROUNDS&#39;][&#39;PATH&#39;])
+            self.image_configurations = self.full_dict[&#39;BACKGROUNDS&#39;][&#39;CONFIGURATIONS&#39;][:]
+        self.image_paths = file_paths
+
+        return
+    
+    def _get_kw_locations(self, kw):
+        &#34;&#34;&#34;
+        Find locations in main dictionary where a keyword is used
+
+        :param kw: str, a keyword to search the dict keys for
+        :return: paths: list, the keypaths to all occurances of kw
+        &#34;&#34;&#34;
+        d = KeyPathDict(self.full_dict, keypath_separator=&#39;.&#39;)
+        locs = [x.find(kw) for x in d.keypaths()]
+        paths = [y for y in [x[0:k-1] if k != -1 else &#39;&#39; for x, k in zip(d.keypaths(), locs)] if y != &#39;&#39;]
+        return paths
+
+
+    def read(self, config):
+        &#34;&#34;&#34;
+        Reads config file into a dictionary and returns it.
+        
+        Args:
+            config (str): Name of config file.
+        
+        Returns:
+            config_dict (dict): Dictionary containing config information.
+        &#34;&#34;&#34;
+
+        with open(config, &#39;r&#39;) as config_file_obj:
+            config_dict = yaml.safe_load(config_file_obj)
+                        
+        return config_dict
+
+
+    def _parse_for_tabs(self, config):
+        &#34;&#34;&#34;
+        Check for the existence of tab characters that might break yaml
+        &#34;&#34;&#34;
+        stream = open(config, &#39;r&#39;)
+        lines = stream.readlines()
+        stream.close()
+
+        bad_line_numbers = []
+        for index, line in enumerate(lines):
+            if line.find(&#39;\t&#39;) != -1:
+                bad_line_numbers.append(str(index + 1))
+
+        if len(bad_line_numbers) != 0:
+            print(&#34;Tab characters detected on the following lines:&#34;)
+            print(&#34;    &#34; + &#39;, &#39;.join(bad_line_numbers))
+            print(&#34;Please correct the tabs and restart&#34;)
+            sys.exit()
+        return
+    
+    def check(self):
+        &#34;&#34;&#34;
+        Check configuration file for possible user errors.
+        &#34;&#34;&#34;
+        big_check._run_checks(self.full_dict, self.config_dict)
+        
+        return</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="deeplenstronomy.input_reader.Parser.check"><code class="name flex">
+<span>def <span class="ident">check</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check configuration file for possible user errors.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check(self):
+    &#34;&#34;&#34;
+    Check configuration file for possible user errors.
+    &#34;&#34;&#34;
+    big_check._run_checks(self.full_dict, self.config_dict)
+    
+    return</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.input_reader.Parser.read"><code class="name flex">
+<span>def <span class="ident">read</span></span>(<span>self, config)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Reads config file into a dictionary and returns it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of config file.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>config_dict (dict): Dictionary containing config information.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read(self, config):
+    &#34;&#34;&#34;
+    Reads config file into a dictionary and returns it.
+    
+    Args:
+        config (str): Name of config file.
+    
+    Returns:
+        config_dict (dict): Dictionary containing config information.
+    &#34;&#34;&#34;
+
+    with open(config, &#39;r&#39;) as config_file_obj:
+        config_dict = yaml.safe_load(config_file_obj)
+                    
+    return config_dict</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.input_reader.Parser.write_survey"><code class="name flex">
+<span>def <span class="ident">write_survey</span></span>(<span>self, config, survey)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Writes survey information to config file. Creates a new file named {survey}_{config}
+by copying the contents of {config} and appending the IMAGE and SURVEY sections for
+a desired survey. The yaml parser will automatically overwrite the IMAGE and SURVEY
+dictionary keys.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of yaml configuration file</dd>
+<dt><strong><code>survey</code></strong> :&ensp;<code>str</code> or <code>None</code>, optional, default=<code>None</code></dt>
+<dd>Automatically passed from deeplenstronomy.make_dataset() args</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>outfile (str): name of survey-specific configuration file</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def write_survey(self, config, survey):
+    &#34;&#34;&#34;
+    Writes survey information to config file. Creates a new file named {survey}_{config}
+    by copying the contents of {config} and appending the IMAGE and SURVEY sections for 
+    a desired survey. The yaml parser will automatically overwrite the IMAGE and SURVEY
+    dictionary keys.
+
+    Args:
+        config (str): name of yaml configuration file
+        survey (str or None, optional, default=None): Automatically passed from deeplenstronomy.make_dataset() args
+
+    Returns:
+        outfile (str): name of survey-specific configuration file
+    &#34;&#34;&#34;
+    # set new config file name
+    config_basename = config.split(&#39;/&#39;)
+    if len(config_basename) == 1:
+        outfile = survey + &#39;_&#39; + config
+    else:
+        outfile = &#39;/&#39;.join(config_basename[0:-1]) + &#39;/&#39; + survey + &#39;_&#39; + config_basename[-1]
+
+    # write new config file
+    with open(config, &#39;r&#39;) as old, open(outfile, &#39;w+&#39;) as new:
+        new.writelines(old.readlines())
+        new.writelines(eval(&#34;surveys.{}()&#34;.format(survey)))
+    return outfile</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="deeplenstronomy" href="index.html">deeplenstronomy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="deeplenstronomy.input_reader.Organizer" href="#deeplenstronomy.input_reader.Organizer">Organizer</a></code></h4>
+<ul class="">
+<li><code><a title="deeplenstronomy.input_reader.Organizer.breakup" href="#deeplenstronomy.input_reader.Organizer.breakup">breakup</a></code></li>
+<li><code><a title="deeplenstronomy.input_reader.Organizer.generate_time_series" href="#deeplenstronomy.input_reader.Organizer.generate_time_series">generate_time_series</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="deeplenstronomy.input_reader.Parser" href="#deeplenstronomy.input_reader.Parser">Parser</a></code></h4>
+<ul class="">
+<li><code><a title="deeplenstronomy.input_reader.Parser.check" href="#deeplenstronomy.input_reader.Parser.check">check</a></code></li>
+<li><code><a title="deeplenstronomy.input_reader.Parser.read" href="#deeplenstronomy.input_reader.Parser.read">read</a></code></li>
+<li><code><a title="deeplenstronomy.input_reader.Parser.write_survey" href="#deeplenstronomy.input_reader.Parser.write_survey">write_survey</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
