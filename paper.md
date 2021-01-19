@@ -45,7 +45,7 @@ These systems are of great scientific interest because they provide information 
 They also serve as standing tests of the theory of General Relativity and modified theories of gravity. 
 
 Traditional searches for SL systems have involved time- and effort-intensive visual or manual inspection of images by humans to identify characteristic features --- like arcs, particular color combinations, and  object orientations. 
-However, a comprehensive search using the traditional approach is prohibitively expensive for large numbers of images, like those in cosmological surveys --- e.g., the Sloan Digital Sky Survey [@sdss], the Dark Energy Survey [@des], and the Legacy Survey of Space and Time [@lsst]. 
+However, a comprehensive search using the traditional approach is prohibitively expensive for large numbers of images, like those in cosmological surveys --- e.g., the Sloan Digital Sky Survey [@sdss], the Dark Energy Survey [@des], and the Legacy Survey of Space and Time (LSST) [@lsst]. 
 To automate the SL detection process, techniques based on machine learning (ML) are beginning to overtake traditional approaches for scanning  astronomical images. 
 In particular, deep learning techniques have been the focus, but they require large sets of labeled images to train these models. 
 Because of the relatively low number of observed SL systems, simulated datasets of images are often needed. 
@@ -59,6 +59,8 @@ Generating populations of SL systems that are fit for neural network training re
 Due to the inherent dependence of the performance of ML approaches on their training data, the deep learning approach to SL detection is in tension with scientific reproducibility without a clear prescription for the simulation of the training data. 
 There is a critical need for a tool that simulates full datasets in an efficient and reproducible manner, while enabling the use of all the features of the `lenstronomy` simulation API. 
 Additionally, this tool should  simplify user interaction with `lenstronomy` and organize the simulations and associated metadata into convenient data structures for deep learning problems.
+Multiple packages have been developed to generate realistic training data by wrapping around `lenstronomy`: `baobab` [@baobab] generates training sets for lens modeling and heiarchical inference and the LSST Dark Energy Science Collaboration's `SL Sprinkler` [@lsstdescsl] imputes strongly lensed variable objects into catalogs and images. 
+Nonetheless, the need for a simple, general tool capable of efficiently simulating any astronomical system in a reproducible manner while giving the user complete freedom to set the properties of objects remains. 
 
 
 # Summary
