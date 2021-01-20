@@ -59,7 +59,7 @@ Generating populations of SL systems that are fit for neural network training re
 Due to the inherent dependence of the performance of ML approaches on their training data, the deep learning approach to SL detection is in tension with scientific reproducibility without a clear prescription for the simulation of the training data. 
 There is a critical need for a tool that simulates full datasets in an efficient and reproducible manner, while enabling the use of all the features of the `lenstronomy` simulation API. 
 Additionally, this tool should  simplify user interaction with `lenstronomy` and organize the simulations and associated metadata into convenient data structures for deep learning problems.
-Multiple packages have been developed to generate realistic training data by wrapping around `lenstronomy`: `baobab` [@baobab] generates training sets for lens modeling and heiarchical inference and the LSST Dark Energy Science Collaboration's `SL Sprinkler` [@lsstdescsl] imputes strongly lensed variable objects into catalogs and images. 
+Multiple packages have been developed to generate realistic training data by wrapping around `lenstronomy`: `baobab` [@baobab] generates training sets for lens modeling and hierarchical inference and the LSST Dark Energy Science Collaboration's `SL Sprinkler` [@lsstdescsl] imputes strongly lensed variable objects into catalogs and images. 
 Nonetheless, the need for a simple, general tool capable of efficiently simulating any astronomical system in a reproducible manner while giving the user complete freedom to set the properties of objects remains. 
 
 
