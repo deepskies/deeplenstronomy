@@ -1,6 +1,11 @@
 """Pre-defined settings for large astronomical surveys"""
 
 def des():
+    """
+    Force Dark Energy Survey 5-band, 6-year survey conditions
+    into your simulated dataset. Utilize this function by passing
+    `survey='des'` in `deeplenstronomy.make_dataset()`.
+    """
     info = """
 IMAGE:
     PARAMETERS:
@@ -39,6 +44,11 @@ SURVEY:
     return info
 
 def delve():
+    """
+    Force DECam Local Volume Exploration 4-band survey conditions
+    into your simulated dataset. Utilize this function by passing
+    `survey='delve'` in `deeplenstronomy.make_dataset()`.
+    """
     info = """
 IMAGE:
     PARAMETERS:
@@ -74,6 +84,11 @@ SURVEY:
     return info
 
 def lsst():
+    """
+    Force Legacy Survey of Space and Time 6-band, 10-year survey conditions
+    into your simulated dataset. Utilize this function by passing
+    `survey='lsst'` in `deeplenstronomy.make_dataset()`.
+    """
     info = """
 IMAGE:
     PARAMETERS:
@@ -109,6 +124,11 @@ SURVEY:
     return info
 
 def hst():
+    """
+    Force Hubble Space Telescope single band survey conditions
+    into your simulated dataset. Utilize this function by passing
+    `survey='hst'` in `deeplenstronomy.make_dataset()`.
+    """
     info = """
 IMAGE:
     PARAMETERS:
@@ -129,6 +149,11 @@ SURVEY:
     return info
 
 def euclid():
+    """
+    Force Euclid single-band survey conditions
+    into your simulated dataset. Utilize this function by passing
+    `survey='des'` in `deeplenstronomy.make_dataset()`.
+    """
     info = """
 IMAGE:
     PARAMETERS:
@@ -149,6 +174,11 @@ SURVEY:
     return info
 
 def ztf():
+    """
+    Force Zwicky Transient Facility 3-band, DR2 survey conditions
+    into your simulated dataset. Utilize this function by passing
+    `survey='ztf'` in `deeplenstronomy.make_dataset()`.
+    """
     info = """
 IMAGE:
     PARAMETERS:
