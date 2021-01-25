@@ -208,9 +208,22 @@ class AllChecks():
     
     @staticmethod
     def config_dict_format(*args):
+        &#34;&#34;&#34;
+        From a list of parameters, construct the path through the config dictionary
+        &#34;&#34;&#34;
         return &#34;[&#39;&#34; + &#34;&#39;][&#39;&#34;.join(args) + &#34;&#39;]&#34;
 
     def config_lookup(self, lookup_str, full=False):
+        &#34;&#34;&#34;
+        From a key path, get the value in the dictionary
+
+        Args:
+            lookup_str (str): path of keys through a nested dictionary
+            full (bool, optional, default=False): `True for lookup in the `full_dict`, `False` for lookup in the `config_dict`
+
+        Returns:
+            The value in the dictionary at the location of the keypath
+        &#34;&#34;&#34;
         if not full:
             return eval(&#34;self.config&#34; + lookup_str)
         else:
@@ -218,6 +231,10 @@ class AllChecks():
         
     ### Check functions
     def check_top_level_existence(self):
+        &#34;&#34;&#34;
+        Check for the DATASET, SURVEY, IMAGE, COSMOLOGY, SPECIES, and GEOMETRY sections
+        in the config file
+        &#34;&#34;&#34;
         errs = []
         for name in [&#39;DATASET&#39;, &#39;SURVEY&#39;, &#39;IMAGE&#39;, &#39;COSMOLOGY&#39;, &#39;SPECIES&#39;, &#39;GEOMETRY&#39;]:
             if name not in self.full.keys():
@@ -225,6 +242,9 @@ class AllChecks():
         return errs
 
     def check_random_seed(self):
+        &#34;&#34;&#34;
+        Check whether the passed value for the random seed is valid
+        &#34;&#34;&#34;
         errs = []
         try:
             seed = int(self.config[&#34;DATASET&#34;][&#34;PARAMETERS&#34;][&#34;SEED&#34;])
@@ -236,6 +256,14 @@ class AllChecks():
         return errs
             
     def check_low_level_existence(self):
+        &#34;&#34;&#34;
+        Check that the DATASET.NAME, DATASET.PARAMETERS.SIZE, COSMOLOGY.PARAMETERS.H0, 
+        COSMOLOGY.PARAMETERS.Om0, IMAGE.PARAMETERS.exposure_time, IMAGE.PARAMETERS.numPix, 
+        IMAGE.PARAMETERS.pixel_scale, IMAGE.PARAMETERS.psf_type, IMAGE.PARAMETERS.read_noise,
+        IMAGE.PARAMETERS.ccd_gain, SURVEY.PARAMETERS.BANDS, SURVEY.PARAMETERS.seeing, 
+        SURVEY.PARAMETERS.magnitude_zero_point, SURVEY.PARAMETERS.sky_brightness, and
+        SURVEY.PARAMETERS.num_exposures are all present in the config file
+        &#34;&#34;&#34;
         errs = []
         param_names = {&#34;DATASET.NAME&#34;,
                        &#34;DATASET.PARAMETERS.SIZE&#34;,
@@ -261,6 +289,13 @@ class AllChecks():
         return errs
 
     def check_not_allowed_to_be_drawn_from_a_distribution(self):
+        &#34;&#34;&#34;
+        Check that parameters that must be fixed in the simulation (DATASET.NAME,
+        DATASET.PARAMETERS.SIZE, DATASET.PARAMETERS.OUTDIR, IMAGE.PARAMETERS.numPix,
+        COSMOLOGY.PARAMETERS.H0, COSMOLOGY.PARAMETERS.Tcmb, COSMOLOGY.PARAMETERS.Neff, 
+        COSMOLOGY.PARAMETERS.m_nu, and COSMOLOGY.PARAMETERS.Ob0) are not being
+        drawn from a distribution with the DISTRIBUTION keyword
+        &#34;&#34;&#34;
         errs = []
         param_names = {&#34;DATASET.NAME&#34;,
                        &#34;DATASET.PARAMETERS.SIZE&#34;,
@@ -284,6 +319,10 @@ class AllChecks():
         return errs
 
     def check_for_auxiliary_files(self):
+        &#34;&#34;&#34;
+        Check that any auxiliary files specified with the INPUT keyword are
+        able to be found
+        &#34;&#34;&#34;
         errs = []
         input_paths = [x for x in self.full_keypaths if x.find(&#34;INPUT&#34;) != -1]
         input_files = [self.config_lookup(self.config_dict_format(*param.split(&#39;.&#39;)), full=True) for param in input_paths]
@@ -293,6 +332,10 @@ class AllChecks():
         return errs
 
     def check_for_valid_distribution_entry(self):
+        &#34;&#34;&#34;
+        Check that use of the DISTRIBUTION keyword in the configuration file (1) points
+        to a valid distribution and (2) has an entry for each parameter
+        &#34;&#34;&#34;
         errs = []
         distribution_paths = [x for x in self.full_keypaths if x.endswith(&#34;DISTRIBUTION&#34;)]
         distribution_dicts = [self.config_lookup(self.config_dict_format(*param.split(&#39;.&#39;))) for param in distribution_paths]
@@ -333,6 +376,9 @@ class AllChecks():
         return errs
     
     def check_input_distributions(self):
+        &#34;&#34;&#34;
+        Check that a USERDIST file can be read in and has the proper format
+        &#34;&#34;&#34;
         errs = []
         if &#34;DISTRIBUTIONS&#34; in self.config.keys():
             # there must be at least 1 USERDIST_ key
@@ -380,6 +426,9 @@ class AllChecks():
         return errs
 
     def check_image_backgrounds(self):
+        &#34;&#34;&#34;
+        Check that images used for backgrounds can be read in and organized successfully
+        &#34;&#34;&#34;
         errs = []
         if &#34;BACKGROUNDS&#34; in self.config.keys():
             # value must be a dict
@@ -688,6 +737,9 @@ class AllChecks():
         return detections, errs
     
     def check_valid_species(self):
+        &#34;&#34;&#34;
+        Check that all GALAXY, POINTSOURCE, and NOISE objects are formatted correctly
+        &#34;&#34;&#34;
         errs, names = [], []
 
         # There must be at least one species
@@ -734,6 +786,9 @@ class AllChecks():
         return errs
     
     def check_valid_geometry(self):
+        &#34;&#34;&#34;
+        Check that all configurations in the geometry section are formatted correctly
+        &#34;&#34;&#34;
         errs = []
 
         # There must be at least one configuration
@@ -1106,9 +1161,22 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
     
     @staticmethod
     def config_dict_format(*args):
+        &#34;&#34;&#34;
+        From a list of parameters, construct the path through the config dictionary
+        &#34;&#34;&#34;
         return &#34;[&#39;&#34; + &#34;&#39;][&#39;&#34;.join(args) + &#34;&#39;]&#34;
 
     def config_lookup(self, lookup_str, full=False):
+        &#34;&#34;&#34;
+        From a key path, get the value in the dictionary
+
+        Args:
+            lookup_str (str): path of keys through a nested dictionary
+            full (bool, optional, default=False): `True for lookup in the `full_dict`, `False` for lookup in the `config_dict`
+
+        Returns:
+            The value in the dictionary at the location of the keypath
+        &#34;&#34;&#34;
         if not full:
             return eval(&#34;self.config&#34; + lookup_str)
         else:
@@ -1116,6 +1184,10 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         
     ### Check functions
     def check_top_level_existence(self):
+        &#34;&#34;&#34;
+        Check for the DATASET, SURVEY, IMAGE, COSMOLOGY, SPECIES, and GEOMETRY sections
+        in the config file
+        &#34;&#34;&#34;
         errs = []
         for name in [&#39;DATASET&#39;, &#39;SURVEY&#39;, &#39;IMAGE&#39;, &#39;COSMOLOGY&#39;, &#39;SPECIES&#39;, &#39;GEOMETRY&#39;]:
             if name not in self.full.keys():
@@ -1123,6 +1195,9 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
 
     def check_random_seed(self):
+        &#34;&#34;&#34;
+        Check whether the passed value for the random seed is valid
+        &#34;&#34;&#34;
         errs = []
         try:
             seed = int(self.config[&#34;DATASET&#34;][&#34;PARAMETERS&#34;][&#34;SEED&#34;])
@@ -1134,6 +1209,14 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
             
     def check_low_level_existence(self):
+        &#34;&#34;&#34;
+        Check that the DATASET.NAME, DATASET.PARAMETERS.SIZE, COSMOLOGY.PARAMETERS.H0, 
+        COSMOLOGY.PARAMETERS.Om0, IMAGE.PARAMETERS.exposure_time, IMAGE.PARAMETERS.numPix, 
+        IMAGE.PARAMETERS.pixel_scale, IMAGE.PARAMETERS.psf_type, IMAGE.PARAMETERS.read_noise,
+        IMAGE.PARAMETERS.ccd_gain, SURVEY.PARAMETERS.BANDS, SURVEY.PARAMETERS.seeing, 
+        SURVEY.PARAMETERS.magnitude_zero_point, SURVEY.PARAMETERS.sky_brightness, and
+        SURVEY.PARAMETERS.num_exposures are all present in the config file
+        &#34;&#34;&#34;
         errs = []
         param_names = {&#34;DATASET.NAME&#34;,
                        &#34;DATASET.PARAMETERS.SIZE&#34;,
@@ -1159,6 +1242,13 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
 
     def check_not_allowed_to_be_drawn_from_a_distribution(self):
+        &#34;&#34;&#34;
+        Check that parameters that must be fixed in the simulation (DATASET.NAME,
+        DATASET.PARAMETERS.SIZE, DATASET.PARAMETERS.OUTDIR, IMAGE.PARAMETERS.numPix,
+        COSMOLOGY.PARAMETERS.H0, COSMOLOGY.PARAMETERS.Tcmb, COSMOLOGY.PARAMETERS.Neff, 
+        COSMOLOGY.PARAMETERS.m_nu, and COSMOLOGY.PARAMETERS.Ob0) are not being
+        drawn from a distribution with the DISTRIBUTION keyword
+        &#34;&#34;&#34;
         errs = []
         param_names = {&#34;DATASET.NAME&#34;,
                        &#34;DATASET.PARAMETERS.SIZE&#34;,
@@ -1182,6 +1272,10 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
 
     def check_for_auxiliary_files(self):
+        &#34;&#34;&#34;
+        Check that any auxiliary files specified with the INPUT keyword are
+        able to be found
+        &#34;&#34;&#34;
         errs = []
         input_paths = [x for x in self.full_keypaths if x.find(&#34;INPUT&#34;) != -1]
         input_files = [self.config_lookup(self.config_dict_format(*param.split(&#39;.&#39;)), full=True) for param in input_paths]
@@ -1191,6 +1285,10 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
 
     def check_for_valid_distribution_entry(self):
+        &#34;&#34;&#34;
+        Check that use of the DISTRIBUTION keyword in the configuration file (1) points
+        to a valid distribution and (2) has an entry for each parameter
+        &#34;&#34;&#34;
         errs = []
         distribution_paths = [x for x in self.full_keypaths if x.endswith(&#34;DISTRIBUTION&#34;)]
         distribution_dicts = [self.config_lookup(self.config_dict_format(*param.split(&#39;.&#39;))) for param in distribution_paths]
@@ -1231,6 +1329,9 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
     
     def check_input_distributions(self):
+        &#34;&#34;&#34;
+        Check that a USERDIST file can be read in and has the proper format
+        &#34;&#34;&#34;
         errs = []
         if &#34;DISTRIBUTIONS&#34; in self.config.keys():
             # there must be at least 1 USERDIST_ key
@@ -1278,6 +1379,9 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
 
     def check_image_backgrounds(self):
+        &#34;&#34;&#34;
+        Check that images used for backgrounds can be read in and organized successfully
+        &#34;&#34;&#34;
         errs = []
         if &#34;BACKGROUNDS&#34; in self.config.keys():
             # value must be a dict
@@ -1586,6 +1690,9 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return detections, errs
     
     def check_valid_species(self):
+        &#34;&#34;&#34;
+        Check that all GALAXY, POINTSOURCE, and NOISE objects are formatted correctly
+        &#34;&#34;&#34;
         errs, names = [], []
 
         # There must be at least one species
@@ -1632,6 +1739,9 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         return errs
     
     def check_valid_geometry(self):
+        &#34;&#34;&#34;
+        Check that all configurations in the geometry section are formatted correctly
+        &#34;&#34;&#34;
         errs = []
 
         # There must be at least one configuration
@@ -1805,13 +1915,16 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
 <span>def <span class="ident">config_dict_format</span></span>(<span>*args)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>From a list of parameters, construct the path through the config dictionary</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def config_dict_format(*args):
+    &#34;&#34;&#34;
+    From a list of parameters, construct the path through the config dictionary
+    &#34;&#34;&#34;
     return &#34;[&#39;&#34; + &#34;&#39;][&#39;&#34;.join(args) + &#34;&#39;]&#34;</code></pre>
 </details>
 </dd>
@@ -1822,12 +1935,17 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_for_auxiliary_files</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that any auxiliary files specified with the INPUT keyword are
+able to be found</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_for_auxiliary_files(self):
+    &#34;&#34;&#34;
+    Check that any auxiliary files specified with the INPUT keyword are
+    able to be found
+    &#34;&#34;&#34;
     errs = []
     input_paths = [x for x in self.full_keypaths if x.find(&#34;INPUT&#34;) != -1]
     input_files = [self.config_lookup(self.config_dict_format(*param.split(&#39;.&#39;)), full=True) for param in input_paths]
@@ -1841,12 +1959,17 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_for_valid_distribution_entry</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that use of the DISTRIBUTION keyword in the configuration file (1) points
+to a valid distribution and (2) has an entry for each parameter</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_for_valid_distribution_entry(self):
+    &#34;&#34;&#34;
+    Check that use of the DISTRIBUTION keyword in the configuration file (1) points
+    to a valid distribution and (2) has an entry for each parameter
+    &#34;&#34;&#34;
     errs = []
     distribution_paths = [x for x in self.full_keypaths if x.endswith(&#34;DISTRIBUTION&#34;)]
     distribution_dicts = [self.config_lookup(self.config_dict_format(*param.split(&#39;.&#39;))) for param in distribution_paths]
@@ -1891,12 +2014,15 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_image_backgrounds</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that images used for backgrounds can be read in and organized successfully</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_image_backgrounds(self):
+    &#34;&#34;&#34;
+    Check that images used for backgrounds can be read in and organized successfully
+    &#34;&#34;&#34;
     errs = []
     if &#34;BACKGROUNDS&#34; in self.config.keys():
         # value must be a dict
@@ -1972,12 +2098,15 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_input_distributions</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that a USERDIST file can be read in and has the proper format</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_input_distributions(self):
+    &#34;&#34;&#34;
+    Check that a USERDIST file can be read in and has the proper format
+    &#34;&#34;&#34;
     errs = []
     if &#34;DISTRIBUTIONS&#34; in self.config.keys():
         # there must be at least 1 USERDIST_ key
@@ -2029,12 +2158,25 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_low_level_existence</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that the DATASET.NAME, DATASET.PARAMETERS.SIZE, COSMOLOGY.PARAMETERS.H0,
+COSMOLOGY.PARAMETERS.Om0, IMAGE.PARAMETERS.exposure_time, IMAGE.PARAMETERS.numPix,
+IMAGE.PARAMETERS.pixel_scale, IMAGE.PARAMETERS.psf_type, IMAGE.PARAMETERS.read_noise,
+IMAGE.PARAMETERS.ccd_gain, SURVEY.PARAMETERS.BANDS, SURVEY.PARAMETERS.seeing,
+SURVEY.PARAMETERS.magnitude_zero_point, SURVEY.PARAMETERS.sky_brightness, and
+SURVEY.PARAMETERS.num_exposures are all present in the config file</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_low_level_existence(self):
+    &#34;&#34;&#34;
+    Check that the DATASET.NAME, DATASET.PARAMETERS.SIZE, COSMOLOGY.PARAMETERS.H0, 
+    COSMOLOGY.PARAMETERS.Om0, IMAGE.PARAMETERS.exposure_time, IMAGE.PARAMETERS.numPix, 
+    IMAGE.PARAMETERS.pixel_scale, IMAGE.PARAMETERS.psf_type, IMAGE.PARAMETERS.read_noise,
+    IMAGE.PARAMETERS.ccd_gain, SURVEY.PARAMETERS.BANDS, SURVEY.PARAMETERS.seeing, 
+    SURVEY.PARAMETERS.magnitude_zero_point, SURVEY.PARAMETERS.sky_brightness, and
+    SURVEY.PARAMETERS.num_exposures are all present in the config file
+    &#34;&#34;&#34;
     errs = []
     param_names = {&#34;DATASET.NAME&#34;,
                    &#34;DATASET.PARAMETERS.SIZE&#34;,
@@ -2064,12 +2206,23 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_not_allowed_to_be_drawn_from_a_distribution</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that parameters that must be fixed in the simulation (DATASET.NAME,
+DATASET.PARAMETERS.SIZE, DATASET.PARAMETERS.OUTDIR, IMAGE.PARAMETERS.numPix,
+COSMOLOGY.PARAMETERS.H0, COSMOLOGY.PARAMETERS.Tcmb, COSMOLOGY.PARAMETERS.Neff,
+COSMOLOGY.PARAMETERS.m_nu, and COSMOLOGY.PARAMETERS.Ob0) are not being
+drawn from a distribution with the DISTRIBUTION keyword</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_not_allowed_to_be_drawn_from_a_distribution(self):
+    &#34;&#34;&#34;
+    Check that parameters that must be fixed in the simulation (DATASET.NAME,
+    DATASET.PARAMETERS.SIZE, DATASET.PARAMETERS.OUTDIR, IMAGE.PARAMETERS.numPix,
+    COSMOLOGY.PARAMETERS.H0, COSMOLOGY.PARAMETERS.Tcmb, COSMOLOGY.PARAMETERS.Neff, 
+    COSMOLOGY.PARAMETERS.m_nu, and COSMOLOGY.PARAMETERS.Ob0) are not being
+    drawn from a distribution with the DISTRIBUTION keyword
+    &#34;&#34;&#34;
     errs = []
     param_names = {&#34;DATASET.NAME&#34;,
                    &#34;DATASET.PARAMETERS.SIZE&#34;,
@@ -2097,12 +2250,15 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_random_seed</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check whether the passed value for the random seed is valid</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_random_seed(self):
+    &#34;&#34;&#34;
+    Check whether the passed value for the random seed is valid
+    &#34;&#34;&#34;
     errs = []
     try:
         seed = int(self.config[&#34;DATASET&#34;][&#34;PARAMETERS&#34;][&#34;SEED&#34;])
@@ -2118,12 +2274,17 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_top_level_existence</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check for the DATASET, SURVEY, IMAGE, COSMOLOGY, SPECIES, and GEOMETRY sections
+in the config file</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_top_level_existence(self):
+    &#34;&#34;&#34;
+    Check for the DATASET, SURVEY, IMAGE, COSMOLOGY, SPECIES, and GEOMETRY sections
+    in the config file
+    &#34;&#34;&#34;
     errs = []
     for name in [&#39;DATASET&#39;, &#39;SURVEY&#39;, &#39;IMAGE&#39;, &#39;COSMOLOGY&#39;, &#39;SPECIES&#39;, &#39;GEOMETRY&#39;]:
         if name not in self.full.keys():
@@ -2135,12 +2296,15 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_valid_geometry</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that all configurations in the geometry section are formatted correctly</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_valid_geometry(self):
+    &#34;&#34;&#34;
+    Check that all configurations in the geometry section are formatted correctly
+    &#34;&#34;&#34;
     errs = []
 
     # There must be at least one configuration
@@ -2313,12 +2477,15 @@ def config_dict_format(*args):
 <span>def <span class="ident">check_valid_species</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that all GALAXY, POINTSOURCE, and NOISE objects are formatted correctly</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_valid_species(self):
+    &#34;&#34;&#34;
+    Check that all GALAXY, POINTSOURCE, and NOISE objects are formatted correctly
+    &#34;&#34;&#34;
     errs, names = [], []
 
     # There must be at least one species
@@ -2369,12 +2536,31 @@ def config_dict_format(*args):
 <span>def <span class="ident">config_lookup</span></span>(<span>self, lookup_str, full=False)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>From a key path, get the value in the dictionary</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lookup_str</code></strong> :&ensp;<code>str</code></dt>
+<dd>path of keys through a nested dictionary</dd>
+<dt><strong><code>full</code></strong> :&ensp;<code>bool</code>, optional, default=<code>False</code></dt>
+<dd><code>True for lookup in the </code>full_dict<code>, </code>False<code> for lookup in the </code>config_dict`</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The value in the dictionary at the location of the keypath</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def config_lookup(self, lookup_str, full=False):
+    &#34;&#34;&#34;
+    From a key path, get the value in the dictionary
+
+    Args:
+        lookup_str (str): path of keys through a nested dictionary
+        full (bool, optional, default=False): `True for lookup in the `full_dict`, `False` for lookup in the `config_dict`
+
+    Returns:
+        The value in the dictionary at the location of the keypath
+    &#34;&#34;&#34;
     if not full:
         return eval(&#34;self.config&#34; + lookup_str)
     else:
