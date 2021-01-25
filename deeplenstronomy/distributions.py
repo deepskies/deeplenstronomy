@@ -1,12 +1,14 @@
 """Contains all available distributions. Utilize the functions in this module
 by using the `DISTRIBUTION` keyword in your configuration file. As an example:
 
+```
 seeing:
     DISTRIBUTION:
         NAME: uniform # function name to call
         PARAMETERS:
             minimum: 0 # value to set for function argument
             maximim: 6 # value to set for function argument
+```
 
 """
 
