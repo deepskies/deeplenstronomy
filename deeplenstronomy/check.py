@@ -896,7 +896,7 @@ class AllChecks():
                     if isinstance(self.config["SURVEY"]["PARAMETERS"]["num_exposures"], dict):
                         errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
                     else:
-                        if self.config["SURVEY"]["PARAMETERS"]["num_exposures"] != 1:
+                        if self.config["SURVEY"]["PARAMETERS"]["num_exposures"] < 0.99 or self.config["SURVEY"]["PARAMETERS"]["num_exposures"] > 1.01:
                             errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
 
                 elif config_k == 'NAME' or config_k == 'FRACTION':
