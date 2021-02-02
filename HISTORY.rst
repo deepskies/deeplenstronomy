@@ -3,6 +3,15 @@
 History
 -------
 
+0.0.1.3 (2021-02-02)
++++++++++++++++++++++
+
+* Introducing the static model for timeseries
+
+* Introducing the peakshift parameter for timeseries
+
+* More accurate treatment of noise for timeseries
+
 0.0.1.2 (2021-01-29)
 +++++++++++++++++++++
 
