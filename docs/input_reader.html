@@ -534,15 +534,17 @@ class Organizer():
         return output_dict
 
 
-    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid):
+    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid, peakshift):
         &#34;&#34;&#34;
         Generate an image info dictionary for each step in the time series
 
         :param config_dict: dictionary built up by self.breakup()
         :param configuration: CONFIGURATION_1, CONFIGURATION_2, etc.
         :param obj_string: list of the strings targetting the object in the flattened dictionary (e.g. [&#39;PLANE_2-OBJECT_2&#39;])
+        :param peakshifts: int or float in units of NITES to shift the peak
         :return: flattened_and_filled dictionary: dict ready for individual image sim  
         &#34;&#34;&#34;
+        
         output_dicts = []
         bands = self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)
         # Get flattened and filled dictionary
@@ -555,10 +557,9 @@ class Organizer():
             lcs = eval(&#39;self.{0}_{1}_lightcurves&#39;.format(configuration, obj_name))
             closest_redshift_lcs.append(lcs[&#39;library&#39;][np.argmin(np.abs(redshift - lcs[&#39;redshifts&#39;]))])
             
-        # overwrite the image sim dictionary
-        fake_noise = np.random.normal(scale=0.15, loc=0, size=len(obj_strings) * len(bands) * len(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]))
-        noise_idx = 0
-        for nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
+        # overwrite the image sim dictionary        
+        for orig_nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
+            nite = orig_nite - peakshift
             output_dict = base_output_dict.copy()
             for band in bands:
                 for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
@@ -570,13 +571,13 @@ class Organizer():
                         #linearly interpolate between the closest two nights
                         band_df = closest_redshift_lc[&#39;lc&#39;][closest_redshift_lc[&#39;lc&#39;][&#39;BAND&#39;].values == band].copy().reset_index(drop=True)
                         closest_nite_indices = np.abs(nite - band_df[&#39;NITE&#39;].values).argsort()[:2]
-                        output_dict[band][obj_string + &#39;-magnitude&#39;] = (band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] - band_df[&#39;MAG&#39;].values[closest_nite_indices[0]]) * (nite - band_df[&#39;NITE&#39;].values[closest_nite_indices[1]]) / (band_df[&#39;NITE&#39;].values[closest_nite_indices[1]] - band_df[&#39;NITE&#39;].values[closest_nite_indices[0]]) + band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] + fake_noise[noise_idx]
+                        output_dict[band][obj_string + &#39;-magnitude&#39;] = (band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] - band_df[&#39;MAG&#39;].values[closest_nite_indices[0]]) * (nite - band_df[&#39;NITE&#39;].values[closest_nite_indices[1]]) / (band_df[&#39;NITE&#39;].values[closest_nite_indices[1]] - band_df[&#39;NITE&#39;].values[closest_nite_indices[0]]) + band_df[&#39;MAG&#39;].values[closest_nite_indices[1]]
+                        output_dict[band][obj_string + &#39;-magnitude_measured&#39;] = np.random.normal(loc=output_dict[band][obj_string + &#39;-magnitude&#39;], scale=0.03)
 
-                    output_dict[band][obj_string + &#39;-nite&#39;] = nite
+                    output_dict[band][obj_string + &#39;-nite&#39;] = orig_nite
+                    output_dict[band][obj_string + &#39;-peaknite&#39;] = peakshift
                     output_dict[band][obj_string + &#39;-id&#39;] = closest_redshift_lc[&#39;sed&#39;]
                     output_dict[band][obj_string + &#39;-type&#39;] = closest_redshift_lc[&#39;obj_type&#39;]
-
-                    noise_idx += 1
 
                 # Use independent observing conditions for each nite if conditions are drawn from distributions
                 # seeing
@@ -755,10 +756,20 @@ class Organizer():
                 # Get string referencing the varaible object
                 obj_strings = [self._find_obj_string(x, k) for x in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]]
 
+                # Get the PEAK for the configuration
+                if &#39;PEAK&#39; in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;].keys():
+                    if isinstance(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;], dict):
+                        peakshifts = [self._draw(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;][&#39;DISTRIBUTION&#39;], bands=&#39;b&#39;)[0] for _ in range(v[&#39;SIZE&#39;])]
+                    else:
+                        peakshifts = [float(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;])] * v[&#39;SIZE&#39;]
+                else:
+                    peakshifts = [0.0] * v[&#39;SIZE&#39;]
+
+                
             for objid in range(v[&#39;SIZE&#39;]):
 
                 if time_series:
-                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid, peakshifts[objid])
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
@@ -1125,15 +1136,17 @@ class Organizer():
         return output_dict
 
 
-    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid):
+    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid, peakshift):
         &#34;&#34;&#34;
         Generate an image info dictionary for each step in the time series
 
         :param config_dict: dictionary built up by self.breakup()
         :param configuration: CONFIGURATION_1, CONFIGURATION_2, etc.
         :param obj_string: list of the strings targetting the object in the flattened dictionary (e.g. [&#39;PLANE_2-OBJECT_2&#39;])
+        :param peakshifts: int or float in units of NITES to shift the peak
         :return: flattened_and_filled dictionary: dict ready for individual image sim  
         &#34;&#34;&#34;
+        
         output_dicts = []
         bands = self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)
         # Get flattened and filled dictionary
@@ -1146,10 +1159,9 @@ class Organizer():
             lcs = eval(&#39;self.{0}_{1}_lightcurves&#39;.format(configuration, obj_name))
             closest_redshift_lcs.append(lcs[&#39;library&#39;][np.argmin(np.abs(redshift - lcs[&#39;redshifts&#39;]))])
             
-        # overwrite the image sim dictionary
-        fake_noise = np.random.normal(scale=0.15, loc=0, size=len(obj_strings) * len(bands) * len(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]))
-        noise_idx = 0
-        for nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
+        # overwrite the image sim dictionary        
+        for orig_nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
+            nite = orig_nite - peakshift
             output_dict = base_output_dict.copy()
             for band in bands:
                 for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
@@ -1161,13 +1173,13 @@ class Organizer():
                         #linearly interpolate between the closest two nights
                         band_df = closest_redshift_lc[&#39;lc&#39;][closest_redshift_lc[&#39;lc&#39;][&#39;BAND&#39;].values == band].copy().reset_index(drop=True)
                         closest_nite_indices = np.abs(nite - band_df[&#39;NITE&#39;].values).argsort()[:2]
-                        output_dict[band][obj_string + &#39;-magnitude&#39;] = (band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] - band_df[&#39;MAG&#39;].values[closest_nite_indices[0]]) * (nite - band_df[&#39;NITE&#39;].values[closest_nite_indices[1]]) / (band_df[&#39;NITE&#39;].values[closest_nite_indices[1]] - band_df[&#39;NITE&#39;].values[closest_nite_indices[0]]) + band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] + fake_noise[noise_idx]
+                        output_dict[band][obj_string + &#39;-magnitude&#39;] = (band_df[&#39;MAG&#39;].values[closest_nite_indices[1]] - band_df[&#39;MAG&#39;].values[closest_nite_indices[0]]) * (nite - band_df[&#39;NITE&#39;].values[closest_nite_indices[1]]) / (band_df[&#39;NITE&#39;].values[closest_nite_indices[1]] - band_df[&#39;NITE&#39;].values[closest_nite_indices[0]]) + band_df[&#39;MAG&#39;].values[closest_nite_indices[1]]
+                        output_dict[band][obj_string + &#39;-magnitude_measured&#39;] = np.random.normal(loc=output_dict[band][obj_string + &#39;-magnitude&#39;], scale=0.03)
 
-                    output_dict[band][obj_string + &#39;-nite&#39;] = nite
+                    output_dict[band][obj_string + &#39;-nite&#39;] = orig_nite
+                    output_dict[band][obj_string + &#39;-peaknite&#39;] = peakshift
                     output_dict[band][obj_string + &#39;-id&#39;] = closest_redshift_lc[&#39;sed&#39;]
                     output_dict[band][obj_string + &#39;-type&#39;] = closest_redshift_lc[&#39;obj_type&#39;]
-
-                    noise_idx += 1
 
                 # Use independent observing conditions for each nite if conditions are drawn from distributions
                 # seeing
@@ -1346,10 +1358,20 @@ class Organizer():
                 # Get string referencing the varaible object
                 obj_strings = [self._find_obj_string(x, k) for x in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]]
 
+                # Get the PEAK for the configuration
+                if &#39;PEAK&#39; in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;].keys():
+                    if isinstance(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;], dict):
+                        peakshifts = [self._draw(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;][&#39;DISTRIBUTION&#39;], bands=&#39;b&#39;)[0] for _ in range(v[&#39;SIZE&#39;])]
+                    else:
+                        peakshifts = [float(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;])] * v[&#39;SIZE&#39;]
+                else:
+                    peakshifts = [0.0] * v[&#39;SIZE&#39;]
+
+                
             for objid in range(v[&#39;SIZE&#39;]):
 
                 if time_series:
-                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid, peakshifts[objid])
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
@@ -1495,10 +1517,20 @@ class Organizer():
             # Get string referencing the varaible object
             obj_strings = [self._find_obj_string(x, k) for x in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;]]
 
+            # Get the PEAK for the configuration
+            if &#39;PEAK&#39; in self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;].keys():
+                if isinstance(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;], dict):
+                    peakshifts = [self._draw(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;][&#39;DISTRIBUTION&#39;], bands=&#39;b&#39;)[0] for _ in range(v[&#39;SIZE&#39;])]
+                else:
+                    peakshifts = [float(self.main_dict[&#39;GEOMETRY&#39;][k][&#39;TIMESERIES&#39;][&#39;PEAK&#39;])] * v[&#39;SIZE&#39;]
+            else:
+                peakshifts = [0.0] * v[&#39;SIZE&#39;]
+
+            
         for objid in range(v[&#39;SIZE&#39;]):
 
             if time_series:
-                flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid)
+                flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid, peakshifts[objid])
                 for flattened_image_info in flattened_image_infos:
                     configuration_sim_dicts[k].append(flattened_image_info)
             else:

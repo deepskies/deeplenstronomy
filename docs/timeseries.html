@@ -275,6 +275,35 @@ class LCGen():
                 &#39;obj_type&#39;: &#39;Flat&#39;,
                 &#39;sed&#39;: &#39;Flat&#39;}
 
+    def gen_static(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        &#34;&#34;&#34;
+        Make a static source capable of having time-series data by introducing a mag=99 source
+        on each NITE of the simulation.
+
+        Args:
+            redshift (float): ignored 
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            sed_filename (str): ignored                                                                                                                                                               
+            cosmo (astropy.cosmology): ignored                                                                                                                                                                                            
+        Returns:
+            lc_dict: a dictionary with keys [&#39;lc, &#39;obj_type&#39;, &#39;sed&#39;]
+              - &#39;lc&#39; contains a dataframe of the light from the object
+              - &#39;obj_type&#39; contains a string for the type of object. Will always be &#39;Static&#39; here
+              - &#39;sed&#39; contains the filename of the sed used. Will always be &#39;Flat&#39; here                                                                                                                        &#34;&#34;&#34;
+        output_data_cols = [&#39;NITE&#39;, &#39;BAND&#39;, &#39;MAG&#39;]
+        central_mag = 99.0
+        mags = {band: central_mag for band in self.bands}
+        output_data = []
+        for nite in nites:
+            for band in self.bands:
+                output_data.append([nite, band, mags[band]])
+
+        return {&#39;lc&#39;: pd.DataFrame(data=output_data, columns=output_data_cols),
+                &#39;obj_type&#39;: &#39;Static&#39;,
+                &#39;sed&#39;: &#39;Static&#39;}
+
+
+        
     def gen_variablenoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         &#34;&#34;&#34; 
         Generate a variable light curve with small random noise
@@ -759,6 +788,35 @@ necessary filter and sed information.</p>
                 &#39;obj_type&#39;: &#39;Flat&#39;,
                 &#39;sed&#39;: &#39;Flat&#39;}
 
+    def gen_static(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        &#34;&#34;&#34;
+        Make a static source capable of having time-series data by introducing a mag=99 source
+        on each NITE of the simulation.
+
+        Args:
+            redshift (float): ignored 
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            sed_filename (str): ignored                                                                                                                                                               
+            cosmo (astropy.cosmology): ignored                                                                                                                                                                                            
+        Returns:
+            lc_dict: a dictionary with keys [&#39;lc, &#39;obj_type&#39;, &#39;sed&#39;]
+              - &#39;lc&#39; contains a dataframe of the light from the object
+              - &#39;obj_type&#39; contains a string for the type of object. Will always be &#39;Static&#39; here
+              - &#39;sed&#39; contains the filename of the sed used. Will always be &#39;Flat&#39; here                                                                                                                        &#34;&#34;&#34;
+        output_data_cols = [&#39;NITE&#39;, &#39;BAND&#39;, &#39;MAG&#39;]
+        central_mag = 99.0
+        mags = {band: central_mag for band in self.bands}
+        output_data = []
+        for nite in nites:
+            for band in self.bands:
+                output_data.append([nite, band, mags[band]])
+
+        return {&#39;lc&#39;: pd.DataFrame(data=output_data, columns=output_data_cols),
+                &#39;obj_type&#39;: &#39;Static&#39;,
+                &#39;sed&#39;: &#39;Static&#39;}
+
+
+        
     def gen_variablenoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         &#34;&#34;&#34; 
         Generate a variable light curve with small random noise
@@ -1369,6 +1427,65 @@ necessary filter and sed information.</p>
             &#39;sed&#39;: sed_filename}</code></pre>
 </details>
 </dd>
+<dt id="deeplenstronomy.timeseries.LCGen.gen_static"><code class="name flex">
+<span>def <span class="ident">gen_static</span></span>(<span>self, redshift, nites, sed=None, sed_filename=None, cosmo=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a static source capable of having time-series data by introducing a mag=99 source
+on each NITE of the simulation.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>redshift</code></strong> :&ensp;<code>float</code></dt>
+<dd>ignored </dd>
+<dt><strong><code>nites</code></strong> :&ensp;<code>List[int]</code></dt>
+<dd>a list of night relative to peak you want to obtain a magnitude for</dd>
+<dt><strong><code>sed_filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>ignored
+</dd>
+<dt><strong><code>cosmo</code></strong> :&ensp;<code>astropy.cosmology</code></dt>
+<dd>ignored
+</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>lc_dict</code></dt>
+<dd>a dictionary with keys ['lc, 'obj_type', 'sed']
+- 'lc' contains a dataframe of the light from the object
+- 'obj_type' contains a string for the type of object. Will always be 'Static' here
+- 'sed' contains the filename of the sed used. Will always be 'Flat' here</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gen_static(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    &#34;&#34;&#34;
+    Make a static source capable of having time-series data by introducing a mag=99 source
+    on each NITE of the simulation.
+
+    Args:
+        redshift (float): ignored 
+        nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+        sed_filename (str): ignored                                                                                                                                                               
+        cosmo (astropy.cosmology): ignored                                                                                                                                                                                            
+    Returns:
+        lc_dict: a dictionary with keys [&#39;lc, &#39;obj_type&#39;, &#39;sed&#39;]
+          - &#39;lc&#39; contains a dataframe of the light from the object
+          - &#39;obj_type&#39; contains a string for the type of object. Will always be &#39;Static&#39; here
+          - &#39;sed&#39; contains the filename of the sed used. Will always be &#39;Flat&#39; here                                                                                                                        &#34;&#34;&#34;
+    output_data_cols = [&#39;NITE&#39;, &#39;BAND&#39;, &#39;MAG&#39;]
+    central_mag = 99.0
+    mags = {band: central_mag for band in self.bands}
+    output_data = []
+    for nite in nites:
+        for band in self.bands:
+            output_data.append([nite, band, mags[band]])
+
+    return {&#39;lc&#39;: pd.DataFrame(data=output_data, columns=output_data_cols),
+            &#39;obj_type&#39;: &#39;Static&#39;,
+            &#39;sed&#39;: &#39;Static&#39;}</code></pre>
+</details>
+</dd>
 <dt id="deeplenstronomy.timeseries.LCGen.gen_user"><code class="name flex">
 <span>def <span class="ident">gen_user</span></span>(<span>self, redshift, nites, sed=None, sed_filename=None, cosmo=None)</span>
 </code></dt>
@@ -1561,6 +1678,7 @@ necessary filter and sed information.</p>
 <li><code><a title="deeplenstronomy.timeseries.LCGen.gen_ia" href="#deeplenstronomy.timeseries.LCGen.gen_ia">gen_ia</a></code></li>
 <li><code><a title="deeplenstronomy.timeseries.LCGen.gen_kn" href="#deeplenstronomy.timeseries.LCGen.gen_kn">gen_kn</a></code></li>
 <li><code><a title="deeplenstronomy.timeseries.LCGen.gen_lc_from_sed" href="#deeplenstronomy.timeseries.LCGen.gen_lc_from_sed">gen_lc_from_sed</a></code></li>
+<li><code><a title="deeplenstronomy.timeseries.LCGen.gen_static" href="#deeplenstronomy.timeseries.LCGen.gen_static">gen_static</a></code></li>
 <li><code><a title="deeplenstronomy.timeseries.LCGen.gen_user" href="#deeplenstronomy.timeseries.LCGen.gen_user">gen_user</a></code></li>
 <li><code><a title="deeplenstronomy.timeseries.LCGen.gen_variable" href="#deeplenstronomy.timeseries.LCGen.gen_variable">gen_variable</a></code></li>
 <li><code><a title="deeplenstronomy.timeseries.LCGen.gen_variablenoise" href="#deeplenstronomy.timeseries.LCGen.gen_variablenoise">gen_variablenoise</a></code></li>

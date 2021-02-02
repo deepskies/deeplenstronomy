@@ -503,7 +503,7 @@ class AllChecks():
         errs = []
 
         # check that transmission curves exist for the bands
-        if model_name not in [&#39;flat&#39;, &#39;flatnoise&#39;, &#39;variable&#39;, &#39;variablenoise&#39;]:
+        if model_name not in [&#39;flat&#39;, &#39;flatnoise&#39;, &#39;variable&#39;, &#39;variablenoise&#39;, &#39;static&#39;]:
             if not self.checked_ts_bands:
                 for band in self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;BANDS&#34;].split(&#39;,&#39;):
                     try:
@@ -923,11 +923,20 @@ class AllChecks():
                             except TypeError:
                                 errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
 
+                    # Check validity of PEAK argument, if passed
+                    if &#34;PEAK&#34; in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
+                        if not isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;PEAK&#34;], dict):
+                            try:
+                                peak = int(float(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;PEAK&#34;]))
+                                del peak
+                            except TypeError:
+                                errs.append(&#34;PEAK argument in GEOMETRY.&#34; + k + &#34;.TIMESERIES.PEAK must be numeric&#34;)
+                                
                     # Impose restriction on num_exposures
                     if isinstance(self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;], dict):
                         errs.append(&#34;You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES&#34;)
                     else:
-                        if self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] != 1:
+                        if self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] &lt; 0.99 or self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] &gt; 1.01:
                             errs.append(&#34;You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES&#34;)
 
                 elif config_k == &#39;NAME&#39; or config_k == &#39;FRACTION&#39;:
@@ -1456,7 +1465,7 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
         errs = []
 
         # check that transmission curves exist for the bands
-        if model_name not in [&#39;flat&#39;, &#39;flatnoise&#39;, &#39;variable&#39;, &#39;variablenoise&#39;]:
+        if model_name not in [&#39;flat&#39;, &#39;flatnoise&#39;, &#39;variable&#39;, &#39;variablenoise&#39;, &#39;static&#39;]:
             if not self.checked_ts_bands:
                 for band in self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;BANDS&#34;].split(&#39;,&#39;):
                     try:
@@ -1876,11 +1885,20 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
                             except TypeError:
                                 errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
 
+                    # Check validity of PEAK argument, if passed
+                    if &#34;PEAK&#34; in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
+                        if not isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;PEAK&#34;], dict):
+                            try:
+                                peak = int(float(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;PEAK&#34;]))
+                                del peak
+                            except TypeError:
+                                errs.append(&#34;PEAK argument in GEOMETRY.&#34; + k + &#34;.TIMESERIES.PEAK must be numeric&#34;)
+                                
                     # Impose restriction on num_exposures
                     if isinstance(self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;], dict):
                         errs.append(&#34;You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES&#34;)
                     else:
-                        if self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] != 1:
+                        if self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] &lt; 0.99 or self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] &gt; 1.01:
                             errs.append(&#34;You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES&#34;)
 
                 elif config_k == &#39;NAME&#39; or config_k == &#39;FRACTION&#39;:
@@ -2439,11 +2457,20 @@ in the config file</p></div>
                         except TypeError:
                             errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
 
+                # Check validity of PEAK argument, if passed
+                if &#34;PEAK&#34; in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
+                    if not isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;PEAK&#34;], dict):
+                        try:
+                            peak = int(float(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;PEAK&#34;]))
+                            del peak
+                        except TypeError:
+                            errs.append(&#34;PEAK argument in GEOMETRY.&#34; + k + &#34;.TIMESERIES.PEAK must be numeric&#34;)
+                            
                 # Impose restriction on num_exposures
                 if isinstance(self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;], dict):
                     errs.append(&#34;You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES&#34;)
                 else:
-                    if self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] != 1:
+                    if self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] &lt; 0.99 or self.config[&#34;SURVEY&#34;][&#34;PARAMETERS&#34;][&#34;num_exposures&#34;] &gt; 1.01:
                         errs.append(&#34;You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES&#34;)
 
             elif config_k == &#39;NAME&#39; or config_k == &#39;FRACTION&#39;:
