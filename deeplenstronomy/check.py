@@ -892,6 +892,15 @@ class AllChecks():
                             except TypeError:
                                 errs.append("Listed NITES in GEOMETRY." + k + ".TIMESERIES.NITES must be numeric")
 
+                    # Check validity of PEAK argument, if passed
+                    if "PEAK" in self.config['GEOMETRY'][k][config_k].keys():
+                        if not isinstance(self.config['GEOMETRY'][k][config_k]["PEAK"], dict):
+                            try:
+                                peak = int(float(self.config['GEOMETRY'][k][config_k]["PEAK"]))
+                                del peak
+                            except TypeError:
+                                errs.append("PEAK argument in GEOMETRY." + k + ".TIMESERIES.PEAK must be numeric")
+                                
                     # Impose restriction on num_exposures
                     if isinstance(self.config["SURVEY"]["PARAMETERS"]["num_exposures"], dict):
                         errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
