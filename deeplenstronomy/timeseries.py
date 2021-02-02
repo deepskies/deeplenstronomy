@@ -246,6 +246,35 @@ class LCGen():
                 'obj_type': 'Flat',
                 'sed': 'Flat'}
 
+    def gen_static(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+        """
+        Make a static source capable of having time-series data by introducing a mag=99 source
+        on each NITE of the simulation.
+
+        Args:
+            redshift (float): ignored 
+            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            sed_filename (str): ignored                                                                                                                                                               
+            cosmo (astropy.cosmology): ignored                                                                                                                                                                                            
+        Returns:
+            lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
+              - 'lc' contains a dataframe of the light from the object
+              - 'obj_type' contains a string for the type of object. Will always be 'Static' here
+              - 'sed' contains the filename of the sed used. Will always be 'Flat' here                                                                                                                        """
+        output_data_cols = ['NITE', 'BAND', 'MAG']
+        central_mag = 99.0
+        mags = {band: central_mag for band in self.bands}
+        output_data = []
+        for nite in nites:
+            for band in self.bands:
+                output_data.append([nite, band, mags[band]])
+
+        return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
+                'obj_type': 'Static',
+                'sed': 'Static'}
+
+
+        
     def gen_variablenoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
         """ 
         Generate a variable light curve with small random noise

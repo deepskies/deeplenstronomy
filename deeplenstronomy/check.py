@@ -472,7 +472,7 @@ class AllChecks():
         errs = []
 
         # check that transmission curves exist for the bands
-        if model_name not in ['flat', 'flatnoise', 'variable', 'variablenoise']:
+        if model_name not in ['flat', 'flatnoise', 'variable', 'variablenoise', 'static']:
             if not self.checked_ts_bands:
                 for band in self.config["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
                     try:
