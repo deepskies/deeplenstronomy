@@ -1,6 +1,9 @@
 # Welcome to `deeplenstronomy`!
 
 [![status](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1/status.svg)](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1)
+[![status](https://img.shields.io/badge/arXiv-2102.02830-red)](http://arxiv.org/abs/2102.02830)
+[![status](https://img.shields.io/badge/PyPi-0.0.1.4-blue)](https://pypi.org/project/deeplenstronomy/)
+[![status](https://img.shields.io/badge/License-MIT-lightgrey)](https://github.com/deepskies/deeplenstronomy/blob/master/LICENSE)
 
 `deeplenstronomy` is a tool for simulating large datasets for applying deep learning to strong gravitational lensing. 
 It works by wrapping the functionalities of [`lenstronomy`](https://github.com/sibirrer/lenstronomy) in a convenient yaml-style interface, allowing users to embrace the astronomer part of their brain rather than their programmer part when generating training datasets.
@@ -55,13 +58,17 @@ However, if you would like to view the full API documentation, you can visit the
 
 If you use `deeplenstronomy` in your work, please include the following citations:
 ```
-@online{deeplenstronomy,
-    author    =   "Robert Morgan and Brian Nord and Simon Birrer and Joshua Yao-Yu Lin and Jason Poh",
-    title     =   "deeplenstronomy: A data set simualtion package for strong gravitational lensing",
-    year      =   "2020",
-    url       =   "https://github.com/deepskies/deeplenstronomy",
-    urldate   =   "2020-12-14"
-    keywords  =   "Python, astronomy, strong lensing, simulation"
+@article{deeplenstronomy,
+  doi = {10.21105/joss.02854},
+  url = {https://doi.org/10.21105/joss.02854},
+  year = {2021},
+  publisher = {The Open Journal},
+  volume = {6},
+  number = {58},
+  pages = {2854},
+  author = {Robert Morgan and Brian Nord and Simon Birrer and Joshua Yao-Yu Lin and Jason Poh},
+  title = {deeplenstronomy: A dataset simulation package for strong gravitational lensing},
+  journal = {Journal of Open Source Software}
 }
 
 @article{lenstronomy,
