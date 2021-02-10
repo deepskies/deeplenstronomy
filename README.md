@@ -26,27 +26,27 @@ conda activate deeplens
 
 - Step 1: `pip install deeplenstronomy`
 
-## Getting Started and Example Notebooks
+## [Getting Started and Example Notebooks](https://deepskies.github.io/deeplenstronomy/Notebooks/)
 
-Start by reading the [Getting Started Guide](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/GettingStarted.ipynb) to familiarize yourself with the `deeplenstronomy` style.
+Start by reading the [Getting Started Guide](https://deepskies.github.io/deeplenstronomy/Notebooks/GettingStarted.html) to familiarize yourself with the `deeplenstronomy` style.
 
 After that, check out the example notebooks below:
 
 ### Notebooks for `deeplenstronomy` Utilities
-- [Creating `deeplenstronomy` Configuration Files](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/ConfigFiles.md)
-- [Generating Datasets](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/DeepLenstronomyDemo.ipynb)
-- [Visualizing `deeplenstronomy` Images](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/Visualization.ipynb)
-- [Utilizing Astronomical Surveys](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/Surveys.ipynb)
-- [Defining Your Own Probability Distributions](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/UserDistributions.ipynb)
-- [Using Your Own Images as Backgrounds](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/BackgroundsDemo.ipynb)
-- [Simulating Time-Series Datasets](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/TimeSeriesDemo.ipynb)
+- [Creating `deeplenstronomy` Configuration Files](https://deepskies.github.io/deeplenstronomy/Notebooks/ConfigFiles.html)
+- [Generating Datasets](https://deepskies.github.io/deeplenstronomy/Notebooks/DeepLenstronomyDemo.html)
+- [Visualizing `deeplenstronomy` Images](https://deepskies.github.io/deeplenstronomy/Notebooks/Visualization.html)
+- [Utilizing Astronomical Surveys](https://deepskies.github.io/deeplenstronomy/Notebooks/Surveys.html)
+- [Defining Your Own Probability Distributions](https://deepskies.github.io/deeplenstronomy/Notebooks/UserDistributions.html)
+- [Using Your Own Images as Backgrounds](https://deepskies.github.io/deeplenstronomy/Notebooks/BackgroundsDemo.html)
+- [Simulating Time-Series Datasets](https://deepskies.github.io/deeplenstronomy/Notebooks/TimeSeriesDemo.html)
 
 ### Notebooks for Applying `deeplenstronomy` to Machine Learning Analyses
-- [Using `deeplenstronomy` for Active Learning](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/ActiveUpdateDemo.ipynb)
-- [Using `deeplenstronomy` for Classification and Regression](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/Metrics.ipynb)
+- [Using `deeplenstronomy` for Active Learning](https://deepskies.github.io/deeplenstronomy/Notebooks/ActiveUpdateDemo.html)
+- [Using `deeplenstronomy` for Classification and Regression](https://deepskies.github.io/deeplenstronomy/Notebooks/Metrics.html)
 
 ### Notebooks for Suggested Science Cases
-- [A Walkthrough of Using `deeplenstronomy` for Science](https://github.com/deepskies/deeplenstronomy/blob/master/Notebooks/FullExample.ipynb)
+- [A Walkthrough of Using `deeplenstronomy` for Science](https://deepskies.github.io/deeplenstronomy/Notebooks/FullExample.html)
 
 
 ## API Documentation
