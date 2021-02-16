@@ -3,6 +3,10 @@
 History
 -------
 
+0.0.1.4 (In development)
++++++++++++++++++++++
+* Fix bug in checking configuration file geometry section
+
 0.0.1.3 (2021-02-02)
 +++++++++++++++++++++
 

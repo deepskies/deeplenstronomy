@@ -807,9 +807,12 @@ class AllChecks():
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' needs a valid integer index greater than zero')
 
                     # Plane must have a redshift
-                    if 'REDSHIFT' not in config_k in self.config['GEOMETRY'][k][config_k]['PARAMETERS'].keys():
-                        errs.append('REDSHIFT is missing from GEOMETRY.' + k + '.' + config_k)
-
+                    try:
+                        if 'REDSHIFT' not in self.config['GEOMETRY'][k][config_k]['PARAMETERS'].keys():
+                            errs.append('REDSHIFT is missing from GEOMETRY.' + k + '.' + config_k)
+                    except AttributeError:
+                        errs.append('Incorrect format detected in ' + k + '.' + config_k)
+                        
                     detected_objects = []
                     for obj_k in self.config['GEOMETRY'][k][config_k].keys():
                         # check individual object properties
