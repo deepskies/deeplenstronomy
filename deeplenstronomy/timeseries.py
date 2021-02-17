@@ -189,13 +189,13 @@ class LCGen():
         """
         return unique_nites[np.argmin(np.abs(nite - unique_nites))]
 
-    def gen_variable(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_variable(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a random variable light curve
 
         Args:
             redshift (float): ignored 
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for    
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey    
             sed_filename (str): ignored
             cosmo (astropy.cosmology): ignored
 
@@ -209,22 +209,22 @@ class LCGen():
         output_data = []
         central_mag = random.uniform(12.0, 23.0)
         colors = {band: mag for band, mag in zip(self.bands, np.random.uniform(low=-2.0, high=2.0, size=len(self.bands)))}
-        for nite in nites:
-            central_mag = random.uniform(central_mag - 1.0, central_mag + 1.0)
-            for band in self.bands:
+        for band in self.bands:
+            for nite in nite_dict[band]:
+                central_mag = random.uniform(central_mag - 1.0, central_mag + 1.0)
                 output_data.append([nite, band, central_mag + colors[band]])
 
         return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
 		'obj_type': 'Variable',
                 'sed': 'Variable'}
     
-    def gen_flat(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_flat(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a random flat light curve.
         
         Args:
             redshift (float): ignored
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey
             sed_filename (str): ignored
             cosmo (astropy.cosmology): ignored
 
@@ -238,35 +238,36 @@ class LCGen():
         central_mag = random.uniform(12.0, 23.0)
         mags = {band: mag for band, mag in zip(self.bands, central_mag + np.random.uniform(low=-2.0, high=2.0, size=len(self.bands)))}
         output_data = []
-        for nite in nites:
-            for band in self.bands:
+        for band in self.bands:
+            for nite in nite_dict[band]:
                 output_data.append([nite, band, mags[band]])
 
         return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
                 'obj_type': 'Flat',
                 'sed': 'Flat'}
 
-    def gen_static(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_static(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Make a static source capable of having time-series data by introducing a mag=99 source
         on each NITE of the simulation.
 
         Args:
             redshift (float): ignored 
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey
             sed_filename (str): ignored                                                                                                                                                               
             cosmo (astropy.cosmology): ignored                                                                                                                                                                                            
         Returns:
             lc_dict: a dictionary with keys ['lc, 'obj_type', 'sed']
               - 'lc' contains a dataframe of the light from the object
               - 'obj_type' contains a string for the type of object. Will always be 'Static' here
-              - 'sed' contains the filename of the sed used. Will always be 'Flat' here                                                                                                                        """
+              - 'sed' contains the filename of the sed used. Will always be 'Flat' here     
+        """
         output_data_cols = ['NITE', 'BAND', 'MAG']
         central_mag = 99.0
         mags = {band: central_mag for band in self.bands}
         output_data = []
-        for nite in nites:
-            for band in self.bands:
+        for band in self.bands:
+            for nite in nite_dict[band]:
                 output_data.append([nite, band, mags[band]])
 
         return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
@@ -275,13 +276,13 @@ class LCGen():
 
 
         
-    def gen_variablenoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_variablenoise(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """ 
         Generate a variable light curve with small random noise
 
         Args:
             redshift (float): ignored
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey
             sed_filename (str): ignored
             cosmo (astropy.cosmology): ignored
 
@@ -291,7 +292,7 @@ class LCGen():
               - 'obj_type' contains a string for the type of object. Will always be 'VariableNoise' here
               - 'sed' contains the filename of the sed used. Will always be 'VariableNoise' here              
         """
-        noiseless_lc_dict = self.gen_variable(redshift, nites)
+        noiseless_lc_dict = self.gen_variable(redshift, nite_dict)
         noise = np.random.normal(loc=0, scale=0.25, size=noiseless_lc_dict['lc'].shape[0])
         noiseless_lc_dict['lc']['MAG'] = noiseless_lc_dict['lc']['MAG'].values + noise
         noiseless_lc_dict['obj_type'] = 'VariableNoise'
@@ -299,13 +300,13 @@ class LCGen():
         return noiseless_lc_dict
 
     
-    def gen_flatnoise(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_flatnoise(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a flat light curve will small random noise
 
         Args:
             redshift (float): ignored
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey
             sed_filename (str): ignored
             cosmo (astropy.cosmology): ignored
 
@@ -315,20 +316,20 @@ class LCGen():
               - 'obj_type' contains a string for the type of object. Will always be 'FlatNoise' here
               - 'sed' contains the filename of the sed used. Will always be 'FlatNoise' here              
         """
-        noiseless_lc_dict = self.gen_flat(redshift, nites)
+        noiseless_lc_dict = self.gen_flat(redshift, nite_dict)
         noise = np.random.normal(loc=0, scale=0.25, size=noiseless_lc_dict['lc'].shape[0])
         noiseless_lc_dict['lc']['MAG'] = noiseless_lc_dict['lc']['MAG'].values + noise
         noiseless_lc_dict['obj_type'] = 'FlatNoise'
         noiseless_lc_dict['sed'] = 'FlatNoise'
         return noiseless_lc_dict
         
-    def gen_user(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_user(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a light curve from a user-specidied SED
 
         Args:
             redshift (float): the redshift of the source
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey 
             sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
             sed_filename (str): filename containing the time-series sed you want to use 
             cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
@@ -342,15 +343,15 @@ class LCGen():
         if not sed:
             sed = self._read_sed('seds/user/' + sed_filename)
 
-        return self.gen_lc_from_sed(redshift, nites, sed, sed_filename, sed_filename, cosmo=cosmo)
+        return self.gen_lc_from_sed(redshift, nite_dict, sed, sed_filename, sed_filename, cosmo=cosmo)
 
-    def gen_kn(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_kn(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a GW170817-like light curve.
 
         Args:
             redshift (float): the redshift of the source
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey 
             sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
             sed_filename (str): filename containing the time-series sed you want to use 
             cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
@@ -366,16 +367,15 @@ class LCGen():
         if not sed:
             sed = self._read_sed(sed_filename)
 
-        return self.gen_lc_from_sed(redshift, nites, sed, 'KN', sed_filename, cosmo=cosmo)
+        return self.gen_lc_from_sed(redshift, nite_dict, sed, 'KN', sed_filename, cosmo=cosmo)
     
-    def gen_ia(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_ia(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a SN-Ia light curve.
-        
 
         Args:
             redshift (float): the redshift of the source
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey 
             sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
             sed_filename (str): filename containing the time-series sed you want to use 
             cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
@@ -396,15 +396,15 @@ class LCGen():
                 sed = self._read_sed(sed_filename)
                 
         # Trigger the lc generation function on this sed
-        return self.gen_lc_from_sed(redshift, nites, sed, 'Ia', sed_filename, cosmo=cosmo)
+        return self.gen_lc_from_sed(redshift, nite_dict, sed, 'Ia', sed_filename, cosmo=cosmo)
     
-    def gen_cc(self, redshift, nites, sed=None, sed_filename=None, cosmo=None):
+    def gen_cc(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
         Generate a SN-CC light curve
         
         Args:
             redshift (float): the redshift of the source
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey 
             sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
             sed_filename (str): filename containing the time-series sed you want to use 
             cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
@@ -428,15 +428,15 @@ class LCGen():
         obj_type = self.cc_info_df['SNTYPE'].values[self.cc_info_df['SED'].values == sed_filename.split('/')[-1].split('.')[0]][0]
         
         # Trigger the lc generation function on this sed
-        return self.gen_lc_from_sed(redshift, nites, sed, obj_type, sed_filename, cosmo=cosmo)
+        return self.gen_lc_from_sed(redshift, nite_dict, sed, obj_type, sed_filename, cosmo=cosmo)
                 
-    def gen_lc_from_sed(self, redshift, nites, sed, obj_type, sed_filename, cosmo=None):
+    def gen_lc_from_sed(self, redshift, nite_dict, sed, obj_type, sed_filename, cosmo=None):
         """
         Generate a light curve based on a time-series sed.
         
         Args:
             redshift (float): the redshift of the source
-            nites (List[int]): a list of night relative to peak you want to obtain a magnitude for 
+            nite_dict (dict[str: List[int]]): (band, list of night relative to peak you want to obtain a magnitude for) pair for each band in survey 
             sed (None or pandas.DataFrame, optional, default=None): a dataframe containing the sed of the SN 
             sed_filename (str): filename containing the time-series sed you want to use 
             cosmo (astropy.cosmology): an astropy.cosmology instance used for distance calculations
@@ -449,14 +449,16 @@ class LCGen():
         """
         
         # If nite not in the sed, set nite to the closest nite in the sed
-        useable_nites = []
+        nites = {}
         sed_nites = np.unique(sed['NITE'].values)
-        for nite in nites:
-            if nite not in sed_nites:
-                useable_nites.append(self._get_closest_nite(sed_nites, nite))
-            else:
-                useable_nites.append(nite)
-        nites = useable_nites
+        for band, cad_nites in nite_dict.items():
+            useable_nites = []
+            for nite in cad_nites:
+                if nite not in sed_nites:
+                    useable_nites.append(self._get_closest_nite(sed_nites, nite))
+                else:
+                    useable_nites.append(nite)
+            nites[band] = useable_nites
             
         # Redshift the sed frequencies and wavelengths
         sed['WAVELENGTH_OBS'] = (1.0 + redshift) * sed['WAVELENGTH_REST'].values
@@ -475,19 +477,19 @@ class LCGen():
         # On each nite, in each band, calculate the absolute mag
         output_data = []
         output_data_cols = ['NITE', 'BAND', 'MAG']
-        for nite in nites:
-            nite_sed = sed[sed['NITE'].values == nite].copy().reset_index(drop=True)
+        for band, k_correction in zip(self.bands, k_corrections):
             
-            # Apply factors to calculate absolute mag
-            nite_sed['FLUX'] = (cosmo.luminosity_distance(redshift).value * 10 ** 6 / 10) ** 2 / (1 + redshift) * nite_sed['FLUX'].values
-            nite_sed['FREQUENCY_REST'] = nite_sed['FREQUENCY_REST'].values / (1. + redshift)
-            
-            # Convert to AB Magnitude system
-            norm_sed = nite_sed.copy()
-            norm_sed['FLUX'] = 3631.0
-            
-            for band, k_correction in zip(self.bands, k_corrections):
+            for nite in nites[band]:
+                nite_sed = sed[sed['NITE'].values == nite].copy().reset_index(drop=True)
                 
+                # Apply factors to calculate absolute mag
+                nite_sed['FLUX'] = (cosmo.luminosity_distance(redshift).value * 10 ** 6 / 10) ** 2 / (1 + redshift) * nite_sed['FLUX'].values
+                nite_sed['FREQUENCY_REST'] = nite_sed['FREQUENCY_REST'].values / (1. + redshift)
+            
+                # Convert to AB Magnitude system
+                norm_sed = nite_sed.copy()
+                norm_sed['FLUX'] = 3631.0
+            
                 # Calculate the apparent magnitude
                 norm = self._integrate_through_band(norm_sed, band, redshift, frame='REST')
                 absolute_ab_mag = self._integrate_through_band(nite_sed, band, redshift, frame='REST') / norm

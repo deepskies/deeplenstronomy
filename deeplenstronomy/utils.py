@@ -2,6 +2,7 @@
 
 import os
 import sys
+import yaml
 
 from astropy.io import fits
 import numpy as np
@@ -303,3 +304,22 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
 
     return image_indices
     
+
+def read_cadence_file(filename):
+    """
+    Parse a cadence file.
+
+    Args:
+        filename (str): Name of cadence file
+
+    Returns:
+        cadence_dict: dictionary containing cadence file contents
+    """
+    with open(filename, 'r') as f:
+        cadence_dict = yaml.safe_load(f)        
+        
+        # Set reference mjd to the default value of 0
+        if 'REFERENCE_MJD' not in cadence_dict:
+            cadence_dict['REFERENCE_MJD'] = 0
+                        
+    return cadence_dict
