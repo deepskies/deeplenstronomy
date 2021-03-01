@@ -104,8 +104,8 @@ class LCGen():
         setattr(self, '_{0}_obs_frame_freq_max'.format(band), 2.99792458e18 / np.min(passband['WAVELENGTH'].values))
         
         # Add boundary terms to cover the whole range
-        passband.loc[passband.shape[0]] = (1.e-1, 0.0)
-        passband.loc[passband.shape[0]] = (4.e+4, 0.0)
+        passband.loc[passband.shape[0]] = (1.e-9, 0.0)
+        passband.loc[passband.shape[0]] = (4.e+9, 0.0)
         
         # Convert to frequency using speed of light in angstroms
         passband['FREQUENCY'] = 2.99792458e18 / passband['WAVELENGTH'].values
@@ -129,13 +129,20 @@ class LCGen():
         sed = pd.read_csv(sed_filename,
                           names=['NITE', 'WAVELENGTH_REST', 'FLUX'], 
                           delim_whitespace=True, comment='#')
+
+        # Remove unrealistic wavelengths
+        sed = sed[sed['WAVELENGTH_REST'].values > 10.0].copy().reset_index(drop=True)
+        
+        # Add new boundaries
         boundary_data = []
         for nite in np.unique(sed['NITE'].values):
             boundary_data.append((nite, 10.0, 0.0))
             boundary_data.append((nite, 25000.0, 0.0))
         sed = sed.append(pd.DataFrame(data=boundary_data, columns=['NITE', 'WAVELENGTH_REST', 'FLUX']))
+
+        # Convert to frequency
         sed['FREQUENCY_REST'] = 2.99792458e18 / sed['WAVELENGTH_REST'].values
-        
+
         # Normalize
         func = interp1d(sed['WAVELENGTH_REST'].values, sed['FLUX'].values)
         sed['FLUX'] = sed['FLUX'].values / quad(func, 10.0, 25000.0)[0]
@@ -196,7 +203,7 @@ class LCGen():
         frequency_arr = sed['FREQUENCY_{0}'.format(frame)].values
         delta_frequencies = np.diff(frequency_arr) * -1.0
         integrand = eval("self.{0}_transmission_frequency(frequency_arr) * sed['FLUX'].values / frequency_arr".format(band))
-        average_integrands = np.diff(integrand) + integrand[0:-1]
+        average_integrands = 0.5 * np.diff(integrand) + integrand[0:-1]
         return np.sum(delta_frequencies * average_integrands)
     
     def _get_closest_nite(self, unique_nites, nite):
@@ -361,11 +368,17 @@ class LCGen():
               - 'sed' contains the filename of the sed used  
         """
         if sed is None:
-            if hasattr(self, sed_filename.split('.')[0]):
-                sed = getattr(self, sed_filename.split('.')[0])
+            if sed_filename.startswith('seds/user/'):
+                attr_name = sed_filename.split('.')[0]
             else:
-                sed = self._read_sed('seds/user/' + sed_filename)
-                setattr(self, sed_filename.split('.')[0], sed)
+                attr_name = 'seds/user/' + sed_filename.split('.')[0]
+                sed_filename = 'seds/user/' + sed_filename
+                
+            if hasattr(self, attr_name):
+                sed = getattr(self, attr_name)
+            else:
+                sed = self._read_sed(sed_filename)
+                setattr(self, attr_name, sed)
 
         return self.gen_lc_from_sed(redshift, nite_dict, sed, sed_filename, sed_filename, cosmo=cosmo)
 
@@ -389,11 +402,12 @@ class LCGen():
 
         sed_filename = 'seds/kn/kn.SED'
         if sed is None:
-            if hasattr(self, sed_filename.split('.')[0]):
-                sed = getattr(self, sed_filename.split('.')[0])
+            attr_name = sed_filename.split('.')[0]
+            if hasattr(self, attr_name):
+                sed = getattr(self, attr_name)
             else:
                 sed = self._read_sed(sed_filename)
-                setattr(self, sed_filename.split('.')[0], sed)
+                setattr(self, attr_name, sed)
                 
         return self.gen_lc_from_sed(redshift, nite_dict, sed, 'KN', sed_filename, cosmo=cosmo)
     
@@ -417,19 +431,20 @@ class LCGen():
         
         # Read rest-frame sed if not supplied as argument
         if sed is None:
-            if sed_filename is not None:
-                if hasattr(self, sed_filename.split('.')[0]):
-                    sed = getattr(self, sed_filename.split('.')[0])
-                else:
-                    sed = self._read_sed('seds/ia/' + sed_filename)
-                    setattr(self, sed_filename.split('.')[0], sed)
-            else:
+            if sed_filename is None:
                 sed_filename = random.choice(self.ia_sed_files)
-                if hasattr(self, sed_filename.split('.')[0]):
-                    sed = getattr(self, sed_filename.split('.')[0])
-                else:
-                    sed = self._read_sed(sed_filename)
-                    setattr(self, sed_filename.split('.')[0], sed)
+            
+            if sed_filename.startswith('seds/ia/'):
+                attr_name = sed_filename.split('.')[0]
+            else:
+                attr_name = 'seds/ia/' + sed_filename.split('.')[0]
+                sed_filename = 'seds/ia/' + sed_filename
+
+            if hasattr(self, attr_name):
+                sed = getattr(self, attr_name)
+            else:
+                sed = self._read_sed(sed_filename)
+                setattr(self, attr_name, sed)
                 
         # Trigger the lc generation function on this sed
         return self.gen_lc_from_sed(redshift, nite_dict, sed, 'Ia', sed_filename, cosmo=cosmo)
@@ -453,21 +468,21 @@ class LCGen():
         """
 
         # If sed not specified, choose sed based on weight map
-        if not sed:
-            if sed_filename is not None:
-                if hasattr(self, sed_filename.split('.')[0]):
-                    sed = getattr(self, sed_filename.split('.')[0])
-                else:
-                    sed = self._read_sed('seds/cc/' + sed_filename)
-                    setattr(self, sed_filename.split('.')[0], sed)
-            else:
+        if sed is None:
+            if sed_filename is None:
                 sed_filename = random.choices(self.cc_sed_files, weights=self.cc_weights, k=1)[0]
-                if hasattr(self, sed_filename.split('.')[0]):
-                    sed = getattr(self, sed_filename.split('.')[0])
-                else:
-                    sed = self._read_sed('seds/cc/' + sed_filename)
-                    setattr(self, sed_filename.split('.')[0], sed)
-                
+
+            if sed_filename.startswith('seds/cc/'):
+                attr_name = sed_filename.split('.')[0]
+            else:
+                attr_name = 'seds/cc/' + sed_filename.split('.')[0]
+                sed_filename = 'seds/cc/' + sed_filename
+                    
+            if hasattr(self, attr_name):
+                sed = getattr(self, attr_name)
+            else:
+                sed = self._read_sed(sed_filename)
+                setattr(self, attr_name, sed)
         
         # Get the type of SN-CC
         obj_type = self.cc_info_df['SNTYPE'].values[self.cc_info_df['SED'].values == sed_filename.split('/')[-1].split('.')[0]][0]
