@@ -7,6 +7,8 @@ History
 +++++++++++++++++++++
 * Fix bug in checking configuration file geometry section
 
+* Speed improvements for timeseries functionalities
+
 0.0.1.3 (2021-02-02)
 +++++++++++++++++++++
 
