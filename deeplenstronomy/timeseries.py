@@ -13,7 +13,7 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
 
-class LCGen():
+class LCGen_new():
     """Light Curve Generation"""    
     def __init__(self, bands=''):
         """
@@ -36,10 +36,21 @@ class LCGen():
         self.bands = bands.split(',')
         
         # Interpolate the transmission curves
+        self.norm_dict = {}
         for band in self.bands:
             transmission_frequency, transmission_wavelength = self.__read_passband(band)
             setattr(self, '{0}_transmission_frequency'.format(band), transmission_frequency)
             setattr(self, '{0}_transmission_wavelength'.format(band), transmission_wavelength)
+            
+            # Store normalizations
+            lower_bound = eval('self._{0}_obs_frame_freq_min'.format(band))
+            upper_bound = eval('self._{0}_obs_frame_freq_max'.format(band))        
+            frequency_arr = np.linspace(upper_bound, lower_bound, 10000)
+            norm_arr = np.ones(len(frequency_arr)) * 3631.0
+            
+            norm_sed = pd.DataFrame(data=np.vstack((norm_arr, frequency_arr)).T,
+                                    columns=['FLUX', 'FREQUENCY_REST'])
+            self.norm_dict[band] = self._integrate_through_band(norm_sed, band, 0.0, frame='REST')
         
         return
 
@@ -118,9 +129,11 @@ class LCGen():
         sed = pd.read_csv(sed_filename,
                           names=['NITE', 'WAVELENGTH_REST', 'FLUX'], 
                           delim_whitespace=True, comment='#')
+        boundary_data = []
         for nite in np.unique(sed['NITE'].values):
-            sed.loc[sed.shape[0]] = (nite, 10.0, 0.0)
-            sed.loc[sed.shape[0]] = (nite, 25000.0, 0.0)
+            boundary_data.append((nite, 10.0, 0.0))
+            boundary_data.append((nite, 25000.0, 0.0))
+        sed = sed.append(pd.DataFrame(data=boundary_data, columns=['NITE', 'WAVELENGTH_REST', 'FLUX']))
         sed['FREQUENCY_REST'] = 2.99792458e18 / sed['WAVELENGTH_REST'].values
         
         # Normalize
@@ -128,7 +141,7 @@ class LCGen():
         sed['FLUX'] = sed['FLUX'].values / quad(func, 10.0, 25000.0)[0]
         
         # Round nights to nearest int
-        sed['NITE'] = [round(x) for x in sed['NITE'].values]
+        sed['NITE'] = sed['NITE'].values.round()
         
         return sed
     
@@ -144,6 +157,20 @@ class LCGen():
         return -2.5 * np.log10((1.0 + redshift) * 
                                (self._integrate_through_band(sed, band, redshift, frame='OBS') /
                                 self._integrate_through_band(sed, band, redshift, frame='REST')))
+    
+    def _get_kcorrections(self, sed, sed_filename, redshift):
+        """
+        Cache the k-correction factors and return
+        """
+        attr_name = sed_filename.split('.')[0] + '-kcorrect_dict-' + str(redshift*100).split('.')[0]
+        if hasattr(self, attr_name):
+            return [getattr(self, attr_name)[b] for b in self.bands]
+        else:
+            peak_sed = sed[sed['NITE'].values == self._get_closest_nite(np.unique(sed['NITE'].values), 0)].copy().reset_index(drop=True)
+            k_corrections = [self._get_kcorrect(peak_sed, band, redshift) for band in self.bands]
+            setattr(self, attr_name, {b: k for b, k in zip(self.bands, k_corrections)})
+            return k_corrections
+        
         
     def _get_distance_modulus(self, redshift, cosmo):
         """
@@ -165,19 +192,12 @@ class LCGen():
         :param redshift: the redshift of the source
         :param frame: chose from ['REST', 'OBS'] to choose the rest frame or the observer frame
         :return: flux: the measured flux from the source through the filter
-        """
-        # Tighten bounds for accurate integration
-        lower_bound = eval('self._{0}_obs_frame_freq_min'.format(band))
-        upper_bound = eval('self._{0}_obs_frame_freq_max'.format(band))        
-        frequency_arr = np.linspace(lower_bound, upper_bound, 100000)
-        
-        # Make an interpolated version of the integrand
-        interpolated_sed = interp1d(sed['FREQUENCY_{0}'.format(frame)].values, sed['FLUX'].values, fill_value=0.0)
-        integrand = eval('self.{0}_transmission_frequency(frequency_arr) * interpolated_sed(frequency_arr) / frequency_arr'.format(band))
-        interpolated_integrand = interp1d(frequency_arr, integrand, fill_value=0.0)
-               
-        # Integrate and return
-        return quad(interpolated_integrand, lower_bound, upper_bound, limit=500)[0]
+        """     
+        frequency_arr = sed['FREQUENCY_{0}'.format(frame)].values
+        delta_frequencies = np.diff(frequency_arr) * -1.0
+        integrand = eval("self.{0}_transmission_frequency(frequency_arr) * sed['FLUX'].values / frequency_arr".format(band))
+        average_integrands = np.diff(integrand) + integrand[0:-1]
+        return np.sum(delta_frequencies * average_integrands)
     
     def _get_closest_nite(self, unique_nites, nite):
         """
@@ -215,7 +235,7 @@ class LCGen():
                 output_data.append([nite, band, central_mag + colors[band]])
 
         return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols),
-		'obj_type': 'Variable',
+                'obj_type': 'Variable',
                 'sed': 'Variable'}
     
     def gen_flat(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
@@ -340,8 +360,12 @@ class LCGen():
               - 'obj_type' contains a string for the type of object. Will always be <sed_filename> here 
               - 'sed' contains the filename of the sed used  
         """
-        if not sed:
-            sed = self._read_sed('seds/user/' + sed_filename)
+        if sed is None:
+            if hasattr(self, sed_filename.split('.')[0]):
+                sed = getattr(self, sed_filename.split('.')[0])
+            else:
+                sed = self._read_sed('seds/user/' + sed_filename)
+                setattr(self, sed_filename.split('.')[0], sed)
 
         return self.gen_lc_from_sed(redshift, nite_dict, sed, sed_filename, sed_filename, cosmo=cosmo)
 
@@ -364,9 +388,13 @@ class LCGen():
         """
 
         sed_filename = 'seds/kn/kn.SED'
-        if not sed:
-            sed = self._read_sed(sed_filename)
-
+        if sed is None:
+            if hasattr(self, sed_filename.split('.')[0]):
+                sed = getattr(self, sed_filename.split('.')[0])
+            else:
+                sed = self._read_sed(sed_filename)
+                setattr(self, sed_filename.split('.')[0], sed)
+                
         return self.gen_lc_from_sed(redshift, nite_dict, sed, 'KN', sed_filename, cosmo=cosmo)
     
     def gen_ia(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
@@ -388,12 +416,20 @@ class LCGen():
         """
         
         # Read rest-frame sed if not supplied as argument
-        if not sed:
-            if sed_filename:
-                sed = self._read_sed('seds/ia/' + sed_filename)
+        if sed is None:
+            if sed_filename is not None:
+                if hasattr(self, sed_filename.split('.')[0]):
+                    sed = getattr(self, sed_filename.split('.')[0])
+                else:
+                    sed = self._read_sed('seds/ia/' + sed_filename)
+                    setattr(self, sed_filename.split('.')[0], sed)
             else:
                 sed_filename = random.choice(self.ia_sed_files)
-                sed = self._read_sed(sed_filename)
+                if hasattr(self, sed_filename.split('.')[0]):
+                    sed = getattr(self, sed_filename.split('.')[0])
+                else:
+                    sed = self._read_sed(sed_filename)
+                    setattr(self, sed_filename.split('.')[0], sed)
                 
         # Trigger the lc generation function on this sed
         return self.gen_lc_from_sed(redshift, nite_dict, sed, 'Ia', sed_filename, cosmo=cosmo)
@@ -418,11 +454,20 @@ class LCGen():
 
         # If sed not specified, choose sed based on weight map
         if not sed:
-            if sed_filename:
-                sed = self._read_sed('seds/cc/' + sed_filename)
+            if sed_filename is not None:
+                if hasattr(self, sed_filename.split('.')[0]):
+                    sed = getattr(self, sed_filename.split('.')[0])
+                else:
+                    sed = self._read_sed('seds/cc/' + sed_filename)
+                    setattr(self, sed_filename.split('.')[0], sed)
             else:
                 sed_filename = random.choices(self.cc_sed_files, weights=self.cc_weights, k=1)[0]
-                sed = self._read_sed(sed_filename)
+                if hasattr(self, sed_filename.split('.')[0]):
+                    sed = getattr(self, sed_filename.split('.')[0])
+                else:
+                    sed = self._read_sed('seds/cc/' + sed_filename)
+                    setattr(self, sed_filename.split('.')[0], sed)
+                
         
         # Get the type of SN-CC
         obj_type = self.cc_info_df['SNTYPE'].values[self.cc_info_df['SED'].values == sed_filename.split('/')[-1].split('.')[0]][0]
@@ -471,12 +516,12 @@ class LCGen():
         distance_modulus = self._get_distance_modulus(redshift, cosmo=cosmo)
         
         # Calculate k-correction at peak
-        peak_sed = sed[sed['NITE'].values == self._get_closest_nite(np.unique(sed['NITE'].values), 0)].copy().reset_index(drop=True)
-        k_corrections = [self._get_kcorrect(peak_sed, band, redshift) for band in self.bands]
+        k_corrections = self._get_kcorrections(sed, sed_filename, redshift)
         
         # On each nite, in each band, calculate the absolute mag
         output_data = []
         output_data_cols = ['NITE', 'BAND', 'MAG']
+        
         for band, k_correction in zip(self.bands, k_corrections):
             
             for nite in nites[band]:
@@ -486,17 +531,10 @@ class LCGen():
                 nite_sed['FLUX'] = (cosmo.luminosity_distance(redshift).value * 10 ** 6 / 10) ** 2 / (1 + redshift) * nite_sed['FLUX'].values
                 nite_sed['FREQUENCY_REST'] = nite_sed['FREQUENCY_REST'].values / (1. + redshift)
             
-                # Convert to AB Magnitude system
-                norm_sed = nite_sed.copy()
-                norm_sed['FLUX'] = 3631.0
-            
                 # Calculate the apparent magnitude
-                norm = self._integrate_through_band(norm_sed, band, redshift, frame='REST')
-                absolute_ab_mag = self._integrate_through_band(nite_sed, band, redshift, frame='REST') / norm
+                absolute_ab_mag = self._integrate_through_band(nite_sed, band, redshift, frame='REST') / self.norm_dict[band]
                 output_data.append([nite, band, -2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction])
                 
         return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols).replace(np.nan, 30.0, inplace=False),
                 'obj_type': obj_type,
                 'sed': sed_filename}
-
-    
