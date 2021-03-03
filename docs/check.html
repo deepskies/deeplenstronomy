@@ -53,7 +53,7 @@ for model in lens_models:
     exec(f&#39;import lenstronomy.LensModel.Profiles.{model} as {model}_lens&#39;)
 
 
-from deeplenstronomy.utils import KeyPathDict
+from deeplenstronomy.utils import KeyPathDict, read_cadence_file
 import deeplenstronomy.distributions as distributions
 
 class ConfigFileError(Exception): pass
@@ -838,9 +838,12 @@ class AllChecks():
                         errs.append(&#39;GEOMETRY.&#39; + k + &#39;.&#39; + config_k + &#39; needs a valid integer index greater than zero&#39;)
 
                     # Plane must have a redshift
-                    if &#39;REDSHIFT&#39; not in config_k in self.config[&#39;GEOMETRY&#39;][k][config_k][&#39;PARAMETERS&#39;].keys():
-                        errs.append(&#39;REDSHIFT is missing from GEOMETRY.&#39; + k + &#39;.&#39; + config_k)
-
+                    try:
+                        if &#39;REDSHIFT&#39; not in self.config[&#39;GEOMETRY&#39;][k][config_k][&#39;PARAMETERS&#39;].keys():
+                            errs.append(&#39;REDSHIFT is missing from GEOMETRY.&#39; + k + &#39;.&#39; + config_k)
+                    except AttributeError:
+                        errs.append(&#39;Incorrect format detected in &#39; + k + &#39;.&#39; + config_k)
+                        
                     detected_objects = []
                     for obj_k in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
                         # check individual object properties
@@ -913,15 +916,43 @@ class AllChecks():
                     if &#34;NITES&#34; not in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
                         errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES is missing the NITES parameter&#34;)
                     else:
-                        if not isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list):
-                            errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be a list&#34;)
+                        if not (isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list) or isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], str)):
+                            errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be a list or a filename&#34;)
                         else:
-                            # listed nights must be numeric
-                            try:
-                                nites = [int(float(x)) for x in self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;]]
-                                del nites
-                            except TypeError:
-                                errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
+                            if isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list):
+                                nitelists = [self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;]]
+                            else:
+                                # filename of cadence file
+                                try:
+                                    cadence_dict = read_cadence_file(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;])
+
+                                    # Pointings must be incrementally sequenced
+                                    nitelists = []
+                                    bands = set(self.config[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].strip().split(&#39;,&#39;))
+                                    pointings = [x for x in cadence_dict.keys() if x.startswith(&#39;POINTING_&#39;)]
+                                    if len(pointings) == 0:
+                                        errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + &#34; contains no POINTING entries&#34;)
+                                    for pointing in pointings:
+                                        if set(list(cadence_dict[pointing].keys())) != bands:
+                                            errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + pointing + &#34; does not contain same bands as the survey&#34;)
+                                        else:
+                                            cad_length = len(cadence_dict[pointing][self.config[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].strip().split(&#39;,&#39;)[0]])
+                                            for band in bands:
+                                                if len(cadence_dict[pointing][band]) != cad_length:
+                                                    errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + pointing + &#34; contains cadences of different lengths&#34;)
+                                                nitelists.append(cadence_dict[pointing][band])
+                                    
+                                except Exception:
+                                    errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + &#34; caused an error when reading file&#34;)
+                                    nitelists = [[]]
+                                    
+                            for nitelist in nitelists:
+                                # listed nights must be numeric
+                                try:
+                                    nites = [int(float(x)) for x in nitelist]
+                                    del nites
+                                except TypeError:
+                                    errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
 
                     # Check validity of PEAK argument, if passed
                     if &#34;PEAK&#34; in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
@@ -1800,9 +1831,12 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
                         errs.append(&#39;GEOMETRY.&#39; + k + &#39;.&#39; + config_k + &#39; needs a valid integer index greater than zero&#39;)
 
                     # Plane must have a redshift
-                    if &#39;REDSHIFT&#39; not in config_k in self.config[&#39;GEOMETRY&#39;][k][config_k][&#39;PARAMETERS&#39;].keys():
-                        errs.append(&#39;REDSHIFT is missing from GEOMETRY.&#39; + k + &#39;.&#39; + config_k)
-
+                    try:
+                        if &#39;REDSHIFT&#39; not in self.config[&#39;GEOMETRY&#39;][k][config_k][&#39;PARAMETERS&#39;].keys():
+                            errs.append(&#39;REDSHIFT is missing from GEOMETRY.&#39; + k + &#39;.&#39; + config_k)
+                    except AttributeError:
+                        errs.append(&#39;Incorrect format detected in &#39; + k + &#39;.&#39; + config_k)
+                        
                     detected_objects = []
                     for obj_k in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
                         # check individual object properties
@@ -1875,15 +1909,43 @@ If failure, the err_messages are printed and sys.exit() is called.</p>
                     if &#34;NITES&#34; not in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
                         errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES is missing the NITES parameter&#34;)
                     else:
-                        if not isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list):
-                            errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be a list&#34;)
+                        if not (isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list) or isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], str)):
+                            errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be a list or a filename&#34;)
                         else:
-                            # listed nights must be numeric
-                            try:
-                                nites = [int(float(x)) for x in self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;]]
-                                del nites
-                            except TypeError:
-                                errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
+                            if isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list):
+                                nitelists = [self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;]]
+                            else:
+                                # filename of cadence file
+                                try:
+                                    cadence_dict = read_cadence_file(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;])
+
+                                    # Pointings must be incrementally sequenced
+                                    nitelists = []
+                                    bands = set(self.config[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].strip().split(&#39;,&#39;))
+                                    pointings = [x for x in cadence_dict.keys() if x.startswith(&#39;POINTING_&#39;)]
+                                    if len(pointings) == 0:
+                                        errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + &#34; contains no POINTING entries&#34;)
+                                    for pointing in pointings:
+                                        if set(list(cadence_dict[pointing].keys())) != bands:
+                                            errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + pointing + &#34; does not contain same bands as the survey&#34;)
+                                        else:
+                                            cad_length = len(cadence_dict[pointing][self.config[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].strip().split(&#39;,&#39;)[0]])
+                                            for band in bands:
+                                                if len(cadence_dict[pointing][band]) != cad_length:
+                                                    errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + pointing + &#34; contains cadences of different lengths&#34;)
+                                                nitelists.append(cadence_dict[pointing][band])
+                                    
+                                except Exception:
+                                    errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + &#34; caused an error when reading file&#34;)
+                                    nitelists = [[]]
+                                    
+                            for nitelist in nitelists:
+                                # listed nights must be numeric
+                                try:
+                                    nites = [int(float(x)) for x in nitelist]
+                                    del nites
+                                except TypeError:
+                                    errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
 
                     # Check validity of PEAK argument, if passed
                     if &#34;PEAK&#34; in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
@@ -2372,9 +2434,12 @@ in the config file</p></div>
                     errs.append(&#39;GEOMETRY.&#39; + k + &#39;.&#39; + config_k + &#39; needs a valid integer index greater than zero&#39;)
 
                 # Plane must have a redshift
-                if &#39;REDSHIFT&#39; not in config_k in self.config[&#39;GEOMETRY&#39;][k][config_k][&#39;PARAMETERS&#39;].keys():
-                    errs.append(&#39;REDSHIFT is missing from GEOMETRY.&#39; + k + &#39;.&#39; + config_k)
-
+                try:
+                    if &#39;REDSHIFT&#39; not in self.config[&#39;GEOMETRY&#39;][k][config_k][&#39;PARAMETERS&#39;].keys():
+                        errs.append(&#39;REDSHIFT is missing from GEOMETRY.&#39; + k + &#39;.&#39; + config_k)
+                except AttributeError:
+                    errs.append(&#39;Incorrect format detected in &#39; + k + &#39;.&#39; + config_k)
+                    
                 detected_objects = []
                 for obj_k in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
                     # check individual object properties
@@ -2447,15 +2512,43 @@ in the config file</p></div>
                 if &#34;NITES&#34; not in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():
                     errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES is missing the NITES parameter&#34;)
                 else:
-                    if not isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list):
-                        errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be a list&#34;)
+                    if not (isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list) or isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], str)):
+                        errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be a list or a filename&#34;)
                     else:
-                        # listed nights must be numeric
-                        try:
-                            nites = [int(float(x)) for x in self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;]]
-                            del nites
-                        except TypeError:
-                            errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
+                        if isinstance(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;], list):
+                            nitelists = [self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;]]
+                        else:
+                            # filename of cadence file
+                            try:
+                                cadence_dict = read_cadence_file(self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;])
+
+                                # Pointings must be incrementally sequenced
+                                nitelists = []
+                                bands = set(self.config[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].strip().split(&#39;,&#39;))
+                                pointings = [x for x in cadence_dict.keys() if x.startswith(&#39;POINTING_&#39;)]
+                                if len(pointings) == 0:
+                                    errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + &#34; contains no POINTING entries&#34;)
+                                for pointing in pointings:
+                                    if set(list(cadence_dict[pointing].keys())) != bands:
+                                        errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + pointing + &#34; does not contain same bands as the survey&#34;)
+                                    else:
+                                        cad_length = len(cadence_dict[pointing][self.config[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].strip().split(&#39;,&#39;)[0]])
+                                        for band in bands:
+                                            if len(cadence_dict[pointing][band]) != cad_length:
+                                                errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + pointing + &#34; contains cadences of different lengths&#34;)
+                                            nitelists.append(cadence_dict[pointing][band])
+                                
+                            except Exception:
+                                errs.append(&#34;GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES.&#34; + self.config[&#39;GEOMETRY&#39;][k][config_k][&#34;NITES&#34;] + &#34; caused an error when reading file&#34;)
+                                nitelists = [[]]
+                                
+                        for nitelist in nitelists:
+                            # listed nights must be numeric
+                            try:
+                                nites = [int(float(x)) for x in nitelist]
+                                del nites
+                            except TypeError:
+                                errs.append(&#34;Listed NITES in GEOMETRY.&#34; + k + &#34;.TIMESERIES.NITES must be numeric&#34;)
 
                 # Check validity of PEAK argument, if passed
                 if &#34;PEAK&#34; in self.config[&#39;GEOMETRY&#39;][k][config_k].keys():

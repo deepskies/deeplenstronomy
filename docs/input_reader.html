@@ -39,7 +39,7 @@ from astropy.cosmology import FlatLambdaCDM
 import numpy as np
 
 import deeplenstronomy.timeseries as timeseries
-from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_user_dist, KeyPathDict
+from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_user_dist, KeyPathDict, read_cadence_file
 import deeplenstronomy.distributions as distributions
 import deeplenstronomy.special as special
 import deeplenstronomy.surveys as surveys
@@ -316,6 +316,11 @@ class Organizer():
         #Object IDs
         for band in bands:
             output_dict[band][&#39;OBJID&#39;] = objid
+
+        #Pointing
+        pointing = random.choice(list(set(self.cadence_dict.keys()) - set([&#39;REFERENCE_MJD&#39;])))
+        for band in bands:
+            output_dict[band][&#39;POINTING&#39;] = pointing
         
         #COSMOLOGY
         for k, v in config_dict[&#39;COSMOLOGY_DICT&#39;].items():
@@ -550,18 +555,22 @@ class Organizer():
         # Get flattened and filled dictionary
         base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
 
+        pointing = base_output_dict[bands[0]][&#39;POINTING&#39;]
         closest_redshift_lcs = []
         for obj_name, obj_string in zip(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], obj_strings):
             # determine closest lc in library to redshift
             redshift = base_output_dict[bands[0]][obj_string + &#39;-REDSHIFT&#39;]
-            lcs = eval(&#39;self.{0}_{1}_lightcurves&#39;.format(configuration, obj_name))
+            lcs = eval(&#39;self.{0}_{1}_lightcurves_{2}&#39;.format(configuration, obj_name, pointing))
             closest_redshift_lcs.append(lcs[&#39;library&#39;][np.argmin(np.abs(redshift - lcs[&#39;redshifts&#39;]))])
             
-        # overwrite the image sim dictionary        
-        for orig_nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
-            nite = orig_nite - peakshift
-            output_dict = base_output_dict.copy()
+        # overwrite the image sim dictionary
+        nite_dict = self.cadence_dict[pointing]
+        for nite_idx in range(len(nite_dict[bands[0]])):
             for band in bands:
+                orig_nite = nite_dict[band][nite_idx]
+                #for orig_nite in nite_dict[band]:
+                nite = orig_nite - peakshift
+                output_dict = base_output_dict.copy()
                 for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
 
                     try:
@@ -602,35 +611,49 @@ class Organizer():
 
         Args:
             configuration (str): like &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc...
-            nites (List[int]): a list of nites relative to explosion to get a photometric measurement  
+            nites (List[int] or str): a list of nites relative to explosion to get a photometric measurement or the name of a cadence file  
             objects (List[str]):  a list of object names   
             redshift_dicts (List[dict]): a list of redshift information about the objects
             cosmo (astropy.cosmology): An astropy.cosmology instance for distance calculations
         &#34;&#34;&#34;
 
+        # Convert nites to a cadence dict
+        if isinstance(nites, str):
+            cadence_dict = read_cadence_file(nites)
+        else:
+            cadence_dict = {&#39;REFERENCE_MJD&#39;: 0.0,
+                            &#39;POINTING_1&#39;: {b: nites for b in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)}}
+        self.cadence_dict = cadence_dict
+
+        # Use the reference MJD to shift all the nites to be relative to 0
+        shifted_cadence_dict = {k: {b: [x - cadence_dict[&#39;REFERENCE_MJD&#39;] for x in cadence_dict[k][b]] for b in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)} for k in cadence_dict.keys() if k.startswith(&#39;POINTING_&#39;)}
+            
         # instantiate an LCGen object
         lc_gen = timeseries.LCGen(bands=self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;])
 
-        for obj, redshift_dict in zip(objects, redshift_dicts):
-            lc_library = []
-
-            # get redshifts to simulate light curves at
-            if isinstance(redshift_dict, dict):
-                drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
-                redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
-            else:
-                redshifts = np.array([redshift_dict])
-
-            # get model to simulate
-            model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
-            if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
-                for redshift in redshifts:
-                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)&#39;.format(model_info[0])))
-            else:
-                for redshift in redshifts:
-                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+        # make a library for each pointing - need to speed this up (horrible performance for non-fixed redshifts and many pointings)
+        for pointing, nite_dict in shifted_cadence_dict.items():
             
-            setattr(self, configuration + &#39;_&#39; + obj + &#39;_&#39; + &#39;lightcurves&#39;, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
+            for obj, redshift_dict in zip(objects, redshift_dicts):
+                lc_library = []
+                
+                # get redshifts to simulate light curves at
+                if isinstance(redshift_dict, dict):
+                    drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
+                    redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
+                else:
+                    redshifts = np.array([redshift_dict])
+
+                # get model to simulate
+                model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
+                if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
+                    for redshift in redshifts:
+                        lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nite_dict, cosmo=cosmo)&#39;.format(model_info[0])))
+                else:
+                    for redshift in redshifts:
+                        lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nite_dict, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+            
+                setattr(self, configuration + &#39;_&#39; + obj + &#39;_lightcurves_&#39; + pointing, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
         
         return
     
@@ -918,6 +941,11 @@ class Organizer():
         #Object IDs
         for band in bands:
             output_dict[band][&#39;OBJID&#39;] = objid
+
+        #Pointing
+        pointing = random.choice(list(set(self.cadence_dict.keys()) - set([&#39;REFERENCE_MJD&#39;])))
+        for band in bands:
+            output_dict[band][&#39;POINTING&#39;] = pointing
         
         #COSMOLOGY
         for k, v in config_dict[&#39;COSMOLOGY_DICT&#39;].items():
@@ -1152,18 +1180,22 @@ class Organizer():
         # Get flattened and filled dictionary
         base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
 
+        pointing = base_output_dict[bands[0]][&#39;POINTING&#39;]
         closest_redshift_lcs = []
         for obj_name, obj_string in zip(self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;OBJECTS&#39;], obj_strings):
             # determine closest lc in library to redshift
             redshift = base_output_dict[bands[0]][obj_string + &#39;-REDSHIFT&#39;]
-            lcs = eval(&#39;self.{0}_{1}_lightcurves&#39;.format(configuration, obj_name))
+            lcs = eval(&#39;self.{0}_{1}_lightcurves_{2}&#39;.format(configuration, obj_name, pointing))
             closest_redshift_lcs.append(lcs[&#39;library&#39;][np.argmin(np.abs(redshift - lcs[&#39;redshifts&#39;]))])
             
-        # overwrite the image sim dictionary        
-        for orig_nite in self.main_dict[&#39;GEOMETRY&#39;][configuration][&#39;TIMESERIES&#39;][&#39;NITES&#39;]:
-            nite = orig_nite - peakshift
-            output_dict = base_output_dict.copy()
+        # overwrite the image sim dictionary
+        nite_dict = self.cadence_dict[pointing]
+        for nite_idx in range(len(nite_dict[bands[0]])):
             for band in bands:
+                orig_nite = nite_dict[band][nite_idx]
+                #for orig_nite in nite_dict[band]:
+                nite = orig_nite - peakshift
+                output_dict = base_output_dict.copy()
                 for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
 
                     try:
@@ -1204,35 +1236,49 @@ class Organizer():
 
         Args:
             configuration (str): like &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc...
-            nites (List[int]): a list of nites relative to explosion to get a photometric measurement  
+            nites (List[int] or str): a list of nites relative to explosion to get a photometric measurement or the name of a cadence file  
             objects (List[str]):  a list of object names   
             redshift_dicts (List[dict]): a list of redshift information about the objects
             cosmo (astropy.cosmology): An astropy.cosmology instance for distance calculations
         &#34;&#34;&#34;
 
+        # Convert nites to a cadence dict
+        if isinstance(nites, str):
+            cadence_dict = read_cadence_file(nites)
+        else:
+            cadence_dict = {&#39;REFERENCE_MJD&#39;: 0.0,
+                            &#39;POINTING_1&#39;: {b: nites for b in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)}}
+        self.cadence_dict = cadence_dict
+
+        # Use the reference MJD to shift all the nites to be relative to 0
+        shifted_cadence_dict = {k: {b: [x - cadence_dict[&#39;REFERENCE_MJD&#39;] for x in cadence_dict[k][b]] for b in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)} for k in cadence_dict.keys() if k.startswith(&#39;POINTING_&#39;)}
+            
         # instantiate an LCGen object
         lc_gen = timeseries.LCGen(bands=self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;])
 
-        for obj, redshift_dict in zip(objects, redshift_dicts):
-            lc_library = []
-
-            # get redshifts to simulate light curves at
-            if isinstance(redshift_dict, dict):
-                drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
-                redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
-            else:
-                redshifts = np.array([redshift_dict])
-
-            # get model to simulate
-            model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
-            if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
-                for redshift in redshifts:
-                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)&#39;.format(model_info[0])))
-            else:
-                for redshift in redshifts:
-                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+        # make a library for each pointing - need to speed this up (horrible performance for non-fixed redshifts and many pointings)
+        for pointing, nite_dict in shifted_cadence_dict.items():
             
-            setattr(self, configuration + &#39;_&#39; + obj + &#39;_&#39; + &#39;lightcurves&#39;, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
+            for obj, redshift_dict in zip(objects, redshift_dicts):
+                lc_library = []
+                
+                # get redshifts to simulate light curves at
+                if isinstance(redshift_dict, dict):
+                    drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
+                    redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
+                else:
+                    redshifts = np.array([redshift_dict])
+
+                # get model to simulate
+                model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
+                if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
+                    for redshift in redshifts:
+                        lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nite_dict, cosmo=cosmo)&#39;.format(model_info[0])))
+                else:
+                    for redshift in redshifts:
+                        lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nite_dict, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+            
+                setattr(self, configuration + &#39;_&#39; + obj + &#39;_lightcurves_&#39; + pointing, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
         
         return
     
@@ -1548,8 +1594,8 @@ class Organizer():
 <dl>
 <dt><strong><code>configuration</code></strong> :&ensp;<code>str</code></dt>
 <dd>like 'CONFIGURATION_1', 'CONFIGURATION_2', etc&hellip;</dd>
-<dt><strong><code>nites</code></strong> :&ensp;<code>List[int]</code></dt>
-<dd>a list of nites relative to explosion to get a photometric measurement
+<dt><strong><code>nites</code></strong> :&ensp;<code>List[int]</code> or <code>str</code></dt>
+<dd>a list of nites relative to explosion to get a photometric measurement or the name of a cadence file
 </dd>
 <dt><strong><code>objects</code></strong> :&ensp;<code>List[str]</code></dt>
 <dd>a list of object names
@@ -1569,35 +1615,49 @@ class Organizer():
 
     Args:
         configuration (str): like &#39;CONFIGURATION_1&#39;, &#39;CONFIGURATION_2&#39;, etc...
-        nites (List[int]): a list of nites relative to explosion to get a photometric measurement  
+        nites (List[int] or str): a list of nites relative to explosion to get a photometric measurement or the name of a cadence file  
         objects (List[str]):  a list of object names   
         redshift_dicts (List[dict]): a list of redshift information about the objects
         cosmo (astropy.cosmology): An astropy.cosmology instance for distance calculations
     &#34;&#34;&#34;
 
+    # Convert nites to a cadence dict
+    if isinstance(nites, str):
+        cadence_dict = read_cadence_file(nites)
+    else:
+        cadence_dict = {&#39;REFERENCE_MJD&#39;: 0.0,
+                        &#39;POINTING_1&#39;: {b: nites for b in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)}}
+    self.cadence_dict = cadence_dict
+
+    # Use the reference MJD to shift all the nites to be relative to 0
+    shifted_cadence_dict = {k: {b: [x - cadence_dict[&#39;REFERENCE_MJD&#39;] for x in cadence_dict[k][b]] for b in self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;].split(&#39;,&#39;)} for k in cadence_dict.keys() if k.startswith(&#39;POINTING_&#39;)}
+        
     # instantiate an LCGen object
     lc_gen = timeseries.LCGen(bands=self.main_dict[&#39;SURVEY&#39;][&#39;PARAMETERS&#39;][&#39;BANDS&#39;])
 
-    for obj, redshift_dict in zip(objects, redshift_dicts):
-        lc_library = []
-
-        # get redshifts to simulate light curves at
-        if isinstance(redshift_dict, dict):
-            drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
-            redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
-        else:
-            redshifts = np.array([redshift_dict])
-
-        # get model to simulate
-        model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
-        if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
-            for redshift in redshifts:
-                lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, cosmo=cosmo)&#39;.format(model_info[0])))
-        else:
-            for redshift in redshifts:
-                lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nites, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+    # make a library for each pointing - need to speed this up (horrible performance for non-fixed redshifts and many pointings)
+    for pointing, nite_dict in shifted_cadence_dict.items():
         
-        setattr(self, configuration + &#39;_&#39; + obj + &#39;_&#39; + &#39;lightcurves&#39;, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
+        for obj, redshift_dict in zip(objects, redshift_dicts):
+            lc_library = []
+            
+            # get redshifts to simulate light curves at
+            if isinstance(redshift_dict, dict):
+                drawn_redshifts = [self._draw(redshift_dict[&#39;DISTRIBUTION&#39;], bands=&#39;g&#39;) for _ in range(100)]
+                redshifts = np.linspace(np.min(drawn_redshifts), np.max(drawn_redshifts), 15)
+            else:
+                redshifts = np.array([redshift_dict])
+
+            # get model to simulate
+            model_info = self.main_dict[&#39;SPECIES&#39;][self._species_map[obj]][&#39;MODEL&#39;].split(&#39;_&#39;)
+            if model_info[-1].lower() == &#39;random&#39; or len(model_info) == 1:
+                for redshift in redshifts:
+                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nite_dict, cosmo=cosmo)&#39;.format(model_info[0])))
+            else:
+                for redshift in redshifts:
+                    lc_library.append(eval(&#39;lc_gen.gen_{0}(redshift, nite_dict, sed_filename=&#34;{1}&#34;, cosmo=cosmo)&#39;.format(model_info[0], model_info[1])))
+        
+            setattr(self, configuration + &#39;_&#39; + obj + &#39;_lightcurves_&#39; + pointing, {&#39;library&#39;: lc_library, &#39;redshifts&#39;: redshifts})
     
     return</code></pre>
 </details>

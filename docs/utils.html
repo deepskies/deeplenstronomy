@@ -31,6 +31,7 @@
 
 import os
 import sys
+import yaml
 
 from astropy.io import fits
 import numpy as np
@@ -331,7 +332,26 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
         image_indices = np.argmin(np.sum(np.abs(im_param_array - map_param_array) / im_stds, axis=2), axis=0)
 
     return image_indices
-    </code></pre>
+    
+
+def read_cadence_file(filename):
+    &#34;&#34;&#34;
+    Parse a cadence file.
+
+    Args:
+        filename (str): Name of cadence file
+
+    Returns:
+        cadence_dict: dictionary containing cadence file contents
+    &#34;&#34;&#34;
+    with open(filename, &#39;r&#39;) as f:
+        cadence_dict = yaml.safe_load(f)        
+        
+        # Set reference mjd to the default value of 0
+        if &#39;REFERENCE_MJD&#39; not in cadence_dict:
+            cadence_dict[&#39;REFERENCE_MJD&#39;] = 0
+                        
+    return cadence_dict</code></pre>
 </details>
 </section>
 <section>
@@ -587,6 +607,45 @@ sample from it.</p>
         image_indices = np.argmin(np.sum(np.abs(im_param_array - map_param_array) / im_stds, axis=2), axis=0)
 
     return image_indices</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.read_cadence_file"><code class="name flex">
+<span>def <span class="ident">read_cadence_file</span></span>(<span>filename)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse a cadence file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of cadence file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>cadence_dict</code></dt>
+<dd>dictionary containing cadence file contents</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_cadence_file(filename):
+    &#34;&#34;&#34;
+    Parse a cadence file.
+
+    Args:
+        filename (str): Name of cadence file
+
+    Returns:
+        cadence_dict: dictionary containing cadence file contents
+    &#34;&#34;&#34;
+    with open(filename, &#39;r&#39;) as f:
+        cadence_dict = yaml.safe_load(f)        
+        
+        # Set reference mjd to the default value of 0
+        if &#39;REFERENCE_MJD&#39; not in cadence_dict:
+            cadence_dict[&#39;REFERENCE_MJD&#39;] = 0
+                        
+    return cadence_dict</code></pre>
 </details>
 </dd>
 <dt id="deeplenstronomy.utils.read_distribution_file"><code class="name flex">
@@ -871,6 +930,7 @@ list of all keypaths in the dictionary as strings</p></div>
 <li><code><a title="deeplenstronomy.utils.dict_select_choose" href="#deeplenstronomy.utils.dict_select_choose">dict_select_choose</a></code></li>
 <li><code><a title="deeplenstronomy.utils.draw_from_user_dist" href="#deeplenstronomy.utils.draw_from_user_dist">draw_from_user_dist</a></code></li>
 <li><code><a title="deeplenstronomy.utils.organize_image_backgrounds" href="#deeplenstronomy.utils.organize_image_backgrounds">organize_image_backgrounds</a></code></li>
+<li><code><a title="deeplenstronomy.utils.read_cadence_file" href="#deeplenstronomy.utils.read_cadence_file">read_cadence_file</a></code></li>
 <li><code><a title="deeplenstronomy.utils.read_distribution_file" href="#deeplenstronomy.utils.read_distribution_file">read_distribution_file</a></code></li>
 <li><code><a title="deeplenstronomy.utils.read_images" href="#deeplenstronomy.utils.read_images">read_images</a></code></li>
 <li><code><a title="deeplenstronomy.utils.select_params" href="#deeplenstronomy.utils.select_params">select_params</a></code></li>
