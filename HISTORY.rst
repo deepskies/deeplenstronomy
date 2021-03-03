@@ -9,6 +9,8 @@ History
 
 * Speed improvements for timeseries functionalities
 
+* Corner plot functionality for metadata visualization
+
 0.0.1.3 (2021-02-02)
 +++++++++++++++++++++
 
