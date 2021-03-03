@@ -214,7 +214,13 @@ class LCGen():
         :param nite: the nite you wish to find the closest neighbor for
         :return: closest_nite: the closest nite in the sed to the given nite
         """
-        return unique_nites[np.argmin(np.abs(nite - unique_nites))]
+        
+        ## If nite not in the sed, (but within range) set nite to the closest nite in the sed
+        ## If nite is outside range, keep the same
+        if nite > unique_nites.max() or nite < unique_nites.min():
+            return nite
+        else:
+            return unique_nites[np.argmin(np.abs(nite - unique_nites))]
 
     def gen_variable(self, redshift, nite_dict, sed=None, sed_filename=None, cosmo=None):
         """
@@ -508,7 +514,7 @@ class LCGen():
               - 'sed' contains the filename of the sed used  
         """
         
-        # If nite not in the sed, set nite to the closest nite in the sed
+        # Adjust nites
         nites = {}
         sed_nites = np.unique(sed['NITE'].values)
         for band, cad_nites in nite_dict.items():
@@ -542,6 +548,11 @@ class LCGen():
             for nite in nites[band]:
                 nite_sed = sed[sed['NITE'].values == nite].copy().reset_index(drop=True)
                 
+                # Flux is zero if requested nite is noe in sed
+                if len(nite_sed) == 0:
+                    output_data.append([nite, band, 99.0])
+                    continue
+                
                 # Apply factors to calculate absolute mag
                 nite_sed['FLUX'] = (cosmo.luminosity_distance(redshift).value * 10 ** 6 / 10) ** 2 / (1 + redshift) * nite_sed['FLUX'].values
                 nite_sed['FREQUENCY_REST'] = nite_sed['FREQUENCY_REST'].values / (1. + redshift)
@@ -550,6 +561,6 @@ class LCGen():
                 absolute_ab_mag = self._integrate_through_band(nite_sed, band, redshift, frame='REST') / self.norm_dict[band]
                 output_data.append([nite, band, -2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction])
                 
-        return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols).replace(np.nan, 30.0, inplace=False),
+        return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols).replace(np.nan, 99.0, inplace=False),
                 'obj_type': obj_type,
                 'sed': sed_filename}
