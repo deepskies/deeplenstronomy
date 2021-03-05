@@ -262,7 +262,7 @@ def _format_time(elapsed_time):
     hours = elapsed_time // 3600
     minutes = (elapsed_time - hours * 3600) // 60
     seconds = elapsed_time - (hours * 3600) - (minutes * 60)
-    return "%i H %i M %i S" %(hours, minutes, seconds)
+    return "%i H %i M %i S         " %(hours, minutes, seconds)
 
 def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                  verbose=False, store_sample=False, image_file_format='npy',
@@ -346,6 +346,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
+    max_size = max([len(organizer.configuration_sim_dicts[x]) for x in dataset.configurations])
     for fp in parser.file_paths:
         filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['FILENAME']")
         mode = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['MODE']")
@@ -353,9 +354,10 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             step = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['STEP']")
         except KeyError:
             step = 10
-        draw_param_names, draw_param_values = draw_from_user_dist(filename, dataset.size, mode, step)
+        draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step)
         forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
-    
+
+        
     # Overwrite the configuration dict with any forced values from user distribtuions
     force_param_inputs = _get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
 
@@ -364,6 +366,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         warned = False
 
         sim_inputs = organizer.configuration_sim_dicts[configuration]
+        
         for sim_input, val in zip(sim_inputs, values):
             if param_name in sim_input[band].keys():
                 sim_input[band][param_name] = val
