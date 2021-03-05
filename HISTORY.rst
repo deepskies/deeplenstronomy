@@ -3,6 +3,10 @@
 History
 -------
 
+0.0.1.5 (In development)
++++++++++++++++++++++
+* Fix bug in the number of times a USERDIST gets sampled
+
 0.0.1.4 (2021-03-03)
 +++++++++++++++++++++
 * Fix bug in checking configuration file geometry section
