@@ -161,9 +161,15 @@ class LCGen():
         :param redshift: the redshift of the object
         :return: kcor: the k-correction to the absolute magnitude
         """
-        return -2.5 * np.log10((1.0 + redshift) * 
-                               (self._integrate_through_band(sed, band, redshift, frame='OBS') /
-                                self._integrate_through_band(sed, band, redshift, frame='REST')))
+        kcorrect =  -2.5 * np.log10((1.0 + redshift) * 
+                                   (self._integrate_through_band(sed, band, redshift, frame='OBS') /
+                                    self._integrate_through_band(sed, band, redshift, frame='REST')))
+        if np.isnan(kcorrect):
+            # object is redshifted out of the passband
+            return 99.0
+        else:
+            return kcorrect
+
     
     def _get_kcorrections(self, sed, sed_filename, redshift):
         """
@@ -204,7 +210,14 @@ class LCGen():
         delta_frequencies = np.diff(frequency_arr) * -1.0
         integrand = eval("self.{0}_transmission_frequency(frequency_arr) * sed['FLUX'].values / frequency_arr".format(band))
         average_integrands = 0.5 * np.diff(integrand) + integrand[0:-1]
-        return np.sum(delta_frequencies * average_integrands)
+        res = np.sum(delta_frequencies * average_integrands)
+        
+        if np.isnan(res):
+            # SED was redshifted out of passband
+            return 1.e99
+        else:
+            return res
+
     
     def _get_closest_nite(self, unique_nites, nite):
         """
@@ -561,6 +574,6 @@ class LCGen():
                 absolute_ab_mag = self._integrate_through_band(nite_sed, band, redshift, frame='REST') / self.norm_dict[band]
                 output_data.append([nite, band, -2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction])
                 
-        return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols).replace(np.nan, 99.0, inplace=False),
+        return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols).replace(np.inf, 99.0, inplace=False).replace(np.nan, 99.0, inplace=False),
                 'obj_type': obj_type,
                 'sed': sed_filename}
