@@ -337,6 +337,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     
     # Organize the configuration dict
     organizer = Organizer(dataset.config_dict, verbose=verbose)
+    dataset.organizer = organizer
 
     # Store configurations
     dataset.configurations = list(organizer.configuration_sim_dicts.keys())
