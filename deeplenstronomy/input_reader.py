@@ -288,10 +288,11 @@ class Organizer():
         for band in bands:
             output_dict[band]['OBJID'] = objid
 
-        #Pointing
-        pointing = random.choice(list(set(self.cadence_dict.keys()) - set(['REFERENCE_MJD'])))
-        for band in bands:
-            output_dict[band]['POINTING'] = pointing
+        #Pointing - Timeseries only
+        if hasattr(self, "cadence_dict"):
+            pointing = random.choice(list(set(self.cadence_dict.keys()) - set(['REFERENCE_MJD'])))
+            for band in bands:
+                output_dict[band]['POINTING'] = pointing
         
         #COSMOLOGY
         for k, v in config_dict['COSMOLOGY_DICT'].items():
