@@ -119,7 +119,8 @@ SURVEY:
         num_exposures:
             DISTRIBUTION:
                 NAME: lsst_num_exposures
-                PARAMETERS: None
+                PARAMETERS:
+                    coadd_years: 10
 """
     return info
 
