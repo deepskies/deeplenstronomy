@@ -3,9 +3,13 @@
 History
 -------
 
-0.0.1.5 (In development)
+0.0.1.5 (I2021-03-10)
 +++++++++++++++++++++
 * Fix bug in the number of times a USERDIST gets sampled
+
+* Fix bug in lsst survey mode
+
+* Fix bug in the redshifting calculations for supernovae to prevent NaNs
 
 0.0.1.4 (2021-03-03)
 +++++++++++++++++++++
