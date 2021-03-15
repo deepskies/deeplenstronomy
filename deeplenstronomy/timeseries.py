@@ -161,9 +161,9 @@ class LCGen():
         :param redshift: the redshift of the object
         :return: kcor: the k-correction to the absolute magnitude
         """
-        kcorrect =  -2.5 * np.log10((1.0 + redshift) * 
+        kcorrect =  -2.5 * np.log10( 
                                    (self._integrate_through_band(sed, band, redshift, frame='OBS') /
-                                    self._integrate_through_band(sed, band, redshift, frame='REST')))
+                                    self._integrate_through_band(sed, band, redshift, frame='REST')) / (1.0 + redshift) )
         if np.isnan(kcorrect):
             # object is redshifted out of the passband
             return 99.0
@@ -541,7 +541,7 @@ class LCGen():
             
         # Redshift the sed frequencies and wavelengths
         sed['WAVELENGTH_OBS'] = (1.0 + redshift) * sed['WAVELENGTH_REST'].values
-        sed['FREQUENCY_OBS'] = sed['FREQUENCY_REST'].values * (1.0 + redshift)
+        sed['FREQUENCY_OBS'] = sed['FREQUENCY_REST'].values / (1.0 + redshift)
         
         # Calculate distance modulus
         if not cosmo:
@@ -573,6 +573,9 @@ class LCGen():
                 # Calculate the apparent magnitude
                 absolute_ab_mag = self._integrate_through_band(nite_sed, band, redshift, frame='REST') / self.norm_dict[band]
                 output_data.append([nite, band, -2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction])
+                
+                # Output
+                #print("Nite:", nite, "\tBand:", band, "\tBase: %.2f" %(-2.5 * np.log10(absolute_ab_mag)), "\tDist:", round(distance_modulus, 2), "\tKC:", round(k_correction, 2), '\tMAG:', round(-2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction, 2))
                 
         return {'lc': pd.DataFrame(data=output_data, columns=output_data_cols).replace(np.inf, 99.0, inplace=False).replace(np.nan, 99.0, inplace=False),
                 'obj_type': obj_type,
