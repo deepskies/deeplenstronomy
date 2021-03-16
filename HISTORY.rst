@@ -3,7 +3,7 @@
 History
 -------
 
-0.0.1.6 (In Development)
+0.0.1.6 (2021-03-16)
 +++++++++++++++++++++
 * Fix bug in calculation of K-Correction
 
