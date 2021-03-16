@@ -7,6 +7,8 @@ History
 +++++++++++++++++++++
 * Fix bug in calculation of K-Correction
 
+* Add DES deep field distributiions
+  
 0.0.1.5 (2021-03-10)
 +++++++++++++++++++++
 * Fix bug in the number of times a USERDIST gets sampled
