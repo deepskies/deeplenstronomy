@@ -398,9 +398,16 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
     else:
         image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
-    
+
+    # Clear the sim_dicts out of memory
+    for configuration in dataset.configurations:
+        np.save("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), {0: organizer.configuration_sim_dicts[configuration]}, allow_pickle=True)
+        del organizer.configuration_sim_dicts[configuration]
+        
     # Simulate images
-    for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
+    #for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
+    for configuration in dataset.configurations:
+        sim_inputs = np.load("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), allow_pickle=True).item()[0]
 
         if verbose:
             print("Generating images for {0}".format(configuration))
@@ -469,7 +476,9 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                     sys.stdout.write('\r\tProgress: 100.0 %%  ---  Elapsed Time: %s\n' %(_format_time(elapsed_time)))
                     sys.stdout.flush()
 
-                              
+        # Clear sim_inputs out of memory
+        del sim_inputs
+                    
         # Group images -- the array index will correspond to the id_num of the metadata
         configuration_images = np.array(images)
 
