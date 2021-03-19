@@ -3,6 +3,10 @@
 History
 -------
 
+0.0.1.7 (In Development)
++++++++++++++++++++++
+* Write simulation input dicts to disk to limit memory usage
+
 0.0.1.6 (2021-03-16)
 +++++++++++++++++++++
 * Fix bug in calculation of K-Correction
