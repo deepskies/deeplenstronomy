@@ -34,6 +34,9 @@ class LCGen():
         # Collect filter transmission curves
         self.filter_files = glob.glob('filters/*.dat')
         self.bands = bands.split(',')
+
+        # Load corrections
+        self._load_corrections()
         
         # Interpolate the transmission curves
         self.norm_dict = {}
@@ -183,7 +186,27 @@ class LCGen():
             k_corrections = [self._get_kcorrect(peak_sed, band, redshift) for band in self.bands]
             setattr(self, attr_name, {b: k for b, k in zip(self.bands, k_corrections)})
             return k_corrections
+
+
+    def _load_corrections(self):
+        """
+        10 degree polynomials to interpolate for magnitude calibration
+        """
+        coeff = {'g': np.array([4.51183210e+01, -4.44347636e+02, 1.83994410e+03, -4.13920560e+03,
+                                5.43570479e+03, -4.11857064e+03, 1.58851514e+03, -1.24875350e+02,
+                                -1.27356106e+02, 5.11527289e+01, -1.29985868e+00]), 
+                 'r': np.array([17.15707984, -147.24752602, 498.8769753, -806.5297888,
+                                493.38669116, 322.32930769, -768.87362622, 568.07310502,
+                                -224.21701522, 57.16290538, -2.11245789]), 
+                 'i': np.array([-1.52230194e+00, 2.13199036e+01, -1.32235571e+02, 4.71861410e+02,
+                                -1.05833909e+03, 1.53795060e+03, -1.44717045e+03, 8.60925102e+02,
+                                -3.12509126e+02, 7.12590111e+01, -2.99493586e+00]), 
+                 'z': np.array([-2.24573756e+01, 2.39916362e+02, -1.09998790e+03, 2.82651442e+03,
+                                -4.46372497e+03, 4.48084163e+03, -2.87704854e+03, 1.17947248e+03,
+                                -3.16911098e+02, 6.50723854e+01, -3.28937692e+00])}
         
+        self.corr = {b: np.poly1d(coeff_arr) for b, coeff_arr in coeff.items()}
+
         
     def _get_distance_modulus(self, redshift, cosmo):
         """
@@ -572,7 +595,7 @@ class LCGen():
             
                 # Calculate the apparent magnitude
                 absolute_ab_mag = self._integrate_through_band(nite_sed, band, redshift, frame='REST') / self.norm_dict[band]
-                output_data.append([nite, band, -2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction])
+                output_data.append([nite, band, -2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction + self.corr[band](redshift)])
                 
                 # Output
                 #print("Nite:", nite, "\tBand:", band, "\tBase: %.2f" %(-2.5 * np.log10(absolute_ab_mag)), "\tDist:", round(distance_modulus, 2), "\tKC:", round(k_correction, 2), '\tMAG:', round(-2.5 * np.log10(absolute_ab_mag) + distance_modulus + k_correction, 2))
