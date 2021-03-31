@@ -419,19 +419,19 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             total = len(sim_inputs)
 
         # Handle image backgrounds if they exist
+        real_image_indices = []
         if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
             image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
-            additive_image_backgrounds = image_backgrounds[image_indices]
         else:
             image_indices = np.zeros(len(sim_inputs), dtype=int)
-            temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
-            additive_image_backgrounds = temp_array[image_indices]
             
         metadata, images = [], []
         if return_planes:
             planes = []
 
-        for image_info, image_idx in zip(sim_inputs, image_indices):
+        objid_bkg_map = {}
+        img_counter, prev_objid = 0, sim_inputs[0][dataset.bands[0]]['OBJID']
+        for image_info in sim_inputs:
             # track progress if verbose
             if verbose:
                 counter += 1
@@ -440,6 +440,21 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                     elapsed_time = time.time() - start_time
                     sys.stdout.write('\r\tProgress: %.1f %%  ---  Elapsed Time: %s' %(progress, _format_time(elapsed_time)))
                     sys.stdout.flush()
+            
+
+            # Check if the objid already has an image_idx in use
+            if image_info[dataset.bands[0]]['OBJID'] != prev_objid:
+                img_counter += 1
+            image_idx_ = image_indices[img_counter]
+            if image_info[dataset.bands[0]]['OBJID'] in objid_bkg_map:
+                image_idx = objid_bkg_map[image_info[dataset.bands[0]]['OBJID']]
+            else:
+                image_idx = image_idx_
+                objid_bkg_map[image_info[dataset.bands[0]]['OBJID']] = image_idx
+
+            prev_objid = image_info[dataset.bands[0]]['OBJID']
+            real_image_indices.append(image_idx)
+
             
             # Add background image index to image_info
             for band in dataset.bands:
@@ -490,6 +505,14 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             configuration_planes = np.array(planes)
 
         # Add image backgrounds -- will just add zeros if no backgrounds have been specified
+        if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
+            additive_image_backgrounds = image_backgrounds[np.array(real_image_indices)]
+            additive_image_backgrounds = np.random.poisson(np.where(additive_image_backgrounds > 0, additive_image_backgrounds, 1.e-3 ))
+        else:
+            temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+            additive_image_backgrounds = temp_array[np.array(real_image_indices)]
+
+
         configuration_images += additive_image_backgrounds
         
         # Convert the metadata to a dataframe
