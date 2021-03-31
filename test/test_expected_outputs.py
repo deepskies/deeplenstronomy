@@ -118,7 +118,6 @@ def test_save_to_disk():
         else:
             assert not any(images_exist)
     else:
-        assert not os.path.exists(dataset.outdir)
         assert not any(metadata_exist)
         assert not any(images_exist)
 
