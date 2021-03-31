@@ -400,6 +400,9 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
 
     # Clear the sim_dicts out of memory
+    if not os.path.exists(dataset.outdir):
+        os.system('mkdir ' + dataset.outdir)
+        
     for configuration in dataset.configurations:
         np.save("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), {0: organizer.configuration_sim_dicts[configuration]}, allow_pickle=True)
         del organizer.configuration_sim_dicts[configuration]
