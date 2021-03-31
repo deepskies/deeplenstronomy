@@ -7,6 +7,7 @@ import sys
 import yaml
 
 from astropy.cosmology import FlatLambdaCDM
+from lenstronomy.Analysis.td_cosmography import TDCosmography
 import numpy as np
 
 import deeplenstronomy.timeseries as timeseries
@@ -15,6 +16,7 @@ import deeplenstronomy.distributions as distributions
 import deeplenstronomy.special as special
 import deeplenstronomy.surveys as surveys
 import deeplenstronomy.check as big_check
+import deeplenstronomy.image_generator as image_generator
 
 class Parser():
     """ 
@@ -527,6 +529,25 @@ class Organizer():
         # Get flattened and filled dictionary
         base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
 
+        # Model the lens for time delay calculations
+        td_dict = {}
+        for obj_string in obj_strings:
+            td_dict[obj_string] = None
+            plane_num = int(obj_string.split('_')[1].split('-')[0])
+            if plane_num >= 2:
+                im_gen = image_generator.ImageGenerator(self.main_dict['SURVEY']['PARAMETERS']['BANDS'])
+                params = im_gen.parse_single_band_info_dict(base_output_dict[bands[0]], cosmo)
+                kwargs_lens_model_list = params[6]
+                kwargs_model = params[1]
+                kwargs_point_source_list = params[5] 
+                try:
+                    z_lens = kwargs_model['lens_redshift_list'][0]
+                    z_source = kwargs_model['z_source']
+                    td_cosmo = TDCosmography(z_lens, z_source, kwargs_model, cosmo_fiducial=cosmo)
+                    td_dict[obj_string] = td_cosmo.time_delays(kwargs_lens_model_list, kwargs_point_source_list, kappa_ext=0).round().astype(int)
+                except IndexError:
+                    pass
+        
         pointing = base_output_dict[bands[0]]['POINTING']
         closest_redshift_lcs = []
         for obj_name, obj_string in zip(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['OBJECTS'], obj_strings):
@@ -541,20 +562,37 @@ class Organizer():
             for band in bands:
                 orig_nite = nite_dict[band][nite_idx]
                 #for orig_nite in nite_dict[band]:
-                nite = orig_nite - peakshift
+                nite_ = orig_nite - peakshift
                 output_dict = base_output_dict.copy()
                 for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
 
-                    try:
-                        #try using the exact night
-                        output_dict[band][obj_string + '-magnitude'] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
-                    except:
-                        #linearly interpolate between the closest two nights
-                        band_df = closest_redshift_lc['lc'][closest_redshift_lc['lc']['BAND'].values == band].copy().reset_index(drop=True)
-                        closest_nite_indices = np.abs(nite - band_df['NITE'].values).argsort()[:2]
-                        output_dict[band][obj_string + '-magnitude'] = (band_df['MAG'].values[closest_nite_indices[1]] - band_df['MAG'].values[closest_nite_indices[0]]) * (nite - band_df['NITE'].values[closest_nite_indices[1]]) / (band_df['NITE'].values[closest_nite_indices[1]] - band_df['NITE'].values[closest_nite_indices[0]]) + band_df['MAG'].values[closest_nite_indices[1]]
-                        output_dict[band][obj_string + '-magnitude_measured'] = np.random.normal(loc=output_dict[band][obj_string + '-magnitude'], scale=0.03)
+                    # account for time delay
+                    td_shift = td_dict[obj_string]
+                    if td_shift is None:
+                        shifted_nites = [nite_]
+                    else:
+                        shifted_nites = [nite_] + [nite_ + x for x in list(td_shift[1:] - td_shift[0])]
 
+                    for idx, nite in enumerate(shifted_nites):
+
+                        if idx == 0:
+                            suffix = ''
+                        else:
+                            suffix = f"_shift_{idx}"
+
+                        output_dict[band][obj_string + '-tdshift_' + str(idx)] = nite
+                            
+                        try:
+                            #try using the exact night
+                            output_dict[band][obj_string + '-magnitude' + suffix] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
+                        except:
+                            #linearly interpolate between the closest two nights
+                            band_df = closest_redshift_lc['lc'][closest_redshift_lc['lc']['BAND'].values == band].copy().reset_index(drop=True)
+                            closest_nite_indices = np.abs(nite - band_df['NITE'].values).argsort()[:2]
+                            output_dict[band][obj_string + '-magnitude' + suffix] = (band_df['MAG'].values[closest_nite_indices[1]] - band_df['MAG'].values[closest_nite_indices[0]]) * (nite - band_df['NITE'].values[closest_nite_indices[1]]) / (band_df['NITE'].values[closest_nite_indices[1]] - band_df['NITE'].values[closest_nite_indices[0]]) + band_df['MAG'].values[closest_nite_indices[1]]
+                            output_dict[band][obj_string + '-magnitude_measured' + suffix] = np.random.normal(loc=output_dict[band][obj_string + '-magnitude'], scale=0.03)
+
+                        
                     output_dict[band][obj_string + '-nite'] = orig_nite
                     output_dict[band][obj_string + '-peaknite'] = peakshift
                     output_dict[band][obj_string + '-id'] = closest_redshift_lc['sed']
