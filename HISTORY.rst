@@ -3,9 +3,15 @@
 History
 -------
 
-0.0.1.7 (In Development)
+0.0.1.7 (2021-04-01)
 +++++++++++++++++++++
 * Write simulation input dicts to disk to limit memory usage
+
+* Improve accuracy of calculated magnitudes from SEDs (SNe, KN)
+
+* Track cosmographic time delays in the metadata
+
+* Make image backgrounds compatible with time series
 
 0.0.1.6 (2021-03-16)
 +++++++++++++++++++++
