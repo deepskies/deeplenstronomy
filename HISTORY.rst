@@ -3,6 +3,10 @@
 History
 -------
 
+0.0.1.9 (In development)
++++++++++++++++++++++
+* Fix bug in number of lensed point sources
+
 0.0.1.8 (2021-04-26)
 +++++++++++++++++++++
 * Fix bug in extrapolating nites outside of SEDs for time series
