@@ -604,6 +604,9 @@ class AllChecks():
         # need at least one light profile
         if len(detected_light_profiles) < 1:
             errs.append("SPECIES." + k + " needs at least one LIGHT_PROFILE")
+        # need at least one mass profile
+        if len(detected_mass_profiles) < 1:
+            errs.append("SPECIES." + k + " needs at least one MASS_PROFILE (this is a new requirement as of version 0.0.1.8)")
         # all indexing must be valid
         elif len(detected_light_profiles) != max(detected_light_profiles):
             errs.append("SPECIES." + k + " LIGHT_PROFILEs must be indexed as 1, 2, 3 ...")
@@ -789,9 +792,9 @@ class AllChecks():
                 except TypeError:
                     errs.append("GEOMETRY." + k + " .FRACTION must be a float")
 
-            # Configurations must have at least one plane
+            # Configurations must have information
             if len(list(self.config['GEOMETRY'][k].keys())) == 0:
-                errs.append("CEOMETRY." + k + " must have at least one PLANE")
+                errs.append("GEOMETRY." + k + " is empty")
 
             detected_planes, detected_noise_sources = [], []
             for config_k in self.config['GEOMETRY'][k].keys():
@@ -949,6 +952,10 @@ class AllChecks():
             # Planes must be indexed sequentially
             if len(detected_planes) != max(detected_planes):
                 errs.append("PLANEs in the GEOMETRY." + k + " section must be indexed as 1, 2, 3, ...")
+
+            # Must have at least 2 planes
+            if len(detected_planes) < 2:
+                errs.append("GEOMETRY." + k + " must have at least 2 planes (this is a new requirement as of version 0.0.1.8)")
 
             # Noise sources must be indexed sequentially
             if len(detected_noise_sources) != 0 and len(detected_noise_sources) != max(detected_noise_sources):
