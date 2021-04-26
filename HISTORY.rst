@@ -3,6 +3,14 @@
 History
 -------
 
+0.0.1.8 (2021-04-26)
++++++++++++++++++++++
+* Fix bug in extrapolating nites outside of SEDs for time series
+
+* Require each galaxy to have at least one mass profile
+
+* Require each configuration to have at least two planes
+
 0.0.1.7 (2021-04-01)
 +++++++++++++++++++++
 * Write simulation input dicts to disk to limit memory usage
