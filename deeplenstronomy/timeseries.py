@@ -553,7 +553,13 @@ class LCGen():
         # Adjust nites
         nites = {}
         sed_nites = np.unique(sed['NITE'].values)
-        for band, cad_nites in nite_dict.items():
+        for band, cad_nites_ in nite_dict.items():
+
+            # evaluate on a wider grid than the cadence
+            cad_nites = np.linspace(min(cad_nites_) - 50, max(cad_nites_) + 50, 5 * len(cad_nites_)).round().astype(int)
+            _, cad_idx = np.unique(cad_nites, return_index=True)
+            cad_nites = cad_nites[np.sort(cad_idx)]
+            
             useable_nites = []
             for nite in cad_nites:
                 if nite not in sed_nites:
