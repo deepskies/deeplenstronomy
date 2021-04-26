@@ -334,20 +334,14 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     if save_to_disk:
         if not os.path.exists(dataset.outdir):
             os.mkdir(dataset.outdir)
-    
-    # Organize the configuration dict
-    organizer = Organizer(dataset.config_dict, verbose=verbose)
-    dataset.organizer = organizer
 
     # Store configurations
-    dataset.configurations = list(organizer.configuration_sim_dicts.keys())
-
-    # Store species map
-    dataset.species_map = organizer._species_map
+    dataset.configurations = list(dataset.config_dict['GEOMETRY'].keys())
 
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
-    max_size = max([len(organizer.configuration_sim_dicts[x]) for x in dataset.configurations])
+    max_size = dataset.size * 100 # maximum 100 epochs if timeseries
+
     for fp in parser.file_paths:
         filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['FILENAME']")
         mode = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['MODE']")
@@ -362,19 +356,12 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     # Overwrite the configuration dict with any forced values from user distribtuions
     force_param_inputs = _get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
 
-    for force_param, values in force_param_inputs.items():
-        configuration, param_name, band = force_param
-        warned = False
+    # Organize the configuration dict
+    organizer = Organizer(dataset.config_dict, forced_inputs=force_param_inputs, verbose=verbose)
+    dataset.organizer = organizer
 
-        sim_inputs = organizer.configuration_sim_dicts[configuration]
-        
-        for sim_input, val in zip(sim_inputs, values):
-            if param_name in sim_input[band].keys():
-                sim_input[band][param_name] = val
-            else:
-                if not warned:
-                    print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
-                    warned = True
+    # Store species map
+    dataset.species_map = organizer._species_map
                     
     # Skip image generation if desired
     if skip_image_generation:

@@ -8,7 +8,9 @@ import yaml
 
 from astropy.cosmology import FlatLambdaCDM
 from lenstronomy.Analysis.td_cosmography import TDCosmography
+from lenstronomy.SimulationAPI.sim_api import SimAPI
 import numpy as np
+import pandas as pd
 
 import deeplenstronomy.timeseries as timeseries
 from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_user_dist, KeyPathDict, read_cadence_file
@@ -180,7 +182,7 @@ class Parser():
     
 
 class Organizer():
-    def __init__(self, config_dict, verbose=False):
+    def __init__(self, config_dict, forced_inputs={}, verbose=False):
         """
         Break up config dict into individual simulation dicts.
         
@@ -189,6 +191,7 @@ class Organizer():
             verbose (bool, optional, default=False): Automatically passed from deeplenstronomy.make_dataset() args
         """
         self.main_dict = config_dict.copy()
+        self.forced_inputs = forced_inputs
         
         self.__track_species_keys()
         
@@ -275,7 +278,7 @@ class Organizer():
         #return [x.replace('.', '-') for x in d.keypaths() if eval("d['" + "']['".join(x.split('.')) + "']") == obj_name][0]
 
     
-    def _flatten_and_fill(self, config_dict, cosmo, objid=0):
+    def _flatten_and_fill(self, config_dict, cosmo, inputs, objid=0):
         """
         Flatten input dictionary, and sample from any specified distributions
         
@@ -509,11 +512,42 @@ class Organizer():
                     for mode, args in self.main_dict['SPECIES'][self._species_map[obj_name]]['SPECIAL'].items():
                         for arg in args:
                             output_dict = eval('special.{0}(output_dict, "{1}", bands=bands)'.format(mode.lower(), arg))
+
+
+        # Overwrite with any forced param inputs from USERDISTs
+        if inputs is not None:
+            
+            for (param_name, band) in inputs.index.values:
+            
+                if param_name in output_dict[band]:
+                    output_dict[band][param_name] = inputs[(param_name, band)]
+                else:
+                    print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
+
+
+#        for force_param, values in self.forced_inputs.items():
+#            configuration, param_name, band = force_param
+#            if configuration == config_dict['SIM_DICT']['CONFIGURATION_LABEL']:
+
+#                if param_name in output_dict[band]:
+#                    output_dict[band][param_name] = random.choice(values)
+#                else:
+#                    print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
                 
+#                warned = False
+
+#                for sim_input, val in zip(output_dict, values):
+#                    if param_name in sim_input[band].keys():
+#                        sim_input[band][param_name] = val
+#                    else:
+#                        if not warned:
+#                            print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
+#                            warned = True
+                            
         return output_dict
 
 
-    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid, peakshift):
+    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid, peakshift, inputs):
         """
         Generate an image info dictionary for each step in the time series
 
@@ -527,7 +561,7 @@ class Organizer():
         output_dicts = []
         bands = self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
         # Get flattened and filled dictionary
-        base_output_dict = self._flatten_and_fill(config_dict, cosmo, objid)
+        base_output_dict = self._flatten_and_fill(config_dict, cosmo, inputs, objid)
 
         # Model the lens for time delay calculations
         td_dict = {}
@@ -540,6 +574,12 @@ class Organizer():
                 kwargs_lens_model_list = params[6]
                 kwargs_model = params[1]
                 kwargs_point_source_list = params[5] 
+                # use sim API in case sigma_v is used for mass profiles
+                sim = SimAPI(numpix=self.main_dict['IMAGE']['PARAMETERS']['numPix'],
+                         kwargs_single_band=params[0],
+                         kwargs_model=kwargs_model)
+                kwargs_lens_model_list = sim.physical2lensing_conversion(kwargs_mass=kwargs_lens_model_list)
+
                 try:
                     z_lens = kwargs_model['lens_redshift_list'][0]
                     z_source = kwargs_model['z_source']
@@ -586,12 +626,18 @@ class Organizer():
                             #try using the exact night
                             output_dict[band][obj_string + '-magnitude' + suffix] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
                         except:
-                            #linearly interpolate between the closest two nights
                             band_df = closest_redshift_lc['lc'][closest_redshift_lc['lc']['BAND'].values == band].copy().reset_index(drop=True)
-                            closest_nite_indices = np.abs(nite - band_df['NITE'].values).argsort()[:2]
-                            output_dict[band][obj_string + '-magnitude' + suffix] = (band_df['MAG'].values[closest_nite_indices[1]] - band_df['MAG'].values[closest_nite_indices[0]]) * (nite - band_df['NITE'].values[closest_nite_indices[1]]) / (band_df['NITE'].values[closest_nite_indices[1]] - band_df['NITE'].values[closest_nite_indices[0]]) + band_df['MAG'].values[closest_nite_indices[1]]
-                            output_dict[band][obj_string + '-magnitude_measured' + suffix] = np.random.normal(loc=output_dict[band][obj_string + '-magnitude'], scale=0.03)
-
+                            # set mag to 99 if nite is outside the SED
+                            if nite < band_df['NITE'].values.min() or nite > band_df['NITE'].values.max():
+                                mag = 99.0
+                            # if nite is within bounds of SED, linearly interpolate
+                            else:
+                                closest_nite_indices = np.abs(nite - band_df['NITE'].values).argsort()[:2]
+                                mag = (band_df['MAG'].values[closest_nite_indices[1]] - band_df['MAG'].values[closest_nite_indices[0]]) * (nite - band_df['NITE'].values[closest_nite_indices[1]]) / (band_df['NITE'].values[closest_nite_indices[1]] - band_df['NITE'].values[closest_nite_indices[0]]) + band_df['MAG'].values[closest_nite_indices[1]]
+                                
+                            output_dict[band][obj_string + '-magnitude' + suffix] = mag
+                            output_dict[band][obj_string + '-magnitude_measured' + suffix] = np.random.normal(loc=mag, scale=0.03)
+                                
                         
                     output_dict[band][obj_string + '-nite'] = orig_nite
                     output_dict[band][obj_string + '-peaknite'] = peakshift
@@ -798,15 +844,24 @@ class Organizer():
                 else:
                     peakshifts = [0.0] * v['SIZE']
 
-                
+            # Handle forced inputs
+            inputs = {}
+            for force_param, values in self.forced_inputs.items():
+                configuration, param_name, band = force_param
+                if configuration == k:
+                    inputs[(param_name, band)] = values
+
+            input_df = pd.DataFrame(inputs)
+                    
+            
             for objid in range(v['SIZE']):
 
                 if time_series:
-                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid, peakshifts[objid])
+                    flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid, peakshifts[objid], inputs=input_df.loc[objid] if len(input_df) != 0 else None)
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
-                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, objid))    
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, input_df.loc[objid] if len(input_df) != 0 else None, objid))    
 
         self.configuration_sim_dicts = configuration_sim_dicts
 

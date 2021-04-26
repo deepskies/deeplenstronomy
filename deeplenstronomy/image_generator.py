@@ -34,7 +34,7 @@ class ImageGenerator():
         return
 
 
-    def parse_single_band_info_dict(self, sim_dict, cosmo):
+    def parse_single_band_info_dict(self, sim_dict, cosmo, band='g'):
         """
         Convert a dictionary from input_reader.Organizer.breakup() to lenstronomy function calls
 
@@ -184,7 +184,7 @@ class ImageGenerator():
         for band, sim_dict in info_dict.items():
 
             # Parse the info dict
-            params = self.parse_single_band_info_dict(sim_dict, cosmo)
+            params = self.parse_single_band_info_dict(sim_dict, cosmo, band=band)
             kwargs_single_band = params[0]
             kwargs_model = params[1]
             kwargs_numerics = params[2]
