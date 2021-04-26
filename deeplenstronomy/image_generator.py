@@ -253,7 +253,8 @@ class ImageGenerator():
                                                                           min_distance=kwargs_single_band['pixel_scale'],
                                                                           search_window=sim_dict['numPix'] * kwargs_single_band['pixel_scale'])
                     magnification = lens_model_class.magnification(x_image, y_image, kwargs=kwargs_lens_model_list)
-                    amplitudes = np.array(amplitudes) * np.abs(magnification)
+                    #amplitudes = np.array(amplitudes) * np.abs(magnification)
+                    amplitudes = np.array([a * m for a, m in zip(amplitudes, magnification)])
                 
                     kwargs_ps.append({'ra_image': x_image, 'dec_image': y_image, 'point_amp': amplitudes})
 
