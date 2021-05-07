@@ -2,7 +2,7 @@
 
 [![status](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1/status.svg)](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1)
 [![status](https://img.shields.io/badge/arXiv-2102.02830-red)](http://arxiv.org/abs/2102.02830)
-[![status](https://img.shields.io/badge/PyPi-0.0.1.8-blue)](https://pypi.org/project/deeplenstronomy/)
+[![status](https://img.shields.io/badge/PyPi-0.0.2.0-blue)](https://pypi.org/project/deeplenstronomy/)
 [![status](https://img.shields.io/badge/License-MIT-lightgrey)](https://github.com/deepskies/deeplenstronomy/blob/master/LICENSE)
 
 `deeplenstronomy` is a tool for simulating large datasets for applying deep learning to strong gravitational lensing. 
