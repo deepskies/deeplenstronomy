@@ -28,7 +28,15 @@ class LCGen():
         
         # Collect sed files
         self.ia_sed_files = glob.glob('seds/ia/*.dat')
-        self.cc_sed_files = glob.glob('seds/cc/*.SED')
+        cc_sed_files = glob.glob('seds/cc/*.SED')
+        bad_seds = ['seds/cc/SDSS-018892.SED',
+                    'seds/cc/Nugent+Scolnic_IIL.SED',
+                    'seds/cc/SDSS-018713.SED',
+                    'seds/cc/SDSS-018700.SED',
+                    'seds/cc/SDSS-018734.SED',
+                    'seds/cc/SDSS-018596.SED',
+                    'seds/cc/SDSS-019323.SED']
+        self.cc_sed_files = [x for x in cc_sed_files if x not in bad_seds]
         self.__read_cc_weights()
         
         # Collect filter transmission curves
@@ -566,6 +574,11 @@ class LCGen():
                     useable_nites.append(self._get_closest_nite(sed_nites, nite))
                 else:
                     useable_nites.append(nite)
+
+            arr = np.array(useable_nites)
+            _, arr_idx = np.unique(arr, return_index=True)
+            useable_nites = list(arr[np.sort(arr_idx)])
+
             nites[band] = useable_nites
             
         # Redshift the sed frequencies and wavelengths
