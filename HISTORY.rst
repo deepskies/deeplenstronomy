@@ -3,9 +3,15 @@
 History
 -------
 
-0.0.1.9 (In development)
+0.0.2.0 (2021-05-07)
++++++++++++++++++++++
+* Verified stability of all new time series features
+
+0.0.1.9 (became version 0.0.2.0)
 +++++++++++++++++++++
 * Fix bug in number of lensed point sources
+
+* Remove a couple CC SNe SEDs that led to erroneous magnitudes
 
 0.0.1.8 (2021-04-26)
 +++++++++++++++++++++
