@@ -66,7 +66,9 @@ class AllChecks():
                                                                'GAUSSIAN_ELLIPSE_KAPPA', 'GAUSSIAN_ELLIPSE_POTENTIAL', 'MULTI_GAUSSIAN_KAPPA',
                                                                'MULTI_GAUSSIAN_KAPPA_ELLIPSE', 'INTERPOL', 'INTERPOL_SCALED', 'SHAPELETS_POLAR', 'SHAPELETS_CART',
                                                                'DIPOLE', 'CURVED_ARC', 'ARC_PERT', 'coreBURKERT', 'CORED_DENSITY', 'CORED_DENSITY_2',
-                                                               'CORED_DENSITY_MST', 'CORED_DENSITY_2_MST', 'NumericalAlpha', 'MULTIPOLE', 'HESSIAN']}
+                                                               'CORED_DENSITY_MST', 'CORED_DENSITY_2_MST', 'NumericalAlpha', 'MULTIPOLE', 'HESSIAN',
+                                                               'ULDM']
+                                         }
         
         # find all check functions
         self.checks = [x for x in dir(self) if x.find('check_') != -1]
@@ -110,7 +112,9 @@ class AllChecks():
               'TRIPLE_CHAMELEON': ".chameleon.TripleChameleon",
               'INTERPOL': ".interpolation.Interpol",
               'SLIT_STARLETS': ".starlets.SLIT_Starlets",
-              'SLIT_STARLETS_GEN2': ".starlets.SLIT_Starlets"}
+              'SLIT_STARLETS_GEN2': ".starlets.SLIT_Starlets",
+              'ULDM': '.uldm.Uldm'
+              }
          setattr(self, "lenstronomy_light_map", p)
 
          d = {"SHIFT": ".alpha_shift.Shift",
@@ -171,7 +175,9 @@ class AllChecks():
               "CORED_DENSITY_2_MST": ".cored_density_mst.CoredDensityMST",
               "NumericalAlpha": ".numerical_deflections.NumericalAlpha",
               "MULTIPOLE": ".multipole.Multipole",
-              "HESSIAN": ".hessian.Hessian"}
+              "HESSIAN": ".hessian.Hessian",
+              'ULDM': '.uldm.Uldm',
+              }
          setattr(self, "lenstronomy_lens_map", d)
          return
     
