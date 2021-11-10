@@ -303,7 +303,22 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
         image_indices = np.argmin(np.sum(np.abs(im_param_array - map_param_array) / im_stds, axis=2), axis=0)
 
     return image_indices
-    
+
+def check_background_indices(idx_list: list):
+    """Issue a warning if an element occurs to frequently in the list.
+
+    Calculate number of elements in the list that deviate from a uniform distribution
+    by more than 1 standard deviation. If this number is more than 1/3 of the elements
+    in the list, print a warning.
+
+    Args:
+        idx_list (list): List of background image indices to use.
+    """
+    values = np.unique(idx_list)
+    average_value, std = np.mean(values), np.std(values)
+    num_deviating = sum(np.abs(values - average_value) > np.std(values))
+    if num_deviating > len(idx_list) / 3:
+        print("WARNING: Non-uniform distribution of background images detected, check map.txt file.")
 
 def read_cadence_file(filename):
     """
