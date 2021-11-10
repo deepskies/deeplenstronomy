@@ -11,7 +11,7 @@ import pandas as pd
 
 from deeplenstronomy.input_reader import Organizer, Parser
 from deeplenstronomy.image_generator import ImageGenerator
-from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images
+from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images, check_background_indices
 from deeplenstronomy import surveys
 
 class Dataset():
@@ -409,6 +409,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         real_image_indices = []
         if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
             image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
+            check_background_indices(image_indices)
         else:
             image_indices = np.zeros(len(sim_inputs), dtype=int)
             
@@ -494,7 +495,6 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         # Add image backgrounds -- will just add zeros if no backgrounds have been specified
         if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
             additive_image_backgrounds = image_backgrounds[np.array(real_image_indices)]
-            additive_image_backgrounds = np.random.poisson(np.where(additive_image_backgrounds > 0, additive_image_backgrounds, 1.e-3 ))
         else:
             temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
             additive_image_backgrounds = temp_array[np.array(real_image_indices)]
