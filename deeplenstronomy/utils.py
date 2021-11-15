@@ -131,9 +131,21 @@ def read_distribution_file(filename):
     assert 'WEIGHT' in df.columns, "'WEIGHT' must be a column in {}".format(filename)
 
     return df
-        
 
-def draw_from_user_dist(filename, size, mode, step=10):
+
+def treat_map_like_user_dist(im_dir, size):
+    """Use the iterate mode of draw_from_user_dist for map.txt.
+
+    Args:
+        im_dir (str): name of directory containing map.txt
+        size (int): size of simulations
+    """
+    df = pd.read_csv(im_dir + '/' + 'map.txt', delim_whitespace=True)
+    df['WEIGHT'] = 1.0
+    return draw_from_user_dist("unused filename", size, 'iterate', df=df)
+    
+
+def draw_from_user_dist(filename, size, mode, step=10, df=None):
     """
     Interpolate a user-specified N-dimensional probability distribution and
     sample from it.
@@ -143,16 +155,18 @@ def draw_from_user_dist(filename, size, mode, step=10):
         size (int):  the number of times to sample the probability distribution 
         mode (str): choose from ['interpolate', 'sample'] 
         step (int): the number of steps on the interpolation grid  
+        df (pd.DataFrame): optional already read dataframe.
         
     Returns:
         parameters: list, the names of the paramters
         choices: array with entries as arrays of drawn parameters 
 
     Raises:
-        NotImplementedError: if a mode other than "sample" or "interpolate" is passed
+        NotImplementedError: if a mode other than "sample" or "interpolate" or "iterate" is passed
     """
 
-    df = read_distribution_file(filename)
+    if df is None:
+        df = read_distribution_file(filename)
 
     parameters = [x for x in df.columns if x != 'WEIGHT']
     points = df[parameters].values
@@ -184,10 +198,16 @@ def draw_from_user_dist(filename, size, mode, step=10):
         index_arr = np.random.choice(np.arange(len(points), dtype=int), size=size, p=weights / weights.sum())
         choices = points[index_arr]
 
+    elif mode == 'iterate':
+        num_repeats = size // len(df) + 1
+        index_arr = np.tile(np.arange(len(df)), num_repeats)[:size]
+        choices = points[index_arr]
+        
     else:
         raise NotImplementedError("unexpected mode passed, must be 'sample' or 'interpolate'")
             
     return parameters, choices
+
 
 def read_images(im_dir, im_size, bands):
     """
@@ -237,7 +257,7 @@ def read_images(im_dir, im_size, bands):
 
     return im_array
 
-def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configuration):
+def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configuration, overwrite=False):
     """
     Sort image files based on map. If no map exists, sort randomly.
 
@@ -246,6 +266,7 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
         image_bank_size (int): number of images in user-specified bank
         config_dicts (List[dict]): list of config_dicts    
         configuration (str): the configuration currently running
+        overwrite (bool): optionally overwrite sim_inputs instead of solving
     
     Returns:
         the indices of the images utilized for each config_dict 
@@ -277,13 +298,17 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
 
 
         if len(bad_columns) != 0:
-            print(config_dicts[0].keys())
             print("WARNING {0} are not found in the simulated dataset for {1}".format(', '.join(bad_columns), configuration) +
                   ". You may see unexpected results. Use the dataset.search(<param_name>) function to find the correct column names.")
         
     if len(map_columns) == 0:
         # Sort randomly
         image_indices = np.random.choice(np.arange(image_bank_size), replace=True, size=len(config_dicts))
+
+    elif overwrite:
+        # Maintain order for iterative insertion.
+        num_repeats = len(config_dicts) // image_bank_size + 1
+        image_indices = np.tile(np.arange(image_bank_size), num_repeats)[:len(config_dicts)]
     
     else:
         # Trim df to just the columns needed

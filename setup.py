@@ -29,7 +29,7 @@ with open(path.join(this_directory, 'requirements.txt'), encoding='utf-8') as re
 
 setup(
     name='deeplenstronomy',
-    version='0.0.2.0',
+    version='0.0.2.1',
     description='wrap lenstronomy for efficient simulation generation',
     long_description=long_description,
     long_description_content_type='text/markdown',

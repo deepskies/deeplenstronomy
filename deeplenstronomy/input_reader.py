@@ -364,6 +364,23 @@ class Organizer():
 
                     # Set the PLANE's redshift in the config_dict
                     if k_param == 'REDSHIFT':
+                        # Check if drawn redshift is less than a closer plane, and redraw if necessary
+                        if plane_num >= 2:
+                            prev_plane_num = plane_num - 1
+                            tries = 0
+                            while tries < 10:
+                                if config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] >= draws[0]:
+                                    draws = self._draw(v_param['DISTRIBUTION'], bands)
+                                    tries += 1
+                                else:
+                                    break
+                            else:
+                                # Set a sentinal value to drop this system
+                                if config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] >= 10:
+                                    draws = [config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] + 1] * len(bands)
+                                else:
+                                    draws = [10] * len(bands)
+                                    
                         config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)] = draws[0]
                     
                     for band, draw in zip(bands, draws):
@@ -372,7 +389,20 @@ class Organizer():
                 else:
                     # Set the PLANE's redshift in the config_dict
                     if k_param == 'REDSHIFT':
-                        config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)]	= v_param
+                        # set the redshift to a sentinal value if it's less than a previous plane
+                        if plane_num >= 2:
+                            prev_plane_num = plane_num - 1
+                            if v_param < config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)]:
+                                if config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] >= 10:
+                                    config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)] = config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] + 1
+                                    redshift = config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] + 1
+                                else:
+                                    config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)] = 10
+                                    redshift = 10
+
+                            else:
+                                config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)]	= v_param
+                        
                     
                     for band in bands:
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
@@ -521,6 +551,22 @@ class Organizer():
             
                 if param_name in output_dict[band]:
                     output_dict[band][param_name] = inputs[(param_name, band)]
+
+                    # Protect against non-physical geometries by setting a sentinal value
+                    if param_name.find('REDSHIFT') != -1:
+                        plane_num = int(param_name.split('PLANE_')[1].split('-')[0])
+                        if plane_num >= 2:
+                            for prev_plane_num in range(1, plane_num):
+                                prev_plane_param_name = param_name.replace('PLANE_{0}'.format(plane_num), 'PLANE_{0}'.format(prev_plane_num))
+                                if output_dict[band][param_name] <= output_dict[band][prev_plane_param_name]:
+                                    if output_dict[band][prev_plane_param_name] >= 10:
+                                        new_redshift = output_dict[band][prev_plane_param_name] + 1
+                                    else:
+                                        new_redshift = 10
+
+                                    for b in output_dict.keys():
+                                        output_dict[b][param_name] = new_redshift
+                    
                 else:
                     print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
 

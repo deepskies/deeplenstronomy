@@ -11,7 +11,7 @@ import pandas as pd
 
 from deeplenstronomy.input_reader import Organizer, Parser
 from deeplenstronomy.image_generator import ImageGenerator
-from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images, check_background_indices
+from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images, check_background_indices, treat_map_like_user_dist
 from deeplenstronomy import surveys
 
 class Dataset():
@@ -338,6 +338,13 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     # Store configurations
     dataset.configurations = list(dataset.config_dict['GEOMETRY'].keys())
 
+    # Handle image backgrounds if they exist
+    if len(parser.image_paths) > 0:
+        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
+        image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
+    else:
+        image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+    
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
     max_size = dataset.size * 100 # maximum 100 epochs if timeseries
@@ -352,6 +359,11 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step)
         forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
 
+    # If we want to iterate through map.txt, add the parameters to the forced inputs
+    if "ITERATE" in parser.config_dict['BACKGROUNDS']:
+        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
+        draw_param_names, draw_param_values = treat_map_like_user_dist(im_dir, max_size)
+        forced_inputs[im_dir + '/map.txt'] = {'names': draw_param_names, 'values': draw_param_values}
         
     # Overwrite the configuration dict with any forced values from user distribtuions
     force_param_inputs = _get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
@@ -378,13 +390,6 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                 
     # Initialize the ImageGenerator
     ImGen = ImageGenerator(return_planes, solve_lens_equation)
-
-    # Handle image backgrounds if they exist
-    if len(parser.image_paths) > 0:
-        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
-        image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
-    else:
-        image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
 
     # Clear the sim_dicts out of memory
     if not os.path.exists(dataset.outdir):
@@ -506,6 +511,17 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         metadata_df = pd.DataFrame(metadata)
         del metadata
 
+        # Delete images with sentinel redshifts
+        redshift_cols = [x for x in metadata_df.columns if x.find('REDSHIFT') != -1]
+        plane_cols = {int(x[x.index('PLANE_') + 6: x.index('-', x.index('PLANE_') + 1)]) : x for x in redshift_cols}
+        greatest_plane_col = plane_cols[max(plane_cols.keys())]
+        mask = metadata_df[greatest_plane_col].values < 10
+        configuration_images = configuration_images[mask]
+        metadata_df = metadata_df[mask].copy().reset_index(drop=True)
+        if return_planes:
+            configuration_planes = configuration_planes[mask]
+                      
+        
         # Save the images and metadata to the outdir if desired (ideal for large simulation production)
         if save_to_disk:
             #Images

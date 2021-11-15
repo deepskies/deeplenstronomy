@@ -3,6 +3,11 @@
 History
 -------
 
+0.0.2.1 (2021-11-15)
++++++++++++++++++++++
+* ITERATE option for image BACKGROUNDS
+* Drop any systems with unphysical redshifts from simulations
+
 0.0.2.0 (2021-05-07)
 +++++++++++++++++++++
 * Verified stability of all new time series features
