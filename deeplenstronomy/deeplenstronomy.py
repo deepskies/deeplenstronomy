@@ -354,9 +354,10 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         mode = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['MODE']")
         try:
             step = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['STEP']")
+            params = eval("parser.config_dict['"+fp.replace('.',"']['")+"']"+"['PARAMS']")
         except KeyError:
             step = 10
-        draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step)
+        draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step, params)
         forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
 
     # If we want to iterate through map.txt, add the parameters to the forced inputs
