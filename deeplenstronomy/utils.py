@@ -168,10 +168,8 @@ def draw_from_user_dist(filename, size, mode, step=10, df=None, params = None):
     Raises:
         NotImplementedError: if a mode other than "sample" or "interpolate" or "iterate" is passed
     """
-
     if df is None:
         df = read_distribution_file(filename)
-
     parameters = [x for x in df.columns if x != 'WEIGHT']
     points = df[parameters].values
     weights = df['WEIGHT'].values
@@ -209,8 +207,11 @@ def draw_from_user_dist(filename, size, mode, step=10, df=None, params = None):
         
     else:
         raise NotImplementedError("unexpected mode passed, must be 'sample' or 'interpolate'")
-            
-    if type(params == list):
+    if type(params) == str:
+        params = params.split(sep=',')
+        params = [i.strip() for i in params]
+    
+    if type(params) == list:
         params = [x for x in params if x != 'WEIGHT']
         assert len(params) == len(parameters), "Parameter list wrong size!"
         return params, choices
