@@ -145,7 +145,7 @@ def treat_map_like_user_dist(im_dir, size):
     return draw_from_user_dist("unused filename", size, 'iterate', df=df)
     
 
-def draw_from_user_dist(filename, size, mode, step=10, df=None, params = None):
+def draw_from_user_dist(filename, size, mode, step=10, df=None, params=None):
     """
     Interpolate a user-specified N-dimensional probability distribution and
     sample from it.
@@ -156,7 +156,7 @@ def draw_from_user_dist(filename, size, mode, step=10, df=None, params = None):
         mode (str): choose from ['interpolate', 'sample'] 
         step (int): the number of steps on the interpolation grid  
         df (pd.DataFrame): optional already read dataframe.
-        Params (list or None): if None, uses parameters in the first line of the dataframe
+        params (list or None): if None, uses parameters in the first line of the dataframe
             and returns them with the userdist samples
             if a list (must be same length as number of df columns), returns the list as parameters
             rather than the first line. Last line of parameter list must be WEIGHT.
@@ -207,11 +207,8 @@ def draw_from_user_dist(filename, size, mode, step=10, df=None, params = None):
         
     else:
         raise NotImplementedError("unexpected mode passed, must be 'sample' or 'interpolate'")
-    if type(params) == str:
-        params = params.split(sep=',')
-        params = [i.strip() for i in params]
-    
-    if type(params) == list:
+
+    if isinstance(params, list):
         params = [x for x in params if x != 'WEIGHT']
         assert len(params) == len(parameters), "Parameter list wrong size!"
         return params, choices

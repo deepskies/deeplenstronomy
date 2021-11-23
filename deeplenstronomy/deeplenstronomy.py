@@ -361,8 +361,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         except KeyError:
             params = None
         draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step, params=params)
-        forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
-
+        forced_inputs[fp] = {'names': draw_param_names, 'values': draw_param_values}
     # If we want to iterate through map.txt, add the parameters to the forced inputs
     if len(parser.image_paths) > 0 and "ITERATE" in parser.config_dict['BACKGROUNDS']:
         im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
