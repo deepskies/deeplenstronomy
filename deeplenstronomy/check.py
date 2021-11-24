@@ -399,7 +399,7 @@ class AllChecks():
                                 if self.config["DISTRIBUTIONS"][userdist]['STEP'] < 1:
                                     errs.append("DISTRIBUTIONS." + userdist + ".STEP must be a positive integer")
                         # if params are specified, they must be in a list
-                        if 'STEP' in self.config["DISTRIBUTIONS"][userdist].keys():
+                        if 'PARAMS' in self.config["DISTRIBUTIONS"][userdist].keys():
                             if not isinstance(self.config["DISTRIBUTIONS"][userdist]['PARAMS'], list):
                                 errs.append("DISTRIBUTIONS." + userdist + ".PARAMS must be a list")
         return errs
