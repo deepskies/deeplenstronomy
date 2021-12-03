@@ -210,7 +210,6 @@ def draw_from_user_dist(filename, size, mode, step=10, df=None, params=None):
 
     if isinstance(params, list):
         params = [x for x in params if x != 'WEIGHT']
-        assert len(params) == len(parameters), "Parameter list wrong size!"
         return params, choices
     
     return parameters, choices

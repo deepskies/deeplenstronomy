@@ -382,6 +382,7 @@ class AllChecks():
                                 df = pd.read_csv(self.config["DISTRIBUTIONS"][userdist]['FILENAME'], delim_whitespace=True)
                                 if "WEIGHT" not in df.columns:
                                     errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
+                                parameter_length = len(df.columns)
                             except Exception as e:
                                 errs.append("Error reading DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
                             finally:
@@ -400,8 +401,13 @@ class AllChecks():
                                     errs.append("DISTRIBUTIONS." + userdist + ".STEP must be a positive integer")
                         # if params are specified, they must be in a list
                         if 'PARAMS' in self.config["DISTRIBUTIONS"][userdist].keys():
-                            if not isinstance(self.config["DISTRIBUTIONS"][userdist]['PARAMS'], list):
+                            if not isinstance(self.config["DISTRIBUTIONS"][userdist]['PARAMS']:
                                 errs.append("DISTRIBUTIONS." + userdist + ".PARAMS must be a list")
+                            else:
+                                user_df = self.config.["DISTRIBUTIONS"][userdist]['FILENAME']
+                            if len(params) != parameter_length:
+                                errs.append("DISTRIBUTIONS." + userdist + "PARAMS must have same length as number of columns in distribution file!")
+
         return errs
 
     def check_image_backgrounds(self):
