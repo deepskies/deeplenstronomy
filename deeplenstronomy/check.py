@@ -387,7 +387,6 @@ class AllChecks():
                                 errs.append("Error reading DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
                             finally:
                                 del df
-
                         # mode must be valid
                         if self.config["DISTRIBUTIONS"][userdist]['MODE'] not in ['interpolate', 'sample']:
                             errs.append("DISTRIBUTIONS." + userdist + ".MODE must be either 'interpolate' or 'sample'")
@@ -401,10 +400,9 @@ class AllChecks():
                                     errs.append("DISTRIBUTIONS." + userdist + ".STEP must be a positive integer")
                         # if params are specified, they must be in a list
                         if 'PARAMS' in self.config["DISTRIBUTIONS"][userdist].keys():
-                            if not isinstance(self.config["DISTRIBUTIONS"][userdist]['PARAMS']:
+                            params = self.config["DISTRIBUTIONS"][userdist]['PARAMS']
+                            if not isinstance(params, list):
                                 errs.append("DISTRIBUTIONS." + userdist + ".PARAMS must be a list")
-                            else:
-                                user_df = self.config.["DISTRIBUTIONS"][userdist]['FILENAME']
                             if len(params) != parameter_length:
                                 errs.append("DISTRIBUTIONS." + userdist + "PARAMS must have same length as number of columns in distribution file!")
 
