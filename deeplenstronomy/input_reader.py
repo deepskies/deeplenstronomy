@@ -655,7 +655,7 @@ class Organizer():
 
                     # account for time delay
                     td_shift = td_dict[obj_string]
-                    if td_shift is None:
+                    if td_shift is None or len(td_shift) == 0:
                         shifted_nites = [nite_]
                     else:
                         shifted_nites = [nite_] + [nite_ + x for x in list(td_shift[1:] - td_shift[0])]
