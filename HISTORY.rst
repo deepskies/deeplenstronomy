@@ -3,6 +3,12 @@
 History
 -------
 
+0.0.2.2 (2021-12-13)
++++++++++++++++++++++
+* Bug fixes for ITERATE option in image BACKGROUNDS
+* Bug fix for time delay calculations (very minor)
+* New PARAMS option to specify USERDIST columns
+
 0.0.2.1 (2021-11-15)
 +++++++++++++++++++++
 * ITERATE option for image BACKGROUNDS
