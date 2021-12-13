@@ -335,7 +335,7 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
 
     return image_indices
 
-def check_background_indices(idx_list: list):
+def check_background_indices(idx_list: list, iterate: bool = False):
     """Issue a warning if an element occurs to frequently in the list.
 
     Calculate number of elements in the list that deviate from a uniform distribution
@@ -344,12 +344,14 @@ def check_background_indices(idx_list: list):
 
     Args:
         idx_list (list): List of background image indices to use.
+        iterate (bool): Whether image backgrounds are using the ITERATE mode.
     """
-    values = np.unique(idx_list)
-    average_value, std = np.mean(values), np.std(values)
-    num_deviating = sum(np.abs(values - average_value) > np.std(values))
-    if num_deviating > len(idx_list) / 3:
-        print("WARNING: Non-uniform distribution of background images detected, check map.txt file.")
+    if not iterate:
+        values = np.unique(idx_list)
+        average_value, std = np.mean(values), np.std(values)
+        num_deviating = sum(np.abs(values - average_value) > np.std(values))
+        if num_deviating > len(idx_list) / 3:
+            print("WARNING: Non-uniform distribution of background images detected, check map.txt file.")
 
 def read_cadence_file(filename):
     """

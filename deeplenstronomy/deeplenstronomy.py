@@ -364,9 +364,12 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         forced_inputs[fp] = {'names': draw_param_names, 'values': draw_param_values}
     # If we want to iterate through map.txt, add the parameters to the forced inputs
     if len(parser.image_paths) > 0 and "ITERATE" in parser.config_dict['BACKGROUNDS']:
+        background_iterate = True
         im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
         draw_param_names, draw_param_values = treat_map_like_user_dist(im_dir, max_size)
         forced_inputs[im_dir + '/map.txt'] = {'names': draw_param_names, 'values': draw_param_values}
+    else:
+        background_iterate = False
         
     # Overwrite the configuration dict with any forced values from user distribtuions
     force_param_inputs = _get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
@@ -417,7 +420,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         real_image_indices = []
         if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
             image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
-            check_background_indices(image_indices)
+            check_background_indices(image_indices, background_iterate)
         else:
             image_indices = np.zeros(len(sim_inputs), dtype=int)
             
