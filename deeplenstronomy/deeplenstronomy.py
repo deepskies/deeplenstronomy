@@ -356,11 +356,14 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             step = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['STEP']")
         except KeyError:
             step = 10
-        draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step)
-        forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
-
+        try:
+            params = eval("parser.config_dict['"+fp.replace('.',"']['")+"']"+"['PARAMS']")
+        except KeyError:
+            params = None
+        draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step, params=params)
+        forced_inputs[fp] = {'names': draw_param_names, 'values': draw_param_values}
     # If we want to iterate through map.txt, add the parameters to the forced inputs
-    if "ITERATE" in parser.config_dict['BACKGROUNDS']:
+    if len(parser.image_paths) > 0 and "ITERATE" in parser.config_dict['BACKGROUNDS']:
         im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
         draw_param_names, draw_param_values = treat_map_like_user_dist(im_dir, max_size)
         forced_inputs[im_dir + '/map.txt'] = {'names': draw_param_names, 'values': draw_param_values}

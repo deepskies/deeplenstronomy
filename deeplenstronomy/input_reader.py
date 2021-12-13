@@ -389,6 +389,7 @@ class Organizer():
                 else:
                     # Set the PLANE's redshift in the config_dict
                     if k_param == 'REDSHIFT':
+                        config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)] = v_param
                         # set the redshift to a sentinal value if it's less than a previous plane
                         if plane_num >= 2:
                             prev_plane_num = plane_num - 1

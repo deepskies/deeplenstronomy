@@ -382,11 +382,11 @@ class AllChecks():
                                 df = pd.read_csv(self.config["DISTRIBUTIONS"][userdist]['FILENAME'], delim_whitespace=True)
                                 if "WEIGHT" not in df.columns:
                                     errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
+                                parameter_length = len(df.columns)
                             except Exception as e:
                                 errs.append("Error reading DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
                             finally:
                                 del df
-
                         # mode must be valid
                         if self.config["DISTRIBUTIONS"][userdist]['MODE'] not in ['interpolate', 'sample']:
                             errs.append("DISTRIBUTIONS." + userdist + ".MODE must be either 'interpolate' or 'sample'")
@@ -398,6 +398,14 @@ class AllChecks():
                             else:
                                 if self.config["DISTRIBUTIONS"][userdist]['STEP'] < 1:
                                     errs.append("DISTRIBUTIONS." + userdist + ".STEP must be a positive integer")
+                        # if params are specified, they must be in a list
+                        if 'PARAMS' in self.config["DISTRIBUTIONS"][userdist].keys():
+                            params = self.config["DISTRIBUTIONS"][userdist]['PARAMS']
+                            if not isinstance(params, list):
+                                errs.append("DISTRIBUTIONS." + userdist + ".PARAMS must be a list")
+                            if len(params) != parameter_length:
+                                errs.append("DISTRIBUTIONS." + userdist + "PARAMS must have same length as number of columns in distribution file!")
+
         return errs
 
     def check_image_backgrounds(self):
