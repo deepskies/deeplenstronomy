@@ -3,6 +3,10 @@
 History
 -------
 
+0.0.2.3 (2021-12-20)
++++++++++++++++++++++
+* Bug fixes for ITERATE option in image BACKGROUNDS
+
 0.0.2.2 (2021-12-13)
 +++++++++++++++++++++
 * Bug fixes for ITERATE option in image BACKGROUNDS

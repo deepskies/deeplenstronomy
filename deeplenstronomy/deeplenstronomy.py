@@ -419,7 +419,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         # Handle image backgrounds if they exist
         real_image_indices = []
         if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
-            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
+            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration, overwrite=background_iterate)
             check_background_indices(image_indices, background_iterate)
         else:
             image_indices = np.zeros(len(sim_inputs), dtype=int)
