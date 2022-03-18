@@ -274,11 +274,11 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     Args:
         config (str or dict): name of yaml file specifying dataset characteristics or pre-parsed yaml file as dictionary
         verbose (bool, optional, default=False): print progress and status  updates at runtime
-        store_in_memory (bool, optional, default=True): save images and metadata as attributes 
-        save_to_disk (bool, optional, default=False): save images and metadata to disk   
-        store_sample (bool, optional, default=False): save five images and metadata as attribute 
+        store_in_memory (bool, optional, default=True): save images and metadata as attributes
+        save_to_disk (bool, optional, default=False): save images and metadata to disk
+        store_sample (bool, optional, default=False): save five images and metadata as attribute
         image_file_format (str, optional, default='npy'): outfile format type, options include ('npy', 'h5')
-        survey (str or None, optional, default=None): a default astronomical survey to use 
+        survey (str or None, optional, default=None): a default astronomical survey to use
         return_planes (bool, optional, default=False): return the lens, source, noise, and point source planes of the simulated images
         skip_image_generation (bool, optional, default=False): skip image generation
         solve_lens_equation (bool, optional, default=False): calculate the source positions
@@ -289,7 +289,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     Raises:
         RuntimeError: If `skip_image_generation == True` and `solve_lens_equation == True`
         RuntimeError: If `survey` is not a valid survey name
-        
+
     """
 
     if solve_lens_equation and skip_image_generation:
@@ -422,18 +422,21 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     # Initialize the ImageGenerator
     ImGen = ImageGenerator(return_planes, solve_lens_equation)
 
-    # Clear the sim_dicts out of memory
-    if not os.path.exists(dataset.outdir):
-        os.system('mkdir ' + dataset.outdir)
+    if save_to_disk:
+        # Clear the sim_dicts out of memory
+        if not os.path.exists(dataset.outdir):
+            os.system('mkdir ' + dataset.outdir)
         
-    for configuration in dataset.configurations:
-        np.save("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), {0: organizer.configuration_sim_dicts[configuration]}, allow_pickle=True)
-        del organizer.configuration_sim_dicts[configuration]
+        for configuration in dataset.configurations:
+            np.save("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), {0: organizer.configuration_sim_dicts[configuration]}, allow_pickle=True)
+            #del organizer.configuration_sim_dicts[configuration]
         
     # Simulate images
     #for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
     for configuration in dataset.configurations:
-        sim_inputs = np.load("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), allow_pickle=True).item()[0]
+        sim_inputs = dataset.organizer.configuration_sim_dicts[configuration]
+        # previously you deleted it (why?)
+        #del organizer.configuration_sim_dicts[configuration]
 
         if verbose:
             print("Generating images for {0}".format(configuration))
