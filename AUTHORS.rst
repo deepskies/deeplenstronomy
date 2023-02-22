@@ -5,10 +5,13 @@ Credits
 Development Lead
 ----------------
 
-* Brian Nord <nord@fnal.gov>
-* Simon Birrer <sibirrer@gmail.com>
+* Rob Morgan <robert.morgan@wisc.edu>
 
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Brian Nord <nord@fnal.gov>
+* Simon Birrer <sibirrer@gmail.com>
+* Jason Poh <jasonpoh@uchicago.edu>
+* Joshua Yao-Yu Lin <joshualin24@gmail.com>
+

@@ -1,7 +1,8 @@
-# Helper functions and classes
+"""Helper functions and classes utilized internally."""
 
 import os
 import sys
+import yaml
 
 from astropy.io import fits
 import numpy as np
@@ -10,31 +11,41 @@ from scipy.interpolate import LinearNDInterpolator, interp1d
 
 def dict_select(input_dict, keys):
     """
-    Trim a dictionary down to selected keys
+    Trim a dictionary down to selected keys. Requires presence of keys
+    in input_dict.
     
-    :param input_dict: full dictionary
-    :param keys: list of keys desired in trimmed dict
-    :return: dict: trimmed dictionary
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
     """
     return {k: input_dict[k] for k in keys}
 
 def dict_select_choose(input_dict, keys):
     """
-    Trim a dictionary down to selected keys, if they are in the dictionary
+    Trim a dictionary down to selected keys, if they are in the dictionary.
     
-    :param input_dict: full dictionary
-    :param keys: list of keys desired in trimmed dict
-    :return: dict: trimmed dictionary
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
     """
     return {k: input_dict[k] for k in keys if k in input_dict.keys()}
 
 def select_params(input_dict, profile_prefix):
     """
-    Get just the parameters and values for a given profile prefix
-    
-    :param input_dict: full dictionary
-    :param profile_prefix: i.e. "PLANE_1-OBJECT_2-LIGHT_PROFILE_1-"
-    :return: dict: parameter dictionary for profile
+    Get just the parameters and values for a given profile prefix.
+
+    Args:
+        input_dict (dict): the dictionary to search
+        profile_prefix (str): i.e. "PLANE_1-OBJECT_2-LIGHT_PROFILE_1-"
+
+    Returns:
+        parameter dictionary for profile
     """
     params = [k for k in input_dict.keys() if k[0:len(profile_prefix)] == profile_prefix]
     return {x.split('-')[-1]: input_dict[x] for x in params if x[-4:] != 'NAME'}
@@ -51,8 +62,9 @@ class KeyPathDict(dict):
         Initialize a KeyPathDict by supplying the underlying dict to which 
         adding keypath functionality is desired.
 
-        :param base_dict: dict, the dictionary to add keypaths to
-        :param keypath_separator: str, the character to use to separate keys
+        Args:
+            base_dict (dict): the dictionary to add keypaths to
+            keypath_separator (str, optional, default='.'):, the character to use to separate keys
         """
         # Inherit attributes of the base dict
         super().__init__(base_dict)
@@ -94,7 +106,8 @@ class KeyPathDict(dict):
         """
         Join the keylists using the keypath_separator.
 
-        :return: kps: list, all keypaths in the dictionary as strings
+        Returns: 
+            list of all keypaths in the dictionary as strings
         """
         kps = [self.keypath_separator.join(['{}'.format(key) for key in kl]) for kl in self.kls]
         kps.sort()
@@ -102,33 +115,61 @@ class KeyPathDict(dict):
 
 def read_distribution_file(filename):
     """
-    Load the file information into a dataframe
+    Load the file information into a pandas dataframe
     
-    :param filename: str, the file containing the distribution     
-    :return: df: pandas.DataFrame containing the tabular distribtution
+    Args:
+        filename (str): the file containing the distribution    
+    
+    Returns:
+        pandas.DataFrame containing the tabular distribtution 
+
+    Raises:
+        AssertionError: if "WEIGHT" is not one of the column names
     """
     df = pd.read_csv(filename, delim_whitespace=True)
 
     assert 'WEIGHT' in df.columns, "'WEIGHT' must be a column in {}".format(filename)
 
     return df
-        
 
-def draw_from_user_dist(filename, size, mode, step=10):
+
+def treat_map_like_user_dist(im_dir, size):
+    """Use the iterate mode of draw_from_user_dist for map.txt.
+
+    Args:
+        im_dir (str): name of directory containing map.txt
+        size (int): size of simulations
+    """
+    df = pd.read_csv(im_dir + '/' + 'map.txt', delim_whitespace=True)
+    df['WEIGHT'] = 1.0
+    return draw_from_user_dist("unused filename", size, 'iterate', df=df)
+    
+
+def draw_from_user_dist(filename, size, mode, step=10, df=None, params=None):
     """
     Interpolate a user-specified N-dimensional probability distribution and
     sample from it.
 
-    :param filename: str, the file containing the distribution
-    :param size: int, the number of times to sample the probability distribution
-    :param mode: str, choose from ['interpolate', 'sample']
-    :param step: int, the number of steps on the interpolation grid
-    :return: parameters: list, the names of the paramters
-    :return: choices: array with entries as arrays of drawn parameters
+    Args:
+        filename (str): the file containing the distribution 
+        size (int):  the number of times to sample the probability distribution 
+        mode (str): choose from ['interpolate', 'sample'] 
+        step (int): the number of steps on the interpolation grid  
+        df (pd.DataFrame): optional already read dataframe.
+        params (list or None): if None, uses parameters in the first line of the dataframe
+            and returns them with the userdist samples
+            if a list (must be same length as number of df columns), returns the list as parameters
+            rather than the first line. Last line of parameter list must be WEIGHT.
+        
+    Returns:
+        parameters: list, the names of the paramters
+        choices: array with entries as arrays of drawn parameters 
+
+    Raises:
+        NotImplementedError: if a mode other than "sample" or "interpolate" or "iterate" is passed
     """
-
-    df = read_distribution_file(filename)
-
+    if df is None:
+        df = read_distribution_file(filename)
     parameters = [x for x in df.columns if x != 'WEIGHT']
     points = df[parameters].values
     weights = df['WEIGHT'].values
@@ -159,19 +200,32 @@ def draw_from_user_dist(filename, size, mode, step=10):
         index_arr = np.random.choice(np.arange(len(points), dtype=int), size=size, p=weights / weights.sum())
         choices = points[index_arr]
 
+    elif mode == 'iterate':
+        num_repeats = size // len(df) + 1
+        index_arr = np.tile(np.arange(len(df)), num_repeats)[:size]
+        choices = points[index_arr]
+        
     else:
         raise NotImplementedError("unexpected mode passed, must be 'sample' or 'interpolate'")
-            
+
+    if isinstance(params, list):
+        params = [x for x in params if x != 'WEIGHT']
+        return params, choices
+    
     return parameters, choices
+
 
 def read_images(im_dir, im_size, bands):
     """
-    Read images into memory and resize to match simulations
+    Read images into memory and resize to match simulations.
 
-    :param im_dir: path to directory of images 
-    :param im_size: numPix along onle side of an image
-    :param bands: list of bands used in simulation
-    :return: im_array: processed images
+    Args:
+        im_dir (str): path to directory of images 
+        im_size (int): numPix along onle side of an image 
+        bands (List[str]): list of bands used in simulation 
+
+    Returns:
+        array of processed images
     """
     # Load images into an array
     im_array = []
@@ -209,15 +263,19 @@ def read_images(im_dir, im_size, bands):
 
     return im_array
 
-def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configuration):
+def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configuration, overwrite=False):
     """
     Sort image files based on map. If no map exists, sort randomly.
 
-    :param im_dir: path to directory of images
-    :param image_bank_size: number of images in user-specified bank
-    :param config_dicts: list of config_dicts
-    :param configuration: the configuration currently running
-    :return: image_indices: the indices of the images utilized for each config_dict
+    Args:
+        im_dir (str): path to directory of images
+        image_bank_size (int): number of images in user-specified bank
+        config_dicts (List[dict]): list of config_dicts    
+        configuration (str): the configuration currently running
+        overwrite (bool): optionally overwrite sim_inputs instead of solving
+    
+    Returns:
+        the indices of the images utilized for each config_dict 
     """
     map_columns = []
     if os.path.exists(im_dir + '/' + 'map.txt'):
@@ -246,13 +304,17 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
 
 
         if len(bad_columns) != 0:
-            print(config_dicts[0].keys())
             print("WARNING {0} are not found in the simulated dataset for {1}".format(', '.join(bad_columns), configuration) +
                   ". You may see unexpected results. Use the dataset.search(<param_name>) function to find the correct column names.")
         
     if len(map_columns) == 0:
         # Sort randomly
         image_indices = np.random.choice(np.arange(image_bank_size), replace=True, size=len(config_dicts))
+
+    elif overwrite:
+        # Maintain order for iterative insertion.
+        num_repeats = len(config_dicts) // image_bank_size + 1
+        image_indices = np.tile(np.arange(image_bank_size), num_repeats)[:len(config_dicts)]
     
     else:
         # Trim df to just the columns needed
@@ -272,4 +334,40 @@ def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configurat
         image_indices = np.argmin(np.sum(np.abs(im_param_array - map_param_array) / im_stds, axis=2), axis=0)
 
     return image_indices
-    
+
+def check_background_indices(idx_list: list, iterate: bool = False):
+    """Issue a warning if an element occurs to frequently in the list.
+
+    Calculate number of elements in the list that deviate from a uniform distribution
+    by more than 1 standard deviation. If this number is more than 1/3 of the elements
+    in the list, print a warning.
+
+    Args:
+        idx_list (list): List of background image indices to use.
+        iterate (bool): Whether image backgrounds are using the ITERATE mode.
+    """
+    if not iterate:
+        values = np.unique(idx_list)
+        average_value, std = np.mean(values), np.std(values)
+        num_deviating = sum(np.abs(values - average_value) > np.std(values))
+        if num_deviating > len(idx_list) / 3:
+            print("WARNING: Non-uniform distribution of background images detected, check map.txt file.")
+
+def read_cadence_file(filename):
+    """
+    Parse a cadence file.
+
+    Args:
+        filename (str): Name of cadence file
+
+    Returns:
+        cadence_dict: dictionary containing cadence file contents
+    """
+    with open(filename, 'r') as f:
+        cadence_dict = yaml.safe_load(f)        
+        
+        # Set reference mjd to the default value of 0
+        if 'REFERENCE_MJD' not in cadence_dict:
+            cadence_dict['REFERENCE_MJD'] = 0
+                        
+    return cadence_dict

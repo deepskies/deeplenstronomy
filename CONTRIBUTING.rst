@@ -13,13 +13,14 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/bnord/deeplenstronomy/issues.
+Report bugs at https://github.com/deepskies/deeplenstronomy/issues.
 
 If you are reporting a bug, please include:
 
 * Your operating system name and version.
 * Any details about your local setup that might be helpful in troubleshooting.
 * Detailed steps to reproduce the bug.
+* Your main configuration file
 
 Fix Bugs
 ~~~~~~~~
@@ -43,7 +44,7 @@ articles, and such.
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/bnord/deeplenstronomy/issues.
+The best way to send feedback is to file an issue at https://github.com/deepskies/deeplenstronomy/issues.
 
 If you are proposing a feature:
 
@@ -69,12 +70,9 @@ local development.
 
 Now you can make your changes locally.
 
-4. When you're done making changes, check that your changes pass style and unit
-   tests, including testing other Python versions with tox::
+4. When you're done making changes, make sure to also add a test.
 
-    $ tox
-
-To get tox, just pip install it.
+See the test directory for examples
 
 5. Commit your changes and push your branch to GitHub::
 
@@ -84,7 +82,7 @@ To get tox, just pip install it.
 
 6. Submit a pull request through the GitHub website.
 
-.. _Fork: https://github.com/bnord/deeplenstronomy/fork
+.. _Fork: https://github.com/deepskies/deeplenstronomy/fork
 
 Pull Request Guidelines
 -----------------------
@@ -93,17 +91,13 @@ Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, and 3.3, and for PyPy.
-   Check https://travis-ci.org/bnord/deeplenstronomy 
-   under pull requests for active pull requests or run the ``tox`` command and
-   make sure that the tests pass for all supported Python versions.
-
+   your new functionality into a function with a docstring, and add an
+   example demonstrating your feature.
+3. The pull request should work for Python >= 3.7, and for PyPy.
 
 Tips
 ----
 
 To run a subset of tests::
 
-	 $ py.test test/test_deeplenstronomy.py
+	 $ cd test && pytest

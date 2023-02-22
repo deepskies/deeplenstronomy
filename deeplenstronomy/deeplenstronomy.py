@@ -1,4 +1,4 @@
-# Outer shell to do everything for you
+"""The main module for dataset generation."""
 
 import os
 import random
@@ -11,7 +11,7 @@ import pandas as pd
 
 from deeplenstronomy.input_reader import Organizer, Parser
 from deeplenstronomy.image_generator import ImageGenerator
-from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images
+from deeplenstronomy.utils import draw_from_user_dist, organize_image_backgrounds, read_images, check_background_indices, treat_map_like_user_dist
 from deeplenstronomy import surveys
 
 class Dataset():
@@ -19,10 +19,11 @@ class Dataset():
         """
         Create a dataset. If config file or config dict is supplied, generate it.
 
-        :param config: yaml file specifying dataset characteristics 
-                       OR                                                                                                                                                                                                                                                                                                                                                                                                                                       pre-parsed y                       yaml file as a dictionary 
-        :param store: If true, the generated data is stored as attributes of this object
-        :param save: If true, the generated data is written to disk
+        Args:
+            config (str or dict, optional, default=None): name of yaml configuration file
+                specifying dataset characteristics or a pre-parsed yaml file as a dictionary 
+            store (bool, optional, default=True): store the generated data as attributes of this object
+            save (bool, optional, default=False): save the generated data to disk
         """
         
         if config:
@@ -31,10 +32,11 @@ class Dataset():
 
     def update_param(self, new_param_dict, configuration):
         """
-        Update single parameters to new values
+        Update single parameters to new values.
 
-        :param new_param_dict: {'param_1_name': new_value_1, 'param_2_name': new_value_2, ...}
-        :param configuration: like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...
+        Args:
+            new_param_dict (dict): {'param_1_name': new_value_1, 'param_2_name': new_value_2, ...}
+            configuration (str): like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...     
         """
         # Put in the updated values
         for new_param, new_value in new_param_dict.items():
@@ -44,16 +46,20 @@ class Dataset():
 
     def update_param_dist(self, new_param_dist_dict, configuration):
         """
-        Update the distribution from which a parameter is drawn
+        Update the distribution from which a parameter is drawn.
 
-        :param new_param_dist_dict: should look like this:
-            {'param_1_name': {'name': 'uniform', 
-                              'parameters': {'minimum': new_value_1, 
-                                             'maximum': new_value_2}},
-             'param_2_name': {'name': 'uniform', 
-                              'parameters': {'minimum': new_value_3, 
-                                             'maximum': new_value_4}}, ...}
-        :param configuration: like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...   
+        Args:
+            new_param_dist_dict (dict): 
+              Should look like this
+              
+                  {'param_1_name': {'name': 'uniform',
+                                  'parameters': {'minimum': new_value_1,
+                                                 'maximum': new_value_2}},
+                  'param_2_name': {'name': 'uniform',
+                                  'parameters': {'minimum': new_value_3,
+                                                 'maximum': new_value_4}}, ...}   
+            
+            configuration (str):  like 'CONFIGURATION_1', 'CONFIGURATION_2', etc...
         """
         # Put in the updated distributions
         for new_param, new_dist_info in new_param_dist_dict.items():
@@ -127,7 +133,8 @@ class Dataset():
         """
         Using the dictionary stored in self.config_dict, make a new dataset
         
-        :param make_dataset_args: dict, arguments supplied to make_dataset when original dataset was generated
+        Args:
+            make_dataset_args (dict): arguments supplied to make_dataset when original dataset was generated
         """
         params = dict(**make_dataset_args)
         params['config'] = self.config_dict
@@ -138,12 +145,13 @@ class Dataset():
 
     def search(self, param_name):
         """
-        Find all USERDIST column headers for a parameter
+        Find all USERDIST column headers for a parameter.
         
-        :param param_name: str, the parameter name to search for
-        :return: output_dict: dict,
-            keys: object names
-            values: list of all possible USERDIST column headers
+        Args:
+            param_name (str): the parameter name to search for
+            
+        Returns:
+            dict: keys contain object names, values contain a list of all possible USERDIST column headers
         """
         obj_paths = ['["' + x[9:].replace('.', '"]["') + '"]' for x in self.config_dict.keypaths() if x.startswith("GEOMETRY") and x.find("OBJECT_") != -1]
         obj_names = []
@@ -187,7 +195,7 @@ class Dataset():
 
 
     
-def flatten_image_info(sim_dict):
+def _flatten_image_info(sim_dict):
     """
     Sim dict will have structure 
         {'g': {'param1': value1}, 'r': {'param1': value2} ...}
@@ -204,7 +212,7 @@ def flatten_image_info(sim_dict):
 
     return out_dict
     
-def get_forced_sim_inputs(forced_inputs, configurations, bands):
+def _get_forced_sim_inputs(forced_inputs, configurations, bands):
 
     force_param_inputs = {}
     for force_params in forced_inputs.values():
@@ -254,28 +262,34 @@ def _format_time(elapsed_time):
     hours = elapsed_time // 3600
     minutes = (elapsed_time - hours * 3600) // 60
     seconds = elapsed_time - (hours * 3600) - (minutes * 60)
-    return "%i H %i M %i S" %(hours, minutes, seconds)
+    return "%i H %i M %i S         " %(hours, minutes, seconds)
 
 def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                  verbose=False, store_sample=False, image_file_format='npy',
                  survey=None, return_planes=False, skip_image_generation=False,
                  solve_lens_equation=False):
     """
-    Generate a dataset from a config file
+    Generate a dataset from a config file.
 
-    :param config: yaml file specifying dataset characteristics
-                   OR
-                   pre-parsed yaml file as a dictionary
-    :param verbose: if true, print status updates
-    :param store_in_memory: save images and metadata as attributes
-    :param save_to_disk: save images and metadata to disk
-    :param store_sample: save five images and metadata as attribute
-    :param image_file_format: outfile format type (npy, h5)
-    :param survey: str, a default astronomical survey to use
-    :param return_planes: bool, if true, return the separate planes of simulated images
-    :param skip_image_generation: bool, if true, skip image generation
-    :param solve_lens_equation: bool, if true, calculate the source positions
-    :return: dataset: instance of dataset class
+    Args:
+        config (str or dict): name of yaml file specifying dataset characteristics or pre-parsed yaml file as dictionary
+        verbose (bool, optional, default=False): print progress and status  updates at runtime
+        store_in_memory (bool, optional, default=True): save images and metadata as attributes 
+        save_to_disk (bool, optional, default=False): save images and metadata to disk   
+        store_sample (bool, optional, default=False): save five images and metadata as attribute 
+        image_file_format (str, optional, default='npy'): outfile format type, options include ('npy', 'h5')
+        survey (str or None, optional, default=None): a default astronomical survey to use 
+        return_planes (bool, optional, default=False): return the lens, source, noise, and point source planes of the simulated images
+        skip_image_generation (bool, optional, default=False): skip image generation
+        solve_lens_equation (bool, optional, default=False): calculate the source positions
+        
+    Returns:
+        dataset (Dataset): and instance of the Dataset class
+
+    Raises:
+        RuntimeError: If `skip_image_generation == True` and `solve_lens_equation == True`
+        RuntimeError: If `survey` is not a valid survey name
+        
     """
 
     if solve_lens_equation and skip_image_generation:
@@ -301,6 +315,9 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         parser = Parser(config, survey=survey)
         dataset.config_dict = parser.config_dict
 
+    # store parser
+    dataset.parser = parser
+
     # Store top-level dataset info
     dataset.name = dataset.config_dict['DATASET']['NAME']
     dataset.size = dataset.config_dict['DATASET']['PARAMETERS']['SIZE']
@@ -317,18 +334,21 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     if save_to_disk:
         if not os.path.exists(dataset.outdir):
             os.mkdir(dataset.outdir)
-    
-    # Organize the configuration dict
-    organizer = Organizer(dataset.config_dict, verbose=verbose)
 
     # Store configurations
-    dataset.configurations = list(organizer.configuration_sim_dicts.keys())
+    dataset.configurations = list(dataset.config_dict['GEOMETRY'].keys())
 
-    # Store species map
-    dataset.species_map = organizer._species_map
-
+    # Handle image backgrounds if they exist
+    if len(parser.image_paths) > 0:
+        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
+        image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
+    else:
+        image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+    
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
+    max_size = dataset.size * 100 # maximum 100 epochs if timeseries
+
     for fp in parser.file_paths:
         filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['FILENAME']")
         mode = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['MODE']")
@@ -336,30 +356,36 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             step = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['STEP']")
         except KeyError:
             step = 10
-        draw_param_names, draw_param_values = draw_from_user_dist(filename, dataset.size, mode, step)
-        forced_inputs[filename] = {'names': draw_param_names, 'values': draw_param_values}
-    
+        try:
+            params = eval("parser.config_dict['"+fp.replace('.',"']['")+"']"+"['PARAMS']")
+        except KeyError:
+            params = None
+        draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step, params=params)
+        forced_inputs[fp] = {'names': draw_param_names, 'values': draw_param_values}
+    # If we want to iterate through map.txt, add the parameters to the forced inputs
+    if len(parser.image_paths) > 0 and "ITERATE" in parser.config_dict['BACKGROUNDS']:
+        background_iterate = True
+        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
+        draw_param_names, draw_param_values = treat_map_like_user_dist(im_dir, max_size)
+        forced_inputs[im_dir + '/map.txt'] = {'names': draw_param_names, 'values': draw_param_values}
+    else:
+        background_iterate = False
+        
     # Overwrite the configuration dict with any forced values from user distribtuions
-    force_param_inputs = get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
+    force_param_inputs = _get_forced_sim_inputs(forced_inputs, dataset.configurations, dataset.bands)
 
-    for force_param, values in force_param_inputs.items():
-        configuration, param_name, band = force_param
-        warned = False
+    # Organize the configuration dict
+    organizer = Organizer(dataset.config_dict, forced_inputs=force_param_inputs, verbose=verbose)
+    dataset.organizer = organizer
 
-        sim_inputs = organizer.configuration_sim_dicts[configuration]
-        for sim_input, val in zip(sim_inputs, values):
-            if param_name in sim_input[band].keys():
-                sim_input[band][param_name] = val
-            else:
-                if not warned:
-                    print("WARNING: " + param_name + " is not present in the simulated dataset and may produce unexpected behavior. Use dataset.search(<param name>) to find all expected names")
-                    warned = True
+    # Store species map
+    dataset.species_map = organizer._species_map
                     
     # Skip image generation if desired
     if skip_image_generation:
         # Handle metadata and return dataset object
         for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
-            metadata = [flatten_image_info(image_info) for image_info in sim_inputs]
+            metadata = [_flatten_image_info(image_info) for image_info in sim_inputs]
             metadata_df = pd.DataFrame(metadata)
             del metadata
             if save_to_disk:
@@ -371,15 +397,18 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     # Initialize the ImageGenerator
     ImGen = ImageGenerator(return_planes, solve_lens_equation)
 
-    # Handle image backgrounds if they exist
-    if len(parser.image_paths) > 0:
-        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
-        image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
-    else:
-        image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
-    
+    # Clear the sim_dicts out of memory
+    if not os.path.exists(dataset.outdir):
+        os.system('mkdir ' + dataset.outdir)
+        
+    for configuration in dataset.configurations:
+        np.save("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), {0: organizer.configuration_sim_dicts[configuration]}, allow_pickle=True)
+        del organizer.configuration_sim_dicts[configuration]
+        
     # Simulate images
-    for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
+    #for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
+    for configuration in dataset.configurations:
+        sim_inputs = np.load("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), allow_pickle=True).item()[0]
 
         if verbose:
             print("Generating images for {0}".format(configuration))
@@ -388,19 +417,20 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             total = len(sim_inputs)
 
         # Handle image backgrounds if they exist
+        real_image_indices = []
         if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
-            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [flatten_image_info(sim_input) for sim_input in sim_inputs], configuration)
-            additive_image_backgrounds = image_backgrounds[image_indices]
+            image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration, overwrite=background_iterate)
+            check_background_indices(image_indices, background_iterate)
         else:
             image_indices = np.zeros(len(sim_inputs), dtype=int)
-            temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
-            additive_image_backgrounds = temp_array[image_indices]
             
         metadata, images = [], []
         if return_planes:
             planes = []
 
-        for image_info, image_idx in zip(sim_inputs, image_indices):
+        objid_bkg_map = {}
+        img_counter, prev_objid = 0, sim_inputs[0][dataset.bands[0]]['OBJID']
+        for image_info in sim_inputs:
             # track progress if verbose
             if verbose:
                 counter += 1
@@ -409,6 +439,21 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                     elapsed_time = time.time() - start_time
                     sys.stdout.write('\r\tProgress: %.1f %%  ---  Elapsed Time: %s' %(progress, _format_time(elapsed_time)))
                     sys.stdout.flush()
+            
+
+            # Check if the objid already has an image_idx in use
+            if image_info[dataset.bands[0]]['OBJID'] != prev_objid:
+                img_counter += 1
+            image_idx_ = image_indices[img_counter]
+            if image_info[dataset.bands[0]]['OBJID'] in objid_bkg_map:
+                image_idx = objid_bkg_map[image_info[dataset.bands[0]]['OBJID']]
+            else:
+                image_idx = image_idx_
+                objid_bkg_map[image_info[dataset.bands[0]]['OBJID']] = image_idx
+
+            prev_objid = image_info[dataset.bands[0]]['OBJID']
+            real_image_indices.append(image_idx)
+
             
             # Add background image index to image_info
             for band in dataset.bands:
@@ -439,7 +484,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                     image_info[band]['num_source_images'] = simulated_image_data['num_source_images']
                               
             # Save metadata for each simulated image 
-            metadata.append(flatten_image_info(image_info))
+            metadata.append(_flatten_image_info(image_info))
 
             # update the progress if in verbose mode
             if verbose:
@@ -448,7 +493,9 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                     sys.stdout.write('\r\tProgress: 100.0 %%  ---  Elapsed Time: %s\n' %(_format_time(elapsed_time)))
                     sys.stdout.flush()
 
-                              
+        # Clear sim_inputs out of memory
+        del sim_inputs
+                    
         # Group images -- the array index will correspond to the id_num of the metadata
         configuration_images = np.array(images)
 
@@ -457,12 +504,30 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             configuration_planes = np.array(planes)
 
         # Add image backgrounds -- will just add zeros if no backgrounds have been specified
+        if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
+            additive_image_backgrounds = image_backgrounds[np.array(real_image_indices)]
+        else:
+            temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+            additive_image_backgrounds = temp_array[np.array(real_image_indices)]
+
+
         configuration_images += additive_image_backgrounds
         
         # Convert the metadata to a dataframe
         metadata_df = pd.DataFrame(metadata)
         del metadata
 
+        # Delete images with sentinel redshifts
+        redshift_cols = [x for x in metadata_df.columns if x.find('REDSHIFT') != -1]
+        plane_cols = {int(x[x.index('PLANE_') + 6: x.index('-', x.index('PLANE_') + 1)]) : x for x in redshift_cols}
+        greatest_plane_col = plane_cols[max(plane_cols.keys())]
+        mask = metadata_df[greatest_plane_col].values < 10
+        configuration_images = configuration_images[mask]
+        metadata_df = metadata_df[mask].copy().reset_index(drop=True)
+        if return_planes:
+            configuration_planes = configuration_planes[mask]
+                      
+        
         # Save the images and metadata to the outdir if desired (ideal for large simulation production)
         if save_to_disk:
             #Images
@@ -504,9 +569,6 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             if return_planes:
                 del configuration_planes
 
-    # store parser and organizer as attributes
-    dataset.parser = parser
-    #dataset.organizer = organizer
                 
     return dataset
 

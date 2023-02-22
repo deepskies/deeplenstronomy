@@ -1,4 +1,5 @@
-# A module to check for user errors in the main config file
+"""This is an internal class. It identifies mistakes in the
+configuration file before dataset generation begins."""
 
 import glob
 from inspect import getfullargspec
@@ -21,7 +22,7 @@ for model in lens_models:
     exec(f'import lenstronomy.LensModel.Profiles.{model} as {model}_lens')
 
 
-from deeplenstronomy.utils import KeyPathDict
+from deeplenstronomy.utils import KeyPathDict, read_cadence_file
 import deeplenstronomy.distributions as distributions
 
 class ConfigFileError(Exception): pass
@@ -29,15 +30,15 @@ class LenstronomyWarning(Exception): pass
 
 class AllChecks():
     """
-    Define new checks as methods starting with 'check_'
+    Define checks as methods starting with 'check_'
     Methods must return a list of err_message where
     an empty list means success and a nonempty list means failure
-    If failure, the err_messages are printed and sys.exit() is called
+    If failure, the err_messages are printed and sys.exit() is called.
     """
     
     def __init__(self, full_dict, config_dict):
         """
-        Trigger the running of all checks
+        All check methods are run at instantiation.
         """
         # flag for already checked timeseries files
         self.checked_ts_bands = False
@@ -65,7 +66,9 @@ class AllChecks():
                                                                'GAUSSIAN_ELLIPSE_KAPPA', 'GAUSSIAN_ELLIPSE_POTENTIAL', 'MULTI_GAUSSIAN_KAPPA',
                                                                'MULTI_GAUSSIAN_KAPPA_ELLIPSE', 'INTERPOL', 'INTERPOL_SCALED', 'SHAPELETS_POLAR', 'SHAPELETS_CART',
                                                                'DIPOLE', 'CURVED_ARC', 'ARC_PERT', 'coreBURKERT', 'CORED_DENSITY', 'CORED_DENSITY_2',
-                                                               'CORED_DENSITY_MST', 'CORED_DENSITY_2_MST', 'NumericalAlpha', 'MULTIPOLE', 'HESSIAN']}
+                                                               'CORED_DENSITY_MST', 'CORED_DENSITY_2_MST', 'NumericalAlpha', 'MULTIPOLE', 'HESSIAN',
+                                                               'ULDM']
+                                         }
         
         # find all check functions
         self.checks = [x for x in dir(self) if x.find('check_') != -1]
@@ -75,16 +78,11 @@ class AllChecks():
         for check in self.checks:
 
             err_messages = eval('self.' + check + '()') 
-            #try:
-            #    err_messages = eval('self.' + check + '()')
-            #except Exception:
-            #    err_messages = ["CheckFunctionError: " + check] 
-
             total_errs += err_messages
 
         # report errors to user
         if len(total_errs) != 0:
-            kind_output(total_errs)
+            _kind_output(total_errs)
             raise ConfigFileError
 
         return
@@ -114,7 +112,9 @@ class AllChecks():
               'TRIPLE_CHAMELEON': ".chameleon.TripleChameleon",
               'INTERPOL': ".interpolation.Interpol",
               'SLIT_STARLETS': ".starlets.SLIT_Starlets",
-              'SLIT_STARLETS_GEN2': ".starlets.SLIT_Starlets"}
+              'SLIT_STARLETS_GEN2': ".starlets.SLIT_Starlets",
+              'ULDM': '.uldm.Uldm'
+              }
          setattr(self, "lenstronomy_light_map", p)
 
          d = {"SHIFT": ".alpha_shift.Shift",
@@ -175,15 +175,30 @@ class AllChecks():
               "CORED_DENSITY_2_MST": ".cored_density_mst.CoredDensityMST",
               "NumericalAlpha": ".numerical_deflections.NumericalAlpha",
               "MULTIPOLE": ".multipole.Multipole",
-              "HESSIAN": ".hessian.Hessian"}
+              "HESSIAN": ".hessian.Hessian",
+              'ULDM': '.uldm.Uldm',
+              }
          setattr(self, "lenstronomy_lens_map", d)
          return
     
     @staticmethod
     def config_dict_format(*args):
+        """
+        From a list of parameters, construct the path through the config dictionary
+        """
         return "['" + "']['".join(args) + "']"
 
     def config_lookup(self, lookup_str, full=False):
+        """
+        From a key path, get the value in the dictionary
+
+        Args:
+            lookup_str (str): path of keys through a nested dictionary
+            full (bool, optional, default=False): `True for lookup in the `full_dict`, `False` for lookup in the `config_dict`
+
+        Returns:
+            The value in the dictionary at the location of the keypath
+        """
         if not full:
             return eval("self.config" + lookup_str)
         else:
@@ -191,6 +206,10 @@ class AllChecks():
         
     ### Check functions
     def check_top_level_existence(self):
+        """
+        Check for the DATASET, SURVEY, IMAGE, COSMOLOGY, SPECIES, and GEOMETRY sections
+        in the config file
+        """
         errs = []
         for name in ['DATASET', 'SURVEY', 'IMAGE', 'COSMOLOGY', 'SPECIES', 'GEOMETRY']:
             if name not in self.full.keys():
@@ -198,6 +217,9 @@ class AllChecks():
         return errs
 
     def check_random_seed(self):
+        """
+        Check whether the passed value for the random seed is valid
+        """
         errs = []
         try:
             seed = int(self.config["DATASET"]["PARAMETERS"]["SEED"])
@@ -209,6 +231,14 @@ class AllChecks():
         return errs
             
     def check_low_level_existence(self):
+        """
+        Check that the DATASET.NAME, DATASET.PARAMETERS.SIZE, COSMOLOGY.PARAMETERS.H0, 
+        COSMOLOGY.PARAMETERS.Om0, IMAGE.PARAMETERS.exposure_time, IMAGE.PARAMETERS.numPix, 
+        IMAGE.PARAMETERS.pixel_scale, IMAGE.PARAMETERS.psf_type, IMAGE.PARAMETERS.read_noise,
+        IMAGE.PARAMETERS.ccd_gain, SURVEY.PARAMETERS.BANDS, SURVEY.PARAMETERS.seeing, 
+        SURVEY.PARAMETERS.magnitude_zero_point, SURVEY.PARAMETERS.sky_brightness, and
+        SURVEY.PARAMETERS.num_exposures are all present in the config file
+        """
         errs = []
         param_names = {"DATASET.NAME",
                        "DATASET.PARAMETERS.SIZE",
@@ -234,6 +264,13 @@ class AllChecks():
         return errs
 
     def check_not_allowed_to_be_drawn_from_a_distribution(self):
+        """
+        Check that parameters that must be fixed in the simulation (DATASET.NAME,
+        DATASET.PARAMETERS.SIZE, DATASET.PARAMETERS.OUTDIR, IMAGE.PARAMETERS.numPix,
+        COSMOLOGY.PARAMETERS.H0, COSMOLOGY.PARAMETERS.Tcmb, COSMOLOGY.PARAMETERS.Neff, 
+        COSMOLOGY.PARAMETERS.m_nu, and COSMOLOGY.PARAMETERS.Ob0) are not being
+        drawn from a distribution with the DISTRIBUTION keyword
+        """
         errs = []
         param_names = {"DATASET.NAME",
                        "DATASET.PARAMETERS.SIZE",
@@ -257,6 +294,10 @@ class AllChecks():
         return errs
 
     def check_for_auxiliary_files(self):
+        """
+        Check that any auxiliary files specified with the INPUT keyword are
+        able to be found
+        """
         errs = []
         input_paths = [x for x in self.full_keypaths if x.find("INPUT") != -1]
         input_files = [self.config_lookup(self.config_dict_format(*param.split('.')), full=True) for param in input_paths]
@@ -266,6 +307,10 @@ class AllChecks():
         return errs
 
     def check_for_valid_distribution_entry(self):
+        """
+        Check that use of the DISTRIBUTION keyword in the configuration file (1) points
+        to a valid distribution and (2) has an entry for each parameter
+        """
         errs = []
         distribution_paths = [x for x in self.full_keypaths if x.endswith("DISTRIBUTION")]
         distribution_dicts = [self.config_lookup(self.config_dict_format(*param.split('.'))) for param in distribution_paths]
@@ -306,6 +351,9 @@ class AllChecks():
         return errs
     
     def check_input_distributions(self):
+        """
+        Check that a USERDIST file can be read in and has the proper format
+        """
         errs = []
         if "DISTRIBUTIONS" in self.config.keys():
             # there must be at least 1 USERDIST_ key
@@ -334,11 +382,11 @@ class AllChecks():
                                 df = pd.read_csv(self.config["DISTRIBUTIONS"][userdist]['FILENAME'], delim_whitespace=True)
                                 if "WEIGHT" not in df.columns:
                                     errs.append("WEIGHT column not found in  DISTRIBUTIONS." + userdist + "File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
+                                parameter_length = len(df.columns)
                             except Exception as e:
                                 errs.append("Error reading DISTRIBUTIONS." + userdist + " File '" + self.config["DISTRIBUTIONS"][userdist]['FILENAME'] + "'")
                             finally:
                                 del df
-
                         # mode must be valid
                         if self.config["DISTRIBUTIONS"][userdist]['MODE'] not in ['interpolate', 'sample']:
                             errs.append("DISTRIBUTIONS." + userdist + ".MODE must be either 'interpolate' or 'sample'")
@@ -350,9 +398,20 @@ class AllChecks():
                             else:
                                 if self.config["DISTRIBUTIONS"][userdist]['STEP'] < 1:
                                     errs.append("DISTRIBUTIONS." + userdist + ".STEP must be a positive integer")
+                        # if params are specified, they must be in a list
+                        if 'PARAMS' in self.config["DISTRIBUTIONS"][userdist].keys():
+                            params = self.config["DISTRIBUTIONS"][userdist]['PARAMS']
+                            if not isinstance(params, list):
+                                errs.append("DISTRIBUTIONS." + userdist + ".PARAMS must be a list")
+                            if len(params) != parameter_length:
+                                errs.append("DISTRIBUTIONS." + userdist + "PARAMS must have same length as number of columns in distribution file!")
+
         return errs
 
     def check_image_backgrounds(self):
+        """
+        Check that images used for backgrounds can be read in and organized successfully
+        """
         errs = []
         if "BACKGROUNDS" in self.config.keys():
             # value must be a dict
@@ -427,7 +486,7 @@ class AllChecks():
         errs = []
 
         # check that transmission curves exist for the bands
-        if model_name not in ['flat', 'flatnoise', 'variable', 'variablenoise']:
+        if model_name not in ['flat', 'flatnoise', 'variable', 'variablenoise', 'static']:
             if not self.checked_ts_bands:
                 for band in self.config["SURVEY"]["PARAMETERS"]["BANDS"].split(','):
                     try:
@@ -559,6 +618,9 @@ class AllChecks():
         # need at least one light profile
         if len(detected_light_profiles) < 1:
             errs.append("SPECIES." + k + " needs at least one LIGHT_PROFILE")
+        # need at least one mass profile
+        if len(detected_mass_profiles) < 1:
+            errs.append("SPECIES." + k + " needs at least one MASS_PROFILE (this is a new requirement as of version 0.0.1.8)")
         # all indexing must be valid
         elif len(detected_light_profiles) != max(detected_light_profiles):
             errs.append("SPECIES." + k + " LIGHT_PROFILEs must be indexed as 1, 2, 3 ...")
@@ -661,6 +723,9 @@ class AllChecks():
         return detections, errs
     
     def check_valid_species(self):
+        """
+        Check that all GALAXY, POINTSOURCE, and NOISE objects are formatted correctly
+        """
         errs, names = [], []
 
         # There must be at least one species
@@ -707,6 +772,9 @@ class AllChecks():
         return errs
     
     def check_valid_geometry(self):
+        """
+        Check that all configurations in the geometry section are formatted correctly
+        """
         errs = []
 
         # There must be at least one configuration
@@ -738,9 +806,9 @@ class AllChecks():
                 except TypeError:
                     errs.append("GEOMETRY." + k + " .FRACTION must be a float")
 
-            # Configurations must have at least one plane
+            # Configurations must have information
             if len(list(self.config['GEOMETRY'][k].keys())) == 0:
-                errs.append("CEOMETRY." + k + " must have at least one PLANE")
+                errs.append("GEOMETRY." + k + " is empty")
 
             detected_planes, detected_noise_sources = [], []
             for config_k in self.config['GEOMETRY'][k].keys():
@@ -756,9 +824,12 @@ class AllChecks():
                         errs.append('GEOMETRY.' + k + '.' + config_k + ' needs a valid integer index greater than zero')
 
                     # Plane must have a redshift
-                    if 'REDSHIFT' not in config_k in self.config['GEOMETRY'][k][config_k]['PARAMETERS'].keys():
-                        errs.append('REDSHIFT is missing from GEOMETRY.' + k + '.' + config_k)
-
+                    try:
+                        if 'REDSHIFT' not in self.config['GEOMETRY'][k][config_k]['PARAMETERS'].keys():
+                            errs.append('REDSHIFT is missing from GEOMETRY.' + k + '.' + config_k)
+                    except AttributeError:
+                        errs.append('Incorrect format detected in ' + k + '.' + config_k)
+                        
                     detected_objects = []
                     for obj_k in self.config['GEOMETRY'][k][config_k].keys():
                         # check individual object properties
@@ -831,21 +902,58 @@ class AllChecks():
                     if "NITES" not in self.config['GEOMETRY'][k][config_k].keys():
                         errs.append("GEOMETRY." + k + ".TIMESERIES is missing the NITES parameter")
                     else:
-                        if not isinstance(self.config['GEOMETRY'][k][config_k]["NITES"], list):
-                            errs.append("GEOMETRY." + k + ".TIMESERIES.NITES must be a list")
+                        if not (isinstance(self.config['GEOMETRY'][k][config_k]["NITES"], list) or isinstance(self.config['GEOMETRY'][k][config_k]["NITES"], str)):
+                            errs.append("GEOMETRY." + k + ".TIMESERIES.NITES must be a list or a filename")
                         else:
-                            # listed nights must be numeric
-                            try:
-                                nites = [int(float(x)) for x in self.config['GEOMETRY'][k][config_k]["NITES"]]
-                                del nites
-                            except TypeError:
-                                errs.append("Listed NITES in GEOMETRY." + k + ".TIMESERIES.NITES must be numeric")
+                            if isinstance(self.config['GEOMETRY'][k][config_k]["NITES"], list):
+                                nitelists = [self.config['GEOMETRY'][k][config_k]["NITES"]]
+                            else:
+                                # filename of cadence file
+                                try:
+                                    cadence_dict = read_cadence_file(self.config['GEOMETRY'][k][config_k]["NITES"])
 
+                                    # Pointings must be incrementally sequenced
+                                    nitelists = []
+                                    bands = set(self.config['SURVEY']['PARAMETERS']['BANDS'].strip().split(','))
+                                    pointings = [x for x in cadence_dict.keys() if x.startswith('POINTING_')]
+                                    if len(pointings) == 0:
+                                        errs.append("GEOMETRY." + k + ".TIMESERIES.NITES." + self.config['GEOMETRY'][k][config_k]["NITES"] + " contains no POINTING entries")
+                                    for pointing in pointings:
+                                        if set(list(cadence_dict[pointing].keys())) != bands:
+                                            errs.append("GEOMETRY." + k + ".TIMESERIES.NITES." + self.config['GEOMETRY'][k][config_k]["NITES"] + pointing + " does not contain same bands as the survey")
+                                        else:
+                                            cad_length = len(cadence_dict[pointing][self.config['SURVEY']['PARAMETERS']['BANDS'].strip().split(',')[0]])
+                                            for band in bands:
+                                                if len(cadence_dict[pointing][band]) != cad_length:
+                                                    errs.append("GEOMETRY." + k + ".TIMESERIES.NITES." + self.config['GEOMETRY'][k][config_k]["NITES"] + pointing + " contains cadences of different lengths")
+                                                nitelists.append(cadence_dict[pointing][band])
+                                    
+                                except Exception:
+                                    errs.append("GEOMETRY." + k + ".TIMESERIES.NITES." + self.config['GEOMETRY'][k][config_k]["NITES"] + " caused an error when reading file")
+                                    nitelists = [[]]
+                                    
+                            for nitelist in nitelists:
+                                # listed nights must be numeric
+                                try:
+                                    nites = [int(float(x)) for x in nitelist]
+                                    del nites
+                                except TypeError:
+                                    errs.append("Listed NITES in GEOMETRY." + k + ".TIMESERIES.NITES must be numeric")
+
+                    # Check validity of PEAK argument, if passed
+                    if "PEAK" in self.config['GEOMETRY'][k][config_k].keys():
+                        if not isinstance(self.config['GEOMETRY'][k][config_k]["PEAK"], dict):
+                            try:
+                                peak = int(float(self.config['GEOMETRY'][k][config_k]["PEAK"]))
+                                del peak
+                            except TypeError:
+                                errs.append("PEAK argument in GEOMETRY." + k + ".TIMESERIES.PEAK must be numeric")
+                                
                     # Impose restriction on num_exposures
                     if isinstance(self.config["SURVEY"]["PARAMETERS"]["num_exposures"], dict):
                         errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
                     else:
-                        if self.config["SURVEY"]["PARAMETERS"]["num_exposures"] != 1:
+                        if self.config["SURVEY"]["PARAMETERS"]["num_exposures"] < 0.99 or self.config["SURVEY"]["PARAMETERS"]["num_exposures"] > 1.01:
                             errs.append("You must set SURVEY.PARAMETERS.num_exposures to 1 if you use TIMESERIES")
 
                 elif config_k == 'NAME' or config_k == 'FRACTION':
@@ -858,6 +966,10 @@ class AllChecks():
             # Planes must be indexed sequentially
             if len(detected_planes) != max(detected_planes):
                 errs.append("PLANEs in the GEOMETRY." + k + " section must be indexed as 1, 2, 3, ...")
+
+            # Must have at least 2 planes
+            if len(detected_planes) < 2:
+                errs.append("GEOMETRY." + k + " must have at least 2 planes (this is a new requirement as of version 0.0.1.8)")
 
             # Noise sources must be indexed sequentially
             if len(detected_noise_sources) != 0 and len(detected_noise_sources) != max(detected_noise_sources):
@@ -876,21 +988,25 @@ class AllChecks():
     
     # End check functions
 
-def kind_output(errs):
+def _kind_output(errs):
     """
     Print all detected errors in the configuration file to the screen
+
+    Args:
+        errs (List[str]): A list of error messages as strings
     """
     for err in errs:
         print(err)
     return
 
 
-def run_checks(full_dict, config_dict):
+def _run_checks(full_dict, config_dict):
     """
     Instantiate an AllChecks object to run checks
 
-    :param full_dict: a Parser.full_dict object
-    :param config_dict: a Parser.config_dict object
+    Args:
+        full_dict (dict): a Parser.full_dict object 
+        config_dict (dict): a Parser.config_dict object 
     """
     try:
         check_runner = AllChecks(full_dict, config_dict)

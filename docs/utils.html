@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>deeplenstronomy.utils API documentation</title>
+<meta name="description" content="Helper functions and classes utilized internally." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>deeplenstronomy.utils</code></h1>
+</header>
+<section id="section-intro">
+<p>Helper functions and classes utilized internally.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Helper functions and classes utilized internally.&#34;&#34;&#34;
+
+import os
+import sys
+import yaml
+
+from astropy.io import fits
+import numpy as np
+import pandas as pd
+from scipy.interpolate import LinearNDInterpolator, interp1d
+
+def dict_select(input_dict, keys):
+    &#34;&#34;&#34;
+    Trim a dictionary down to selected keys. Requires presence of keys
+    in input_dict.
+    
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
+    &#34;&#34;&#34;
+    return {k: input_dict[k] for k in keys}
+
+def dict_select_choose(input_dict, keys):
+    &#34;&#34;&#34;
+    Trim a dictionary down to selected keys, if they are in the dictionary.
+    
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
+    &#34;&#34;&#34;
+    return {k: input_dict[k] for k in keys if k in input_dict.keys()}
+
+def select_params(input_dict, profile_prefix):
+    &#34;&#34;&#34;
+    Get just the parameters and values for a given profile prefix.
+
+    Args:
+        input_dict (dict): the dictionary to search
+        profile_prefix (str): i.e. &#34;PLANE_1-OBJECT_2-LIGHT_PROFILE_1-&#34;
+
+    Returns:
+        parameter dictionary for profile
+    &#34;&#34;&#34;
+    params = [k for k in input_dict.keys() if k[0:len(profile_prefix)] == profile_prefix]
+    return {x.split(&#39;-&#39;)[-1]: input_dict[x] for x in params if x[-4:] != &#39;NAME&#39;}
+
+
+class KeyPathDict(dict):
+    &#34;&#34;&#34;
+    A Subclass of &lt;dict&gt; to enable keypath functionality. Original code is from the 
+    python-benedict module https://github.com/fabiocaccamo/python-benedict 
+    [Copyright (c) 2019 Fabio Caccamo, under the MIT license].
+    &#34;&#34;&#34;
+    def __init__(self, base_dict, keypath_separator=&#39;.&#39;):
+        &#34;&#34;&#34;
+        Initialize a KeyPathDict by supplying the underlying dict to which 
+        adding keypath functionality is desired.
+
+        Args:
+            base_dict (dict): the dictionary to add keypaths to
+            keypath_separator (str, optional, default=&#39;.&#39;):, the character to use to separate keys
+        &#34;&#34;&#34;
+        # Inherit attributes of the base dict
+        super().__init__(base_dict)
+
+        # Set the keypath sepatator and find all nested keys
+        self.keypath_separator = keypath_separator
+        self.kls = self._keylists(base_dict)
+
+        return
+
+    def _get_keylist(self, item, parent_keys):
+        &#34;&#34;&#34;
+        Recursively search for all nested dictionary keys.
+
+        :param item: parent dictionary or value in a dictionary
+        :param parent_keys: the keys of the dictionary one level up
+        :return: keylist: list, list of all keys on a single level in the dictionary
+        &#34;&#34;&#34;
+        keylist = []
+        for key, value in item.items():
+            # Collect the keys of the dictionary
+            keys = parent_keys + [key]
+            keylist += [keys]
+            # If the value is a dict, recursively search that dict
+            if isinstance(value, dict):
+                keylist += self._get_keylist(value, keys)
+        return keylist
+
+    def _keylists(self, d):
+        &#34;&#34;&#34;
+        Shell function to call the recursive key search
+
+        :param d: dict, the dictionary to search
+        :return: keylist: list, nested list of all keys in the dictionary
+        &#34;&#34;&#34;
+        return self._get_keylist(d, [])
+    
+    def keypaths(self):
+        &#34;&#34;&#34;
+        Join the keylists using the keypath_separator.
+
+        Returns: 
+            list of all keypaths in the dictionary as strings
+        &#34;&#34;&#34;
+        kps = [self.keypath_separator.join([&#39;{}&#39;.format(key) for key in kl]) for kl in self.kls]
+        kps.sort()
+        return kps
+
+def read_distribution_file(filename):
+    &#34;&#34;&#34;
+    Load the file information into a pandas dataframe
+    
+    Args:
+        filename (str): the file containing the distribution    
+    
+    Returns:
+        pandas.DataFrame containing the tabular distribtution 
+
+    Raises:
+        AssertionError: if &#34;WEIGHT&#34; is not one of the column names
+    &#34;&#34;&#34;
+    df = pd.read_csv(filename, delim_whitespace=True)
+
+    assert &#39;WEIGHT&#39; in df.columns, &#34;&#39;WEIGHT&#39; must be a column in {}&#34;.format(filename)
+
+    return df
+        
+
+def draw_from_user_dist(filename, size, mode, step=10):
+    &#34;&#34;&#34;
+    Interpolate a user-specified N-dimensional probability distribution and
+    sample from it.
+
+    Args:
+        filename (str): the file containing the distribution 
+        size (int):  the number of times to sample the probability distribution 
+        mode (str): choose from [&#39;interpolate&#39;, &#39;sample&#39;] 
+        step (int): the number of steps on the interpolation grid  
+        
+    Returns:
+        parameters: list, the names of the paramters
+        choices: array with entries as arrays of drawn parameters 
+
+    Raises:
+        NotImplementedError: if a mode other than &#34;sample&#34; or &#34;interpolate&#34; is passed
+    &#34;&#34;&#34;
+
+    df = read_distribution_file(filename)
+
+    parameters = [x for x in df.columns if x != &#39;WEIGHT&#39;]
+    points = df[parameters].values
+    weights = df[&#39;WEIGHT&#39;].values
+
+    if mode == &#39;interpolate&#39;:
+        # 2+ Dimension case
+        if len(parameters) &gt; 1:
+            # Interpolate the distribution and evaluate it on a grid of all possible parameter combinations
+            interpolator = LinearNDInterpolator(points, weights, fill_value=0.0)
+            grid_vectors = [np.linspace(df[x].values.min(), df[x].values.max(), step) for x in parameters]
+            param_grids = np.array(np.meshgrid(*grid_vectors)).T.reshape(step**len(parameters), len(parameters))
+            weighted_params = interpolator(param_grids)
+    
+            # Draw from the grid based on its weight
+            draws = np.random.choice(np.arange(len(param_grids)), size=size, p=weighted_params/weighted_params.sum())
+            choices = param_grids[draws]
+
+        elif len(parameters) == 1:
+            # Interpolate the 1D grid
+            grid = np.linspace(df[parameters].values.min(), df[parameters].values.max(), step)
+            interpolator = interp1d(points.flatten(), weights, fill_value=0.0)
+            weighted_params = interpolator(grid)
+            
+            # Draw from the grid based on its weight
+            choices = np.random.choice(grid, size=size, p=weighted_params/weighted_params.sum())
+
+    elif mode == &#39;sample&#39;:
+        index_arr = np.random.choice(np.arange(len(points), dtype=int), size=size, p=weights / weights.sum())
+        choices = points[index_arr]
+
+    else:
+        raise NotImplementedError(&#34;unexpected mode passed, must be &#39;sample&#39; or &#39;interpolate&#39;&#34;)
+            
+    return parameters, choices
+
+def read_images(im_dir, im_size, bands):
+    &#34;&#34;&#34;
+    Read images into memory and resize to match simulations.
+
+    Args:
+        im_dir (str): path to directory of images 
+        im_size (int): numPix along onle side of an image 
+        bands (List[str]): list of bands used in simulation 
+
+    Returns:
+        array of processed images
+    &#34;&#34;&#34;
+    # Load images into an array
+    im_array = []
+    for band in bands:
+        if not os.path.exists(im_dir + &#39;/&#39; + band + &#39;.fits&#39;):
+            print(im_dir + &#34; is missing &#34; + band + &#34;.fits&#34;)
+            sys.exit()
+            
+        hdu = fits.open(im_dir + &#39;/&#39; + band + &#39;.fits&#39;)
+        im_array.append(hdu[0].data)
+        hdu.close()
+
+    im_array = np.swapaxes(np.array(im_array), 0, 1)
+    
+    # Resize the images to match the simulations
+    if im_array.shape[-1] &lt; im_size:
+        # pad with zeros
+        pad_width = ((0,0), (0,0), (0,0), (im_size // 4, im_size // 4 + 1))
+        im_array = np.pad(im_array, pad_width, mode=&#39;constant&#39;, constant_values=0.0)
+        
+    if im_array.shape[-2] &lt; im_size:
+        # pad with zeros
+        pad_width = ((0,0), (0,0), (im_size // 4, im_size // 4 + 1), (0,0))
+        im_array = np.pad(im_array, pad_width, mode=&#39;constant&#39;, constant_values=0.0)
+        
+    if im_array.shape[-1] &gt; im_size:
+        # Crop on axis=-1
+        crop_amount = im_array.shape[-1] - im_size
+        im_array = im_array[:, :, :, crop_amount // 2 : - crop_amount // 2]
+        
+    if im_array.shape[-2] &gt; im_size:
+        # Crop on axis=-2
+        crop_amount = im_array.shape[-2] - im_size
+        im_array = im_array[:, :, crop_amount // 2 : - crop_amount // 2, :]
+
+    return im_array
+
+def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configuration):
+    &#34;&#34;&#34;
+    Sort image files based on map. If no map exists, sort randomly.
+
+    Args:
+        im_dir (str): path to directory of images
+        image_bank_size (int): number of images in user-specified bank
+        config_dicts (List[dict]): list of config_dicts    
+        configuration (str): the configuration currently running
+    
+    Returns:
+        the indices of the images utilized for each config_dict 
+    &#34;&#34;&#34;
+    map_columns = []
+    if os.path.exists(im_dir + &#39;/&#39; + &#39;map.txt&#39;):
+        # Read the map
+        df = pd.read_csv(im_dir + &#39;/&#39; + &#39;map.txt&#39;, delim_whitespace=True)
+
+        # Trim to just the columns in the config dict
+        map_columns, bad_columns = [], []
+        for x in df.columns:
+            if x.startswith(&#39;CONFIGURATION&#39;):
+                split_x = x.split(&#39;-&#39;)
+                if split_x[0] != configuration:
+                    continue
+                name = &#39;-&#39;.join(split_x[1:])
+
+                if name in config_dicts[0].keys():
+                    map_columns.append(x)
+                else:
+                    bad_columns.append(name)
+            else:
+                # doesn&#39;t start with configuration
+                if x in config_dicts[0].keys():
+                    map_columns.append(x)
+                else:
+                    bad_columns.append(x)
+
+
+        if len(bad_columns) != 0:
+            print(config_dicts[0].keys())
+            print(&#34;WARNING {0} are not found in the simulated dataset for {1}&#34;.format(&#39;, &#39;.join(bad_columns), configuration) +
+                  &#34;. You may see unexpected results. Use the dataset.search(&lt;param_name&gt;) function to find the correct column names.&#34;)
+        
+    if len(map_columns) == 0:
+        # Sort randomly
+        image_indices = np.random.choice(np.arange(image_bank_size), replace=True, size=len(config_dicts))
+    
+    else:
+        # Trim df to just the columns needed
+        map_param_array = df[map_columns].values[:, np.newaxis]
+        
+        # for each entry in config_dict, set up numpy broadcasting
+        im_param_array = []
+        for config_dict in config_dicts:
+            im_param_array.append([config_dict[x] if not x.startswith(&#39;CONFIGURATION&#39;) else config_dict[&#39;-&#39;.join(x.split(&#39;-&#39;)[1:])] for x in map_columns])
+        im_param_array = np.array(im_param_array)
+
+        # divide by stds to put parameters on same footing
+        im_stds = np.std(im_param_array, axis=0)[np.newaxis, :]
+        im_stds = np.where(im_stds &lt; 1.0, np.ones(len(im_stds)), im_stds)
+
+        # Find the closest image to each parameter combination in map_param_array
+        image_indices = np.argmin(np.sum(np.abs(im_param_array - map_param_array) / im_stds, axis=2), axis=0)
+
+    return image_indices
+    
+
+def read_cadence_file(filename):
+    &#34;&#34;&#34;
+    Parse a cadence file.
+
+    Args:
+        filename (str): Name of cadence file
+
+    Returns:
+        cadence_dict: dictionary containing cadence file contents
+    &#34;&#34;&#34;
+    with open(filename, &#39;r&#39;) as f:
+        cadence_dict = yaml.safe_load(f)        
+        
+        # Set reference mjd to the default value of 0
+        if &#39;REFERENCE_MJD&#39; not in cadence_dict:
+            cadence_dict[&#39;REFERENCE_MJD&#39;] = 0
+                        
+    return cadence_dict</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="deeplenstronomy.utils.dict_select"><code class="name flex">
+<span>def <span class="ident">dict_select</span></span>(<span>input_dict, keys)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Trim a dictionary down to selected keys. Requires presence of keys
+in input_dict.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>input_dict</code></strong> :&ensp;<code>dict</code></dt>
+<dd>the dictionary to trim</dd>
+<dt><strong><code>keys</code></strong> :&ensp;<code>List</code></dt>
+<dd>list of keys desired in the final dict</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>trimmed dictionary</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dict_select(input_dict, keys):
+    &#34;&#34;&#34;
+    Trim a dictionary down to selected keys. Requires presence of keys
+    in input_dict.
+    
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
+    &#34;&#34;&#34;
+    return {k: input_dict[k] for k in keys}</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.dict_select_choose"><code class="name flex">
+<span>def <span class="ident">dict_select_choose</span></span>(<span>input_dict, keys)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Trim a dictionary down to selected keys, if they are in the dictionary.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>input_dict</code></strong> :&ensp;<code>dict</code></dt>
+<dd>the dictionary to trim</dd>
+<dt><strong><code>keys</code></strong> :&ensp;<code>List</code></dt>
+<dd>list of keys desired in the final dict</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>trimmed dictionary</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dict_select_choose(input_dict, keys):
+    &#34;&#34;&#34;
+    Trim a dictionary down to selected keys, if they are in the dictionary.
+    
+    Args:
+        input_dict (dict): the dictionary to trim
+        keys (List): list of keys desired in the final dict
+
+    Returns:
+        trimmed dictionary
+    &#34;&#34;&#34;
+    return {k: input_dict[k] for k in keys if k in input_dict.keys()}</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.draw_from_user_dist"><code class="name flex">
+<span>def <span class="ident">draw_from_user_dist</span></span>(<span>filename, size, mode, step=10)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Interpolate a user-specified N-dimensional probability distribution and
+sample from it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>the file containing the distribution </dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>int</code></dt>
+<dd>the number of times to sample the probability distribution </dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>str</code></dt>
+<dd>choose from ['interpolate', 'sample'] </dd>
+<dt><strong><code>step</code></strong> :&ensp;<code>int</code></dt>
+<dd>the number of steps on the interpolation grid
+</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>parameters</code></dt>
+<dd>list, the names of the paramters</dd>
+<dt><code>choices</code></dt>
+<dd>array with entries as arrays of drawn parameters </dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>if a mode other than "sample" or "interpolate" is passed</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw_from_user_dist(filename, size, mode, step=10):
+    &#34;&#34;&#34;
+    Interpolate a user-specified N-dimensional probability distribution and
+    sample from it.
+
+    Args:
+        filename (str): the file containing the distribution 
+        size (int):  the number of times to sample the probability distribution 
+        mode (str): choose from [&#39;interpolate&#39;, &#39;sample&#39;] 
+        step (int): the number of steps on the interpolation grid  
+        
+    Returns:
+        parameters: list, the names of the paramters
+        choices: array with entries as arrays of drawn parameters 
+
+    Raises:
+        NotImplementedError: if a mode other than &#34;sample&#34; or &#34;interpolate&#34; is passed
+    &#34;&#34;&#34;
+
+    df = read_distribution_file(filename)
+
+    parameters = [x for x in df.columns if x != &#39;WEIGHT&#39;]
+    points = df[parameters].values
+    weights = df[&#39;WEIGHT&#39;].values
+
+    if mode == &#39;interpolate&#39;:
+        # 2+ Dimension case
+        if len(parameters) &gt; 1:
+            # Interpolate the distribution and evaluate it on a grid of all possible parameter combinations
+            interpolator = LinearNDInterpolator(points, weights, fill_value=0.0)
+            grid_vectors = [np.linspace(df[x].values.min(), df[x].values.max(), step) for x in parameters]
+            param_grids = np.array(np.meshgrid(*grid_vectors)).T.reshape(step**len(parameters), len(parameters))
+            weighted_params = interpolator(param_grids)
+    
+            # Draw from the grid based on its weight
+            draws = np.random.choice(np.arange(len(param_grids)), size=size, p=weighted_params/weighted_params.sum())
+            choices = param_grids[draws]
+
+        elif len(parameters) == 1:
+            # Interpolate the 1D grid
+            grid = np.linspace(df[parameters].values.min(), df[parameters].values.max(), step)
+            interpolator = interp1d(points.flatten(), weights, fill_value=0.0)
+            weighted_params = interpolator(grid)
+            
+            # Draw from the grid based on its weight
+            choices = np.random.choice(grid, size=size, p=weighted_params/weighted_params.sum())
+
+    elif mode == &#39;sample&#39;:
+        index_arr = np.random.choice(np.arange(len(points), dtype=int), size=size, p=weights / weights.sum())
+        choices = points[index_arr]
+
+    else:
+        raise NotImplementedError(&#34;unexpected mode passed, must be &#39;sample&#39; or &#39;interpolate&#39;&#34;)
+            
+    return parameters, choices</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.organize_image_backgrounds"><code class="name flex">
+<span>def <span class="ident">organize_image_backgrounds</span></span>(<span>im_dir, image_bank_size, config_dicts, configuration)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sort image files based on map. If no map exists, sort randomly.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>im_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>path to directory of images</dd>
+<dt><strong><code>image_bank_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>number of images in user-specified bank</dd>
+<dt><strong><code>config_dicts</code></strong> :&ensp;<code>List[dict]</code></dt>
+<dd>list of config_dicts
+</dd>
+<dt><strong><code>configuration</code></strong> :&ensp;<code>str</code></dt>
+<dd>the configuration currently running</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the indices of the images utilized for each config_dict</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def organize_image_backgrounds(im_dir, image_bank_size, config_dicts, configuration):
+    &#34;&#34;&#34;
+    Sort image files based on map. If no map exists, sort randomly.
+
+    Args:
+        im_dir (str): path to directory of images
+        image_bank_size (int): number of images in user-specified bank
+        config_dicts (List[dict]): list of config_dicts    
+        configuration (str): the configuration currently running
+    
+    Returns:
+        the indices of the images utilized for each config_dict 
+    &#34;&#34;&#34;
+    map_columns = []
+    if os.path.exists(im_dir + &#39;/&#39; + &#39;map.txt&#39;):
+        # Read the map
+        df = pd.read_csv(im_dir + &#39;/&#39; + &#39;map.txt&#39;, delim_whitespace=True)
+
+        # Trim to just the columns in the config dict
+        map_columns, bad_columns = [], []
+        for x in df.columns:
+            if x.startswith(&#39;CONFIGURATION&#39;):
+                split_x = x.split(&#39;-&#39;)
+                if split_x[0] != configuration:
+                    continue
+                name = &#39;-&#39;.join(split_x[1:])
+
+                if name in config_dicts[0].keys():
+                    map_columns.append(x)
+                else:
+                    bad_columns.append(name)
+            else:
+                # doesn&#39;t start with configuration
+                if x in config_dicts[0].keys():
+                    map_columns.append(x)
+                else:
+                    bad_columns.append(x)
+
+
+        if len(bad_columns) != 0:
+            print(config_dicts[0].keys())
+            print(&#34;WARNING {0} are not found in the simulated dataset for {1}&#34;.format(&#39;, &#39;.join(bad_columns), configuration) +
+                  &#34;. You may see unexpected results. Use the dataset.search(&lt;param_name&gt;) function to find the correct column names.&#34;)
+        
+    if len(map_columns) == 0:
+        # Sort randomly
+        image_indices = np.random.choice(np.arange(image_bank_size), replace=True, size=len(config_dicts))
+    
+    else:
+        # Trim df to just the columns needed
+        map_param_array = df[map_columns].values[:, np.newaxis]
+        
+        # for each entry in config_dict, set up numpy broadcasting
+        im_param_array = []
+        for config_dict in config_dicts:
+            im_param_array.append([config_dict[x] if not x.startswith(&#39;CONFIGURATION&#39;) else config_dict[&#39;-&#39;.join(x.split(&#39;-&#39;)[1:])] for x in map_columns])
+        im_param_array = np.array(im_param_array)
+
+        # divide by stds to put parameters on same footing
+        im_stds = np.std(im_param_array, axis=0)[np.newaxis, :]
+        im_stds = np.where(im_stds &lt; 1.0, np.ones(len(im_stds)), im_stds)
+
+        # Find the closest image to each parameter combination in map_param_array
+        image_indices = np.argmin(np.sum(np.abs(im_param_array - map_param_array) / im_stds, axis=2), axis=0)
+
+    return image_indices</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.read_cadence_file"><code class="name flex">
+<span>def <span class="ident">read_cadence_file</span></span>(<span>filename)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse a cadence file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of cadence file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>cadence_dict</code></dt>
+<dd>dictionary containing cadence file contents</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_cadence_file(filename):
+    &#34;&#34;&#34;
+    Parse a cadence file.
+
+    Args:
+        filename (str): Name of cadence file
+
+    Returns:
+        cadence_dict: dictionary containing cadence file contents
+    &#34;&#34;&#34;
+    with open(filename, &#39;r&#39;) as f:
+        cadence_dict = yaml.safe_load(f)        
+        
+        # Set reference mjd to the default value of 0
+        if &#39;REFERENCE_MJD&#39; not in cadence_dict:
+            cadence_dict[&#39;REFERENCE_MJD&#39;] = 0
+                        
+    return cadence_dict</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.read_distribution_file"><code class="name flex">
+<span>def <span class="ident">read_distribution_file</span></span>(<span>filename)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load the file information into a pandas dataframe</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>the file containing the distribution
+</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>pandas.DataFrame containing the tabular distribtution </p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>AssertionError</code></dt>
+<dd>if "WEIGHT" is not one of the column names</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_distribution_file(filename):
+    &#34;&#34;&#34;
+    Load the file information into a pandas dataframe
+    
+    Args:
+        filename (str): the file containing the distribution    
+    
+    Returns:
+        pandas.DataFrame containing the tabular distribtution 
+
+    Raises:
+        AssertionError: if &#34;WEIGHT&#34; is not one of the column names
+    &#34;&#34;&#34;
+    df = pd.read_csv(filename, delim_whitespace=True)
+
+    assert &#39;WEIGHT&#39; in df.columns, &#34;&#39;WEIGHT&#39; must be a column in {}&#34;.format(filename)
+
+    return df</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.read_images"><code class="name flex">
+<span>def <span class="ident">read_images</span></span>(<span>im_dir, im_size, bands)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Read images into memory and resize to match simulations.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>im_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>path to directory of images </dd>
+<dt><strong><code>im_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>numPix along onle side of an image </dd>
+<dt><strong><code>bands</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>list of bands used in simulation </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>array of processed images</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_images(im_dir, im_size, bands):
+    &#34;&#34;&#34;
+    Read images into memory and resize to match simulations.
+
+    Args:
+        im_dir (str): path to directory of images 
+        im_size (int): numPix along onle side of an image 
+        bands (List[str]): list of bands used in simulation 
+
+    Returns:
+        array of processed images
+    &#34;&#34;&#34;
+    # Load images into an array
+    im_array = []
+    for band in bands:
+        if not os.path.exists(im_dir + &#39;/&#39; + band + &#39;.fits&#39;):
+            print(im_dir + &#34; is missing &#34; + band + &#34;.fits&#34;)
+            sys.exit()
+            
+        hdu = fits.open(im_dir + &#39;/&#39; + band + &#39;.fits&#39;)
+        im_array.append(hdu[0].data)
+        hdu.close()
+
+    im_array = np.swapaxes(np.array(im_array), 0, 1)
+    
+    # Resize the images to match the simulations
+    if im_array.shape[-1] &lt; im_size:
+        # pad with zeros
+        pad_width = ((0,0), (0,0), (0,0), (im_size // 4, im_size // 4 + 1))
+        im_array = np.pad(im_array, pad_width, mode=&#39;constant&#39;, constant_values=0.0)
+        
+    if im_array.shape[-2] &lt; im_size:
+        # pad with zeros
+        pad_width = ((0,0), (0,0), (im_size // 4, im_size // 4 + 1), (0,0))
+        im_array = np.pad(im_array, pad_width, mode=&#39;constant&#39;, constant_values=0.0)
+        
+    if im_array.shape[-1] &gt; im_size:
+        # Crop on axis=-1
+        crop_amount = im_array.shape[-1] - im_size
+        im_array = im_array[:, :, :, crop_amount // 2 : - crop_amount // 2]
+        
+    if im_array.shape[-2] &gt; im_size:
+        # Crop on axis=-2
+        crop_amount = im_array.shape[-2] - im_size
+        im_array = im_array[:, :, crop_amount // 2 : - crop_amount // 2, :]
+
+    return im_array</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.utils.select_params"><code class="name flex">
+<span>def <span class="ident">select_params</span></span>(<span>input_dict, profile_prefix)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get just the parameters and values for a given profile prefix.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>input_dict</code></strong> :&ensp;<code>dict</code></dt>
+<dd>the dictionary to search</dd>
+<dt><strong><code>profile_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>i.e. "PLANE_1-OBJECT_2-LIGHT_PROFILE_1-"</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>parameter dictionary for profile</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select_params(input_dict, profile_prefix):
+    &#34;&#34;&#34;
+    Get just the parameters and values for a given profile prefix.
+
+    Args:
+        input_dict (dict): the dictionary to search
+        profile_prefix (str): i.e. &#34;PLANE_1-OBJECT_2-LIGHT_PROFILE_1-&#34;
+
+    Returns:
+        parameter dictionary for profile
+    &#34;&#34;&#34;
+    params = [k for k in input_dict.keys() if k[0:len(profile_prefix)] == profile_prefix]
+    return {x.split(&#39;-&#39;)[-1]: input_dict[x] for x in params if x[-4:] != &#39;NAME&#39;}</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="deeplenstronomy.utils.KeyPathDict"><code class="flex name class">
+<span>class <span class="ident">KeyPathDict</span></span>
+<span>(</span><span>base_dict, keypath_separator='.')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A Subclass of <dict> to enable keypath functionality. Original code is from the
+python-benedict module <a href="https://github.com/fabiocaccamo/python-benedict">https://github.com/fabiocaccamo/python-benedict</a>
+[Copyright (c) 2019 Fabio Caccamo, under the MIT license].</p>
+<p>Initialize a KeyPathDict by supplying the underlying dict to which
+adding keypath functionality is desired.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>base_dict</code></strong> :&ensp;<code>dict</code></dt>
+<dd>the dictionary to add keypaths to</dd>
+</dl>
+<p>keypath_separator (str, optional, default='.'):, the character to use to separate keys</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class KeyPathDict(dict):
+    &#34;&#34;&#34;
+    A Subclass of &lt;dict&gt; to enable keypath functionality. Original code is from the 
+    python-benedict module https://github.com/fabiocaccamo/python-benedict 
+    [Copyright (c) 2019 Fabio Caccamo, under the MIT license].
+    &#34;&#34;&#34;
+    def __init__(self, base_dict, keypath_separator=&#39;.&#39;):
+        &#34;&#34;&#34;
+        Initialize a KeyPathDict by supplying the underlying dict to which 
+        adding keypath functionality is desired.
+
+        Args:
+            base_dict (dict): the dictionary to add keypaths to
+            keypath_separator (str, optional, default=&#39;.&#39;):, the character to use to separate keys
+        &#34;&#34;&#34;
+        # Inherit attributes of the base dict
+        super().__init__(base_dict)
+
+        # Set the keypath sepatator and find all nested keys
+        self.keypath_separator = keypath_separator
+        self.kls = self._keylists(base_dict)
+
+        return
+
+    def _get_keylist(self, item, parent_keys):
+        &#34;&#34;&#34;
+        Recursively search for all nested dictionary keys.
+
+        :param item: parent dictionary or value in a dictionary
+        :param parent_keys: the keys of the dictionary one level up
+        :return: keylist: list, list of all keys on a single level in the dictionary
+        &#34;&#34;&#34;
+        keylist = []
+        for key, value in item.items():
+            # Collect the keys of the dictionary
+            keys = parent_keys + [key]
+            keylist += [keys]
+            # If the value is a dict, recursively search that dict
+            if isinstance(value, dict):
+                keylist += self._get_keylist(value, keys)
+        return keylist
+
+    def _keylists(self, d):
+        &#34;&#34;&#34;
+        Shell function to call the recursive key search
+
+        :param d: dict, the dictionary to search
+        :return: keylist: list, nested list of all keys in the dictionary
+        &#34;&#34;&#34;
+        return self._get_keylist(d, [])
+    
+    def keypaths(self):
+        &#34;&#34;&#34;
+        Join the keylists using the keypath_separator.
+
+        Returns: 
+            list of all keypaths in the dictionary as strings
+        &#34;&#34;&#34;
+        kps = [self.keypath_separator.join([&#39;{}&#39;.format(key) for key in kl]) for kl in self.kls]
+        kps.sort()
+        return kps</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="deeplenstronomy.utils.KeyPathDict.keypaths"><code class="name flex">
+<span>def <span class="ident">keypaths</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Join the keylists using the keypath_separator.</p>
+<p>Returns:
+list of all keypaths in the dictionary as strings</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def keypaths(self):
+    &#34;&#34;&#34;
+    Join the keylists using the keypath_separator.
+
+    Returns: 
+        list of all keypaths in the dictionary as strings
+    &#34;&#34;&#34;
+    kps = [self.keypath_separator.join([&#39;{}&#39;.format(key) for key in kl]) for kl in self.kls]
+    kps.sort()
+    return kps</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="deeplenstronomy" href="index.html">deeplenstronomy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="deeplenstronomy.utils.dict_select" href="#deeplenstronomy.utils.dict_select">dict_select</a></code></li>
+<li><code><a title="deeplenstronomy.utils.dict_select_choose" href="#deeplenstronomy.utils.dict_select_choose">dict_select_choose</a></code></li>
+<li><code><a title="deeplenstronomy.utils.draw_from_user_dist" href="#deeplenstronomy.utils.draw_from_user_dist">draw_from_user_dist</a></code></li>
+<li><code><a title="deeplenstronomy.utils.organize_image_backgrounds" href="#deeplenstronomy.utils.organize_image_backgrounds">organize_image_backgrounds</a></code></li>
+<li><code><a title="deeplenstronomy.utils.read_cadence_file" href="#deeplenstronomy.utils.read_cadence_file">read_cadence_file</a></code></li>
+<li><code><a title="deeplenstronomy.utils.read_distribution_file" href="#deeplenstronomy.utils.read_distribution_file">read_distribution_file</a></code></li>
+<li><code><a title="deeplenstronomy.utils.read_images" href="#deeplenstronomy.utils.read_images">read_images</a></code></li>
+<li><code><a title="deeplenstronomy.utils.select_params" href="#deeplenstronomy.utils.select_params">select_params</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="deeplenstronomy.utils.KeyPathDict" href="#deeplenstronomy.utils.KeyPathDict">KeyPathDict</a></code></h4>
+<ul class="">
+<li><code><a title="deeplenstronomy.utils.KeyPathDict.keypaths" href="#deeplenstronomy.utils.KeyPathDict.keypaths">keypaths</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

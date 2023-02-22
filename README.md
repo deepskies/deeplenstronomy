@@ -1,91 +1,99 @@
-# DeepLenstronomy
+# Welcome to `deeplenstronomy`!
+
+[![status](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1/status.svg)](https://joss.theoj.org/papers/e978dd566d1f290055a02d76288e95e1)
+[![status](https://img.shields.io/badge/arXiv-2102.02830-red)](http://arxiv.org/abs/2102.02830)
+[![status](https://img.shields.io/badge/PyPi-0.0.2.3-blue)](https://pypi.org/project/deeplenstronomy/)
+[![status](https://img.shields.io/badge/License-MIT-lightgrey)](https://github.com/deepskies/deeplenstronomy/blob/master/LICENSE)
+
+`deeplenstronomy` is a tool for simulating large datasets for applying deep learning to strong gravitational lensing. 
+It works by wrapping the functionalities of [`lenstronomy`](https://github.com/sibirrer/lenstronomy) in a convenient yaml-style interface, allowing users to embrace the astronomer part of their brain rather than their programmer part when generating training datasets.
+
+## Installation
+
+**With conda (Recommended)**
+
+- Step 0: Set up an environment. This can be done straightforwardly with a `conda` installation:
+
+```
+conda create -n deeplens python=3.7 jupyter scipy pandas numpy matplotlib astropy h5py PyYAML mpmath future
+conda activate deeplens
+```
+
+- Step 1: `pip install lenstronomy`
+- Step 2: `pip install deeplenstronomy`
+
+**With pip**
+
+- Step 1: `pip install deeplenstronomy`
+
+## [Getting Started and Example Notebooks](https://deepskies.github.io/deeplenstronomy/Notebooks/)
+
+Start by reading the [Getting Started Guide](https://deepskies.github.io/deeplenstronomy/Notebooks/GettingStarted.html) to familiarize yourself with the `deeplenstronomy` style.
+
+After that, check out the example notebooks below:
+
+### Notebooks for `deeplenstronomy` Utilities
+- [Creating `deeplenstronomy` Configuration Files](https://deepskies.github.io/deeplenstronomy/Notebooks/ConfigFiles.html)
+- [Generating Datasets](https://deepskies.github.io/deeplenstronomy/Notebooks/DeepLenstronomyDemo.html)
+- [Visualizing `deeplenstronomy` Images](https://deepskies.github.io/deeplenstronomy/Notebooks/Visualization.html)
+- [Utilizing Astronomical Surveys](https://deepskies.github.io/deeplenstronomy/Notebooks/Surveys.html)
+- [Defining Your Own Probability Distributions](https://deepskies.github.io/deeplenstronomy/Notebooks/UserDistributions.html)
+- [Using Your Own Images as Backgrounds](https://deepskies.github.io/deeplenstronomy/Notebooks/BackgroundsDemo.html)
+- [Simulating Time-Series Datasets](https://deepskies.github.io/deeplenstronomy/Notebooks/TimeSeriesDemo.html)
+
+### Notebooks for Applying `deeplenstronomy` to Machine Learning Analyses
+- [Using `deeplenstronomy` for Active Learning](https://deepskies.github.io/deeplenstronomy/Notebooks/ActiveUpdateDemo.html)
+- [Using `deeplenstronomy` for Classification and Regression](https://deepskies.github.io/deeplenstronomy/Notebooks/Metrics.html)
+
+### Notebooks for Suggested Science Cases
+- [A Walkthrough of Using `deeplenstronomy` for Science](https://deepskies.github.io/deeplenstronomy/Notebooks/FullExample.html)
 
 
-![](bad_logo_small.png)
+## API Documentation
 
-> Welcome to DeepLenstronomy, a wrapper that enables pipelining of the lenstronomy package for efficient and fast simulations of strong gravitational lensing systems. 
+`deeplenstronomy` is designed so that users only need to work with their personal configuration files and the dataset generatation and image visualization functions.
+However, if you would like to view the full API documentation, you can visit the [docs](https://deepskies.github.io/deeplenstronomy/docs/) page.
 
-# Table of Contents 
+## Citation
 
-- [Installation](#installation)
-- [Features](#features)
-- [Contributing](#contributing)
-- [Team](#team)
+If you use `deeplenstronomy` in your work, please include the following citations:
+```
+@article{deeplenstronomy,
+  doi = {10.21105/joss.02854},
+  url = {https://doi.org/10.21105/joss.02854},
+  year = {2021},
+  publisher = {The Open Journal},
+  volume = {6},
+  number = {58},
+  pages = {2854},
+  author = {Robert Morgan and Brian Nord and Simon Birrer and Joshua Yao-Yu Lin and Jason Poh},
+  title = {deeplenstronomy: A dataset simulation package for strong gravitational lensing},
+  journal = {Journal of Open Source Software}
+}
 
----
+@article{lenstronomy,
+    title     =   "lenstronomy: Multi-purpose gravitational lens modelling software package",
+    journal   =   "Physics of the Dark Universe",
+    volume    =   "22",
+    pages     =   "189 - 201",
+    year      =   "2018",
+    issn      =   "2212-6864",
+    doi       =   "10.1016/j.dark.2018.11.002",
+    url       =   "http://www.sciencedirect.com/science/article/pii/S2212686418301869",
+    author    =   "Simon Birrer and Adam Amara",
+    keywords  =   "Gravitational lensing, Software, Image simulations"
+}
+```
 
-# Installation
+## Contact
 
+If you have any questions or run into any errors with the beta release of `deeplenstronomy`, please don't hesitate to reach out:
 
-- you can use pip to install the code
-- you will need to install lenstronomy, which has requirements: link to requirments
+Rob Morgan 
+<br>
+robert [dot] morgan [at] wisc.edu
 
-## Requirement
-
-1. python 3.x
-2. lenstronomy 1.3.0 (https://github.com/sibirrer/lenstronomy)
-
-
----
-
-# Features
-
-## Pipeline Structure
-
-
-The structure of the pipeline is as follows:
-
-1. Inputs 
-   1. YAML file
-2. Generate objects
-   1. with some population samplnig
-   2. with some instrument/experiment characteristics
-   3. of a given type or species
-3. Run Diagnostics over sets of objects
-   1. Display distributions of object parameters
-   2. Show examples of objects
-
-
-The primary elements of the simulated objects are
-
-1. Survey Model (noise and data fidelity): seeing (dist, per band), sky-brightness (dist; corr with seeing; per band?), zero-point (const; per band?), exp time (per band), num exposures, pixel scale (const), read noise, filter set
-2. Expected population distribution 
-3. Injection simulations into real data for the given survey or model
-4. Sky noise: poisson (from lens, source, uniform sky bkg)
-5. A wide selection of strong lens species including gal-gal, gal-qso, gal-sn, multi-plane, cluster
-
-
-# Contributing
-
-> To get started install the code!
-
-## Options for contributions
-
-We now have a good structure to the code, and all the pieces are pulled together, so the next stages of the development will be more clearly planned out. 
-
-We see the set of tasks below as the next things we need to do
-
-* bayeseisan hierachical models for efficient sampling
-* distribution sampling
-* use tensor 2 tensor or gal 2 gal for data structures and as a way to track data sets
-* unit tests
-* documentation
-* conda install
-
-If you'd like to sign up to work on one of these elements, please contact Morgan or Nord.
-
-Aside from those, the most important thing you can do is **try to break the alpha version!**
-
-
----
-
-# Team
-
-* Simon Birrer 
-* Joshua Yao-Yu Lin 
-* Rob Morgan
-* Brian Nord
-* Jason Poh 
+You can also message me on the DES, DELVE, LSSTC, deepskies, or lenstronomers Slack workspaces
 
 
 
@@ -98,5 +106,6 @@ Aside from those, the most important thing you can do is **try to break the alph
 .. image:: https://travis-ci.org/bnord/deeplenstronomy.png?branch=master
     :target: https://travis-ci.org/bnord/deeplenstronomy
 --->
+
 
 

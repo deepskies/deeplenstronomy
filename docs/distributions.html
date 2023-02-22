@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>deeplenstronomy.distributions API documentation</title>
+<meta name="description" content="Contains all available distributions. Utilize the functions in this module
+by using the `DISTRIBUTION` keyword in your configuration file. As an …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>deeplenstronomy.distributions</code></h1>
+</header>
+<section id="section-intro">
+<p>Contains all available distributions. Utilize the functions in this module
+by using the <code>DISTRIBUTION</code> keyword in your configuration file. As an example:</p>
+<pre><code>seeing:
+    DISTRIBUTION:
+        NAME: uniform # function name to call
+        PARAMETERS:
+            minimum: 0 # value to set for function argument
+            maximim: 6 # value to set for function argument
+</code></pre>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Contains all available distributions. Utilize the functions in this module
+by using the `DISTRIBUTION` keyword in your configuration file. As an example:
+
+```
+seeing:
+    DISTRIBUTION:
+        NAME: uniform # function name to call
+        PARAMETERS:
+            minimum: 0 # value to set for function argument
+            maximim: 6 # value to set for function argument
+```
+
+&#34;&#34;&#34;
+
+import numpy as np
+import random
+from scipy.stats import poisson
+
+## Single parameter sampling distributions
+
+def uniform(minimum, maximum, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a uniform probability distribution
+    on the interval [`minimum`, `maximum`]
+
+    Args:
+        minimum (float or int): The minimum of the interval to sample
+        maximum (float or int): The maximum of the interval to sample
+
+    Returns:
+        A sample of the specified uniform distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = random.uniform(minimum, maximum)
+    return [draw] * len(bands.split(&#39;,&#39;))
+
+def uniform_int(minimum, maximum, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a uniform probability distribution
+    on the interval [`minimum`, `maximum`] rounded to the nearest integer
+
+    Args:
+        minimum (int): The minimum of the interval to sample
+        maximum (int): The maximum of the interval to sample
+
+    Returns:
+        A rounded sample of the specified uniform distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = round(random.uniform(minimum, maximum))
+    return [draw] * len(bands.split(&#39;,&#39;))
+
+def normal(mean, std, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a normal probability distribution
+    with specifeid mean and standard deviation
+
+    Args:
+        mean (float or int): The mean of the normal distribution to sample
+        std (float or int): The standard deviation of the normal distribution to sample
+
+    Returns:
+        A sample of the specified normal distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = np.random.normal(loc=mean, scale=std)
+    return [draw] * len(bands.split(&#39;,&#39;))
+
+def lognormal(mean, sigma, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a lognormal probability distribution
+    with specifeid mean and standard deviation
+
+    Args:
+        mean (float or int): The mean of the lognormal distribution to sample
+        sigma (float or int): The standard deviation of the lognormal distribution to sample 
+
+    Returns:
+        A sample of the specified lognormal distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = np.random.lognormal(mean=mean, sigma=sigma)
+    return [draw] * len(bands.split(&#39;,&#39;))
+
+def delta_function(value, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Use a delta function to set a specific value. Alternatively you can directly set the
+    value of a parameter if it is going to be constant. This functionality is useful if
+    you want to avoid deleting the `DISTRIBUTION` entry for a parameter in your
+    configuration file.
+
+    Args:
+        value : The value to set for this parameter
+
+    Returns:
+        A list of values with one value for each band in the simulation
+    &#34;&#34;&#34;
+    return [value] * len(bands.split(&#39;,&#39;))
+
+def symmetric_uniform_annulus(r1, r2, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a sample from a uniform probability distribtuion on the interval
+    [`-r2`, `-r1`] U [`r1`, `r2`]. Useful for setting `center_x`, `center_y`, `sep`, etc.  while
+    avoiding zero values in the sample.
+    
+    Args:
+        r1 (float or int): The minimum radius of the symmetric annulus
+        r2 (float or int): The maximum radius of the symmetric annulus
+
+    Returns:
+        A sample of the specified uniform symmetric annulus for each band in the simulation
+    &#34;&#34;&#34;
+    draw = random.uniform(r1, r2) * random.choice([-1.0, 1.0])
+    return [draw] * len(bands.split(&#39;,&#39;))
+
+## Grid sampling distributions
+
+def poisson_noise(shape, mean):
+    &#34;&#34;&#34;
+    Return a grid of values sampled form a Poisson distribution with specifed mean
+
+    Args:
+        shape (List[int] or int): Automatically passed based on image shape
+        mean: The mean value of the Poisson distirbution to sample from
+
+    Returns:
+        A grid of values sampled form a Poisson distribution with specifed mean
+    &#34;&#34;&#34;
+    return poisson.rvs(mu=mean, size=shape)
+
+
+## Empirical distributions from astronomical surveys
+
+# DES
+def des_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the distribution of single epoch zeropoints for DES
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 26.58, &#39;r&#39;: 26.78, &#39;i&#39;: 26.75, &#39;z&#39;: 26.48, &#39;Y&#39;: 25.40}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+    
+def des_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the distribution of single epoch sky brightness for DES
+    &#34;&#34;&#34;
+    # Figure 4 in https://arxiv.org/pdf/1801.03181.pdf
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [21.016, 21.057, 21.106, 21.179, 21.228, 21.269, 21.326, 
+                             21.367, 21.424, 21.465, 21.522, 21.571, 21.62, 21.677, 
+                             21.717, 21.774, 21.823, 21.872, 21.921, 21.97, 22.019, 
+                             22.068, 22.117, 22.174, 22.215, 22.272, 22.321, 22.378, 
+                             22.427, 22.476],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.001, 0.001, 0.001, 0.001, 0.002, 0.003, 
+                              0.005, 0.007, 0.009, 0.012, 0.016, 0.023, 0.034, 0.048, 
+                              0.063, 0.073, 0.081, 0.093, 0.107, 0.099, 0.087, 0.076, 
+                              0.061, 0.05, 0.027, 0.013, 0.005, 0.0]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [20.16, 20.209, 20.266, 20.323, 20.372, 20.421, 20.47, 
+                             20.519, 20.576, 20.625, 20.674, 20.715, 20.772, 20.821, 
+                             20.87, 20.918, 20.976, 21.024, 21.073, 21.122, 21.171, 
+                             21.22, 21.269, 21.326, 21.375, 21.424, 21.473, 21.522, 
+                             21.571, 21.62, 21.668, 21.726],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.001, 0.001, 0.002, 0.002, 0.005, 0.008, 
+                              0.011, 0.011, 0.012, 0.02, 0.023, 0.034, 0.043, 0.046, 
+                              0.056, 0.07, 0.075, 0.083, 0.093, 0.095, 0.092, 0.078, 
+                              0.057, 0.041, 0.024, 0.012, 0.004, 0.001, 0.0, 0.0]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [18.921, 18.978, 19.027, 19.076, 19.125, 19.174, 19.223, 
+                             19.272, 19.321, 19.378, 19.418, 19.476, 19.524, 19.573, 
+                             19.622, 19.671, 19.728, 19.777, 19.826, 19.875, 19.924, 
+                             19.973, 20.022, 20.071, 20.12, 20.177, 20.226, 20.274, 
+                             20.323, 20.372, 20.421, 20.478, 20.527, 20.576, 20.617, 
+                             20.674, 20.723, 20.772, 20.829],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.002, 0.002, 0.001, 0.002, 0.003, 0.005, 
+                              0.013, 0.017, 0.018, 0.026, 0.029, 0.035, 0.036, 0.047, 
+                              0.053, 0.067, 0.078, 0.084, 0.073, 0.073, 0.063, 0.05, 
+                              0.045, 0.039, 0.031, 0.026, 0.021, 0.018, 0.014, 0.009, 
+                              0.009, 0.003, 0.002, 0.002, 0.001, 0.0, 0.0]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [17.715, 17.772, 17.804, 17.861, 17.918, 17.976, 18.024, 
+                             18.073, 18.122, 18.171, 18.228, 18.277, 18.326, 18.375, 
+                             18.424, 18.473, 18.522, 18.579, 18.628, 18.677, 18.726, 
+                             18.774, 18.823, 18.872, 18.921, 18.97, 19.019, 19.076, 
+                             19.125, 19.174, 19.231, 19.264, 19.329, 19.37, 19.427, 
+                             19.467, 19.524, 19.573, 19.63],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.001, 0.001, 0.004, 0.007, 0.008, 
+                              0.012, 0.014, 0.015, 0.022, 0.028, 0.028, 0.033, 0.045, 
+                              0.052, 0.058, 0.064, 0.073, 0.082, 0.078, 0.069, 0.059, 
+                              0.051, 0.044, 0.036, 0.024, 0.019, 0.018, 0.017, 0.015, 
+                              0.01, 0.005, 0.002, 0.002, 0.002, 0.001, 0.0]},
+            &#39;Y&#39;: {&#39;VALUES&#39;: [17.062, 17.128, 17.177, 17.226, 17.274, 17.323, 17.372, 
+                             17.421, 17.47, 17.527, 17.576, 17.625, 17.674, 17.723, 
+                             17.772, 17.821, 17.878, 17.927, 17.976, 18.024, 18.073, 
+                             18.13, 18.179, 18.228, 18.277, 18.326, 18.375, 18.424, 
+                             18.473, 18.53, 18.579, 18.628, 18.668, 18.726, 18.774, 
+                             18.823, 18.88, 18.929, 18.97, 19.027, 19.076],
+                  &#39;WEIGHTS&#39;: [0.001, 0.002, 0.002, 0.003, 0.006, 0.008, 0.011, 0.015, 
+                              0.02, 0.027, 0.032, 0.041, 0.051, 0.051, 0.05, 0.05, 
+                              0.056, 0.066, 0.072, 0.068, 0.056, 0.047, 0.042, 0.033, 
+                              0.032, 0.029, 0.024, 0.022, 0.021, 0.02, 0.014, 0.011, 
+                              0.006, 0.003, 0.002, 0.001, 0.001, 0.0, 0.002, 0.001, 0.0]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]
+
+
+def des_exposure_time(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the single epoch exposure time for DES
+    &#34;&#34;&#34;
+    # https://arxiv.org/pdf/1801.03181.pdf
+    return [45.0 if b == &#39;Y&#39; else 90.0 for b in bands.split(&#39;,&#39;)]
+
+def des_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the single epoch seeing for DES
+    &#34;&#34;&#34;
+    #Figure 3 in https://arxiv.org/pdf/1801.03181.pdf
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72,
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921,
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101,
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282,
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479,
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658,
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.001, 0.002,
+                              0.004, 0.005, 0.008, 0.011, 0.015, 0.02, 0.025, 0.029, 0.034, 
+                              0.038, 0.042, 0.045, 0.046, 0.047, 0.045, 0.044, 0.041, 0.04, 
+                              0.037, 0.033, 0.031, 0.028, 0.026, 0.025, 0.023, 0.021, 0.019, 
+                              0.018, 0.017, 0.016, 0.015, 0.014, 0.014, 0.013, 0.012, 0.012, 
+                              0.011, 0.01, 0.009, 0.009, 0.008, 0.007, 0.007, 0.006, 0.005, 
+                              0.004, 0.003, 0.002, 0.001, 0.001, 0.0]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.002, 0.004, 0.007, 0.012, 
+                              0.019, 0.027, 0.036, 0.043, 0.051, 0.057, 0.062, 0.063, 0.061, 
+                              0.058, 0.054, 0.048, 0.044, 0.04, 0.036, 0.032, 0.028, 0.025, 
+                              0.022, 0.019, 0.018, 0.015, 0.014, 0.012, 0.011, 0.01, 0.009, 
+                              0.008, 0.008, 0.007, 0.006, 0.005, 0.004, 0.004, 0.003, 0.003, 
+                              0.002, 0.002, 0.002, 0.002, 0.002, 0.001, 0.001, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.001, 0.002, 0.005, 0.01, 0.017, 0.027, 0.038, 
+                              0.049, 0.061, 0.067, 0.072, 0.076, 0.075, 0.071, 0.066, 0.058, 
+                              0.05, 0.045, 0.038, 0.032, 0.026, 0.021, 0.017, 0.014, 0.011, 
+                              0.009, 0.008, 0.007, 0.005, 0.004, 0.003, 0.003, 0.002, 0.002, 
+                              0.002, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.001, 0.003, 0.008, 0.016, 0.027, 0.039, 0.054, 
+                              0.066, 0.073, 0.077, 0.077, 0.073, 0.069, 0.061, 0.054, 0.045, 
+                              0.037, 0.032, 0.026, 0.022, 0.019, 0.017, 0.014, 0.013, 0.011, 
+                              0.009, 0.008, 0.007, 0.007, 0.005, 0.004, 0.003, 0.003, 0.003, 
+                              0.003, 0.002, 0.002, 0.002, 0.002, 0.001, 0.001, 0.001, 0.001, 
+                              0.001, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+            &#39;Y&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.001, 0.001, 0.004, 0.008, 0.014, 0.023, 0.032, 0.038, 
+                              0.045, 0.049, 0.051, 0.051, 0.048, 0.046, 0.043, 0.039, 0.036, 
+                              0.033, 0.031, 0.028, 0.026, 0.023, 0.021, 0.019, 0.018, 0.017, 
+                              0.016, 0.016, 0.014, 0.013, 0.013, 0.012, 0.011, 0.01, 0.01, 
+                              0.01, 0.01, 0.009, 0.008, 0.008, 0.007, 0.008, 0.008, 0.007, 
+                              0.007, 0.007, 0.006, 0.006, 0.006, 0.006, 0.006, 0.005, 0.004, 
+                              0.003, 0.003, 0.002, 0.002, 0.001, 0.001, 0.0, 0.0]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]
+
+def des_ccd_gain(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the single epoch ccd gain for DECam
+    &#34;&#34;&#34;
+    # Figure 2 in https://arxiv.org/pdf/1501.02802.pdf
+    return [5.033 if b == &#39;Y&#39; else 6.083 for b in bands.split(&#39;,&#39;)]
+
+def des_num_exposures(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the effective number of exposures for DES
+    &#34;&#34;&#34;
+    # Figure 5 in https://arxiv.org/pdf/1501.02802.pdf
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.040, 0.113, 0.267, 0.311, 0.178, 0.062, 0.019, 0.007, 0.003]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.041, 0.119, 0.284, 0.321, 0.167, 0.046, 0.014, 0.006, 0.002]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.043, 0.121, 0.291, 0.334, 0.165, 0.033, 0.009, 0.003, 0.001]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.039, 0.106, 0.272, 0.332, 0.183, 0.048, 0.013, 0.005, 0.002]},
+            &#39;Y&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.034, 0.074, 0.195, 0.305, 0.241, 0.099, 0.035, 0.012, 0.005]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]
+
+
+# DELVE
+def delve_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the seeing distribution for DELVE observations
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [0.036, 0.107, 0.178, 0.249, 0.32, 0.392, 0.463, 0.534, 0.605, 0.676,
+                             0.748, 0.819, 0.89, 0.961, 1.032, 1.104, 1.175, 1.246, 1.317, 1.388,
+                             1.46, 1.531, 1.602, 1.673, 1.744, 1.816, 1.887, 1.958, 2.029, 2.1],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.002, 0.019,
+                              0.044, 0.076, 0.107, 0.137, 0.119, 0.126, 0.104, 0.089, 0.067, 0.049,
+                              0.026, 0.017, 0.01, 0.003, 0.003, 0.001, 0.001]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [0.811, 0.85, 0.889, 0.928, 0.967, 1.007, 1.046, 1.085, 1.124, 1.163,
+                             1.203, 1.242, 1.281, 1.32, 1.359, 1.398, 1.438, 1.477, 1.516, 1.555,
+                             1.594, 1.634, 1.673, 1.712, 1.751, 1.79, 1.829, 1.869, 1.908, 1.947],
+                  &#39;WEIGHTS&#39;: [0.005, 0.011, 0.024, 0.039, 0.062, 0.075, 0.079, 0.078, 0.082, 0.081,
+                              0.065, 0.063, 0.055, 0.052, 0.045, 0.04, 0.033, 0.029, 0.023, 0.016,
+                              0.013, 0.01, 0.005, 0.005, 0.002, 0.002, 0.003, 0.001, 0.001, 0.001]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [0.745, 0.792, 0.839, 0.887, 0.934, 0.981, 1.028, 1.075, 1.123, 1.17,
+                             1.217, 1.264, 1.312, 1.359, 1.406, 1.453, 1.5, 1.548, 1.595, 1.642, 1.689,
+                             1.737, 1.784, 1.831, 1.878, 1.925, 1.973, 2.02, 2.067, 2.114],
+                  &#39;WEIGHTS&#39;: [0.003, 0.015, 0.033, 0.06, 0.088, 0.126, 0.127, 0.123, 0.094, 0.072, 0.058,
+                              0.052, 0.035, 0.028, 0.023, 0.018, 0.01, 0.009, 0.007, 0.006, 0.004, 0.002,
+                              0.002, 0.001, 0.002, 0.001, 0.0, 0.001, 0.0, 0.0]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [0.754, 0.801, 0.849, 0.896, 0.944, 0.991, 1.039, 1.086, 1.134, 1.181, 1.229,
+                             1.276, 1.324, 1.371, 1.419, 1.466, 1.514, 1.561, 1.609, 1.656, 1.704, 1.751,
+                             1.799, 1.846, 1.894, 1.941, 1.989, 2.036, 2.084, 2.131],
+                  &#39;WEIGHTS&#39;: [0.009, 0.036, 0.082, 0.111, 0.105, 0.104, 0.091, 0.085, 0.087, 0.065, 0.051,
+                              0.045, 0.035, 0.023, 0.022, 0.013, 0.009, 0.009, 0.005, 0.004, 0.003, 0.002,
+                              0.001, 0.002, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]
+
+def delve_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the sky brightness distribution for DELVE observaitons
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [18.201, 18.362, 18.524, 18.685, 18.847, 19.008, 19.17, 19.331, 19.493, 19.654,
+                             19.816, 19.977, 20.138, 20.3, 20.461, 20.623, 20.784, 20.946, 21.107, 21.269,
+                             21.43, 21.592, 21.753, 21.915, 22.076, 22.238, 22.399, 22.561, 22.722, 22.884],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001,
+                              0.001, 0.003, 0.007, 0.021, 0.024, 0.03, 0.075, 0.202, 0.32, 0.195, 0.099,
+                              0.022, 0.0, 0.0, 0.0]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [16.705, 17.076, 17.447, 17.818, 18.189, 18.56, 18.931, 19.302, 19.674, 20.045,
+                             20.416, 20.787, 21.158, 21.529, 21.9, 22.271, 22.642, 23.013, 23.384, 23.755,
+                             24.126, 24.497, 24.868, 25.239, 25.61, 25.982, 26.353, 26.724, 27.095, 27.466],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.001, 0.0, 0.001, 0.001, 0.001, 0.002, 0.024, 0.084, 0.312,
+                              0.411, 0.157, 0.004, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                              0.0, 0.0, 0.001, 0.001]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [16.481, 16.63, 16.778, 16.927, 17.075, 17.224, 17.373, 17.521, 17.67, 17.818,
+                             17.967, 18.116, 18.264, 18.413, 18.561, 18.71, 18.859, 19.007, 19.156, 19.304,
+                             19.453, 19.602, 19.75, 19.899, 20.047, 20.196, 20.344, 20.493, 20.642, 20.79],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.002, 0.003,
+                              0.009, 0.023, 0.039, 0.057, 0.1, 0.12, 0.137, 0.138, 0.128, 0.091, 0.068, 0.05,
+                              0.029, 0.005, 0.001]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [13.205, 13.604, 14.004, 14.404, 14.804, 15.203, 15.603, 16.003, 16.403, 16.802,
+                             17.202, 17.602, 18.001, 18.401, 18.801, 19.201, 19.6, 20.0, 20.4, 20.8, 21.199,
+                             21.599, 21.999, 22.398, 22.798, 23.198, 23.598, 23.997, 24.397, 24.797],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.001, 0.001, 0.001, 0.002, 0.009, 0.043,
+                              0.237, 0.452, 0.2, 0.038, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.005,
+                              0.007, 0.002, 0.0]}
+            }
+
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]
+
+def delve_exposure_time(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the exposure time distribtuion for DELVE observations
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [35.333, 46.0, 56.667, 67.333, 78.0, 88.667, 99.333,
+                             110.0, 120.667, 131.333, 142.0, 152.667, 163.333, 174.0,
+                             184.667, 195.333, 206.0, 216.667, 227.333, 238.0, 248.667,
+                             259.333, 270.0, 280.667, 291.333, 302.0, 312.667, 323.333,
+                             334.0, 344.667],
+                  &#39;WEIGHTS&#39;: [0.091, 0.031, 0.06, 0.024, 0.021, 0.4, 0.108, 0.018, 0.041,
+                              0.015, 0.004, 0.003, 0.029, 0.015, 0.004, 0.024, 0.003, 0.0,
+                              0.0, 0.012, 0.013, 0.003, 0.026, 0.008, 0.0, 0.044, 0.0, 0.0,
+                              0.0, 0.003]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [35.333, 46.0, 56.667, 67.333, 78.0, 88.667, 99.333, 110.0,
+                             120.667, 131.333, 142.0, 152.667, 163.333, 174.0, 184.667,
+                             195.333, 206.0, 216.667, 227.333, 238.0, 248.667, 259.333,
+                             270.0, 280.667, 291.333, 302.0, 312.667, 323.333, 334.0, 344.667],
+                  &#39;WEIGHTS&#39;: [0.294, 0.069, 0.15, 0.033, 0.03, 0.085, 0.113, 0.007, 0.03,
+                              0.001, 0.0, 0.085, 0.004, 0.004, 0.019, 0.02, 0.006, 0.0, 0.007,
+                              0.0, 0.01, 0.001, 0.018, 0.0, 0.0, 0.012, 0.0, 0.0, 0.0, 0.002]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [35.333, 46.0, 56.667, 67.333, 78.0, 88.667, 99.333, 110.0, 120.667,
+                             131.333, 142.0, 152.667, 163.333, 174.0, 184.667, 195.333, 206.0,
+                             216.667, 227.333, 238.0, 248.667, 259.333, 270.0, 280.667, 291.333,
+                             302.0, 312.667, 323.333, 334.0, 344.667],
+                  &#39;WEIGHTS&#39;: [0.275, 0.029, 0.064, 0.048, 0.045, 0.241, 0.044, 0.007, 0.05, 0.007,
+                              0.014, 0.042, 0.018, 0.0, 0.012, 0.02, 0.005, 0.005, 0.0, 0.0, 0.042,
+                              0.0, 0.0, 0.0, 0.0, 0.021, 0.0, 0.0, 0.009, 0.002]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [35.05, 45.15, 55.25, 65.35, 75.45, 85.55, 95.65, 105.75, 115.85,
+                             125.95, 136.05, 146.15, 156.25, 166.35, 176.45, 186.55, 196.65,
+                             206.75, 216.85, 226.95, 237.05, 247.15, 257.25, 267.35, 277.45,
+                             287.55, 297.65, 307.75, 317.85, 327.95],
+                  &#39;WEIGHTS&#39;: [0.128, 0.043, 0.152, 0.062, 0.083, 0.162, 0.107, 0.022, 0.06, 0.015,
+                              0.013, 0.019, 0.019, 0.006, 0.005, 0.005, 0.01, 0.002, 0.003, 0.001,
+                              0.028, 0.011, 0.0, 0.01, 0.009, 0.0, 0.016, 0.0, 0.0, 0.009]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]
+
+def delve_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the zero point distribtutions for DELVE observaitons
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: 31.550, &#39;r&#39;: 31.284, &#39;i&#39;: 31.608, &#39;z&#39;: 31.262}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+
+# LSST at the Vera C. Rubin Observatory
+def lsst_num_exposures(bands=&#39;&#39;, coadd_years=10):
+    &#34;&#34;&#34;
+    Sample from the LSST number of exposures distribution
+
+    Args:
+        coadd_years (int): Number of years of the survey to utlize
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 140, &#39;g&#39;: 200, &#39;r&#39;: 460, &#39;i&#39;: 460, &#39;z&#39;: 400, &#39;Y&#39;: 400}
+    return [coadd_years * dist[b] // 10 for b in bands.split(&#39;,&#39;)]
+
+def lsst_exposure_time(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST exposure time distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 15.0, &#39;g&#39;: 15.0, &#39;r&#39;: 15.0, &#39;i&#39;: 15.0, &#39;z&#39;: 15.0, &#39;Y&#39;: 15.0}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+
+def lsst_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST zero point distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 26.5, &#39;g&#39;: 28.3, &#39;r&#39;: 28.13, &#39;i&#39;: 27.79, &#39;z&#39;: 27.40, &#39;Y&#39;: 26.58}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+
+def lsst_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST sky brightness distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 22.99, &#39;g&#39;: 22.26, &#39;r&#39;: 21.2, &#39;i&#39;: 20.48, &#39;z&#39;: 19.6, &#39;Y&#39;: 18.61}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+
+def lsst_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST seeing distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 0.81, &#39;g&#39;: 0.77, &#39;r&#39;: 0.73, &#39;i&#39;: 0.71, &#39;z&#39;: 0.69, &#39;Y&#39;: 0.68}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+
+# ZTF
+def ztf_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the ZTF zeropoint distribution
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 26.325, &#39;r&#39;: 26.275, &#39;i&#39;: 25.660}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+
+def ztf_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the ZTF seeing distribution
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 2.1, &#39;r&#39;: 2.0, &#39;i&#39;: 2.1}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+
+def ztf_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the ZTF sky brightness distribution
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 22.01, &#39;r&#39;: 21.15, &#39;i&#39;: 19.89}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]
+    </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="deeplenstronomy.distributions.delta_function"><code class="name flex">
+<span>def <span class="ident">delta_function</span></span>(<span>value, bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Use a delta function to set a specific value. Alternatively you can directly set the
+value of a parameter if it is going to be constant. This functionality is useful if
+you want to avoid deleting the <code>DISTRIBUTION</code> entry for a parameter in your
+configuration file.</p>
+<h2 id="args">Args</h2>
+<p>value : The value to set for this parameter</p>
+<h2 id="returns">Returns</h2>
+<p>A list of values with one value for each band in the simulation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delta_function(value, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Use a delta function to set a specific value. Alternatively you can directly set the
+    value of a parameter if it is going to be constant. This functionality is useful if
+    you want to avoid deleting the `DISTRIBUTION` entry for a parameter in your
+    configuration file.
+
+    Args:
+        value : The value to set for this parameter
+
+    Returns:
+        A list of values with one value for each band in the simulation
+    &#34;&#34;&#34;
+    return [value] * len(bands.split(&#39;,&#39;))</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.delve_exposure_time"><code class="name flex">
+<span>def <span class="ident">delve_exposure_time</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the exposure time distribtuion for DELVE observations</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delve_exposure_time(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the exposure time distribtuion for DELVE observations
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [35.333, 46.0, 56.667, 67.333, 78.0, 88.667, 99.333,
+                             110.0, 120.667, 131.333, 142.0, 152.667, 163.333, 174.0,
+                             184.667, 195.333, 206.0, 216.667, 227.333, 238.0, 248.667,
+                             259.333, 270.0, 280.667, 291.333, 302.0, 312.667, 323.333,
+                             334.0, 344.667],
+                  &#39;WEIGHTS&#39;: [0.091, 0.031, 0.06, 0.024, 0.021, 0.4, 0.108, 0.018, 0.041,
+                              0.015, 0.004, 0.003, 0.029, 0.015, 0.004, 0.024, 0.003, 0.0,
+                              0.0, 0.012, 0.013, 0.003, 0.026, 0.008, 0.0, 0.044, 0.0, 0.0,
+                              0.0, 0.003]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [35.333, 46.0, 56.667, 67.333, 78.0, 88.667, 99.333, 110.0,
+                             120.667, 131.333, 142.0, 152.667, 163.333, 174.0, 184.667,
+                             195.333, 206.0, 216.667, 227.333, 238.0, 248.667, 259.333,
+                             270.0, 280.667, 291.333, 302.0, 312.667, 323.333, 334.0, 344.667],
+                  &#39;WEIGHTS&#39;: [0.294, 0.069, 0.15, 0.033, 0.03, 0.085, 0.113, 0.007, 0.03,
+                              0.001, 0.0, 0.085, 0.004, 0.004, 0.019, 0.02, 0.006, 0.0, 0.007,
+                              0.0, 0.01, 0.001, 0.018, 0.0, 0.0, 0.012, 0.0, 0.0, 0.0, 0.002]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [35.333, 46.0, 56.667, 67.333, 78.0, 88.667, 99.333, 110.0, 120.667,
+                             131.333, 142.0, 152.667, 163.333, 174.0, 184.667, 195.333, 206.0,
+                             216.667, 227.333, 238.0, 248.667, 259.333, 270.0, 280.667, 291.333,
+                             302.0, 312.667, 323.333, 334.0, 344.667],
+                  &#39;WEIGHTS&#39;: [0.275, 0.029, 0.064, 0.048, 0.045, 0.241, 0.044, 0.007, 0.05, 0.007,
+                              0.014, 0.042, 0.018, 0.0, 0.012, 0.02, 0.005, 0.005, 0.0, 0.0, 0.042,
+                              0.0, 0.0, 0.0, 0.0, 0.021, 0.0, 0.0, 0.009, 0.002]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [35.05, 45.15, 55.25, 65.35, 75.45, 85.55, 95.65, 105.75, 115.85,
+                             125.95, 136.05, 146.15, 156.25, 166.35, 176.45, 186.55, 196.65,
+                             206.75, 216.85, 226.95, 237.05, 247.15, 257.25, 267.35, 277.45,
+                             287.55, 297.65, 307.75, 317.85, 327.95],
+                  &#39;WEIGHTS&#39;: [0.128, 0.043, 0.152, 0.062, 0.083, 0.162, 0.107, 0.022, 0.06, 0.015,
+                              0.013, 0.019, 0.019, 0.006, 0.005, 0.005, 0.01, 0.002, 0.003, 0.001,
+                              0.028, 0.011, 0.0, 0.01, 0.009, 0.0, 0.016, 0.0, 0.0, 0.009]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.delve_magnitude_zero_point"><code class="name flex">
+<span>def <span class="ident">delve_magnitude_zero_point</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the zero point distribtutions for DELVE observaitons</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delve_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the zero point distribtutions for DELVE observaitons
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: 31.550, &#39;r&#39;: 31.284, &#39;i&#39;: 31.608, &#39;z&#39;: 31.262}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.delve_seeing"><code class="name flex">
+<span>def <span class="ident">delve_seeing</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the seeing distribution for DELVE observations</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delve_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the seeing distribution for DELVE observations
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [0.036, 0.107, 0.178, 0.249, 0.32, 0.392, 0.463, 0.534, 0.605, 0.676,
+                             0.748, 0.819, 0.89, 0.961, 1.032, 1.104, 1.175, 1.246, 1.317, 1.388,
+                             1.46, 1.531, 1.602, 1.673, 1.744, 1.816, 1.887, 1.958, 2.029, 2.1],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.002, 0.019,
+                              0.044, 0.076, 0.107, 0.137, 0.119, 0.126, 0.104, 0.089, 0.067, 0.049,
+                              0.026, 0.017, 0.01, 0.003, 0.003, 0.001, 0.001]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [0.811, 0.85, 0.889, 0.928, 0.967, 1.007, 1.046, 1.085, 1.124, 1.163,
+                             1.203, 1.242, 1.281, 1.32, 1.359, 1.398, 1.438, 1.477, 1.516, 1.555,
+                             1.594, 1.634, 1.673, 1.712, 1.751, 1.79, 1.829, 1.869, 1.908, 1.947],
+                  &#39;WEIGHTS&#39;: [0.005, 0.011, 0.024, 0.039, 0.062, 0.075, 0.079, 0.078, 0.082, 0.081,
+                              0.065, 0.063, 0.055, 0.052, 0.045, 0.04, 0.033, 0.029, 0.023, 0.016,
+                              0.013, 0.01, 0.005, 0.005, 0.002, 0.002, 0.003, 0.001, 0.001, 0.001]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [0.745, 0.792, 0.839, 0.887, 0.934, 0.981, 1.028, 1.075, 1.123, 1.17,
+                             1.217, 1.264, 1.312, 1.359, 1.406, 1.453, 1.5, 1.548, 1.595, 1.642, 1.689,
+                             1.737, 1.784, 1.831, 1.878, 1.925, 1.973, 2.02, 2.067, 2.114],
+                  &#39;WEIGHTS&#39;: [0.003, 0.015, 0.033, 0.06, 0.088, 0.126, 0.127, 0.123, 0.094, 0.072, 0.058,
+                              0.052, 0.035, 0.028, 0.023, 0.018, 0.01, 0.009, 0.007, 0.006, 0.004, 0.002,
+                              0.002, 0.001, 0.002, 0.001, 0.0, 0.001, 0.0, 0.0]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [0.754, 0.801, 0.849, 0.896, 0.944, 0.991, 1.039, 1.086, 1.134, 1.181, 1.229,
+                             1.276, 1.324, 1.371, 1.419, 1.466, 1.514, 1.561, 1.609, 1.656, 1.704, 1.751,
+                             1.799, 1.846, 1.894, 1.941, 1.989, 2.036, 2.084, 2.131],
+                  &#39;WEIGHTS&#39;: [0.009, 0.036, 0.082, 0.111, 0.105, 0.104, 0.091, 0.085, 0.087, 0.065, 0.051,
+                              0.045, 0.035, 0.023, 0.022, 0.013, 0.009, 0.009, 0.005, 0.004, 0.003, 0.002,
+                              0.001, 0.002, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.delve_sky_brightness"><code class="name flex">
+<span>def <span class="ident">delve_sky_brightness</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the sky brightness distribution for DELVE observaitons</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delve_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the sky brightness distribution for DELVE observaitons
+    &#34;&#34;&#34;
+    # Erik Zaborowski and Alex Drlica-Wagner
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [18.201, 18.362, 18.524, 18.685, 18.847, 19.008, 19.17, 19.331, 19.493, 19.654,
+                             19.816, 19.977, 20.138, 20.3, 20.461, 20.623, 20.784, 20.946, 21.107, 21.269,
+                             21.43, 21.592, 21.753, 21.915, 22.076, 22.238, 22.399, 22.561, 22.722, 22.884],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001,
+                              0.001, 0.003, 0.007, 0.021, 0.024, 0.03, 0.075, 0.202, 0.32, 0.195, 0.099,
+                              0.022, 0.0, 0.0, 0.0]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [16.705, 17.076, 17.447, 17.818, 18.189, 18.56, 18.931, 19.302, 19.674, 20.045,
+                             20.416, 20.787, 21.158, 21.529, 21.9, 22.271, 22.642, 23.013, 23.384, 23.755,
+                             24.126, 24.497, 24.868, 25.239, 25.61, 25.982, 26.353, 26.724, 27.095, 27.466],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.001, 0.0, 0.001, 0.001, 0.001, 0.002, 0.024, 0.084, 0.312,
+                              0.411, 0.157, 0.004, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                              0.0, 0.0, 0.001, 0.001]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [16.481, 16.63, 16.778, 16.927, 17.075, 17.224, 17.373, 17.521, 17.67, 17.818,
+                             17.967, 18.116, 18.264, 18.413, 18.561, 18.71, 18.859, 19.007, 19.156, 19.304,
+                             19.453, 19.602, 19.75, 19.899, 20.047, 20.196, 20.344, 20.493, 20.642, 20.79],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.002, 0.003,
+                              0.009, 0.023, 0.039, 0.057, 0.1, 0.12, 0.137, 0.138, 0.128, 0.091, 0.068, 0.05,
+                              0.029, 0.005, 0.001]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [13.205, 13.604, 14.004, 14.404, 14.804, 15.203, 15.603, 16.003, 16.403, 16.802,
+                             17.202, 17.602, 18.001, 18.401, 18.801, 19.201, 19.6, 20.0, 20.4, 20.8, 21.199,
+                             21.599, 21.999, 22.398, 22.798, 23.198, 23.598, 23.997, 24.397, 24.797],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.001, 0.001, 0.001, 0.002, 0.009, 0.043,
+                              0.237, 0.452, 0.2, 0.038, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.005,
+                              0.007, 0.002, 0.0]}
+            }
+
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.des_ccd_gain"><code class="name flex">
+<span>def <span class="ident">des_ccd_gain</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the single epoch ccd gain for DECam</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def des_ccd_gain(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the single epoch ccd gain for DECam
+    &#34;&#34;&#34;
+    # Figure 2 in https://arxiv.org/pdf/1501.02802.pdf
+    return [5.033 if b == &#39;Y&#39; else 6.083 for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.des_exposure_time"><code class="name flex">
+<span>def <span class="ident">des_exposure_time</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the single epoch exposure time for DES</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def des_exposure_time(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the single epoch exposure time for DES
+    &#34;&#34;&#34;
+    # https://arxiv.org/pdf/1801.03181.pdf
+    return [45.0 if b == &#39;Y&#39; else 90.0 for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.des_magnitude_zero_point"><code class="name flex">
+<span>def <span class="ident">des_magnitude_zero_point</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the distribution of single epoch zeropoints for DES</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def des_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the distribution of single epoch zeropoints for DES
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 26.58, &#39;r&#39;: 26.78, &#39;i&#39;: 26.75, &#39;z&#39;: 26.48, &#39;Y&#39;: 25.40}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.des_num_exposures"><code class="name flex">
+<span>def <span class="ident">des_num_exposures</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the effective number of exposures for DES</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def des_num_exposures(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the effective number of exposures for DES
+    &#34;&#34;&#34;
+    # Figure 5 in https://arxiv.org/pdf/1501.02802.pdf
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.040, 0.113, 0.267, 0.311, 0.178, 0.062, 0.019, 0.007, 0.003]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.041, 0.119, 0.284, 0.321, 0.167, 0.046, 0.014, 0.006, 0.002]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.043, 0.121, 0.291, 0.334, 0.165, 0.033, 0.009, 0.003, 0.001]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.039, 0.106, 0.272, 0.332, 0.183, 0.048, 0.013, 0.005, 0.002]},
+            &#39;Y&#39;: {&#39;VALUES&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                  &#39;WEIGHTS&#39;: [0.034, 0.074, 0.195, 0.305, 0.241, 0.099, 0.035, 0.012, 0.005]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.des_seeing"><code class="name flex">
+<span>def <span class="ident">des_seeing</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the single epoch seeing for DES</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def des_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the single epoch seeing for DES
+    &#34;&#34;&#34;
+    #Figure 3 in https://arxiv.org/pdf/1801.03181.pdf
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72,
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921,
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101,
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282,
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479,
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658,
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.001, 0.002,
+                              0.004, 0.005, 0.008, 0.011, 0.015, 0.02, 0.025, 0.029, 0.034, 
+                              0.038, 0.042, 0.045, 0.046, 0.047, 0.045, 0.044, 0.041, 0.04, 
+                              0.037, 0.033, 0.031, 0.028, 0.026, 0.025, 0.023, 0.021, 0.019, 
+                              0.018, 0.017, 0.016, 0.015, 0.014, 0.014, 0.013, 0.012, 0.012, 
+                              0.011, 0.01, 0.009, 0.009, 0.008, 0.007, 0.007, 0.006, 0.005, 
+                              0.004, 0.003, 0.002, 0.001, 0.001, 0.0]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.002, 0.004, 0.007, 0.012, 
+                              0.019, 0.027, 0.036, 0.043, 0.051, 0.057, 0.062, 0.063, 0.061, 
+                              0.058, 0.054, 0.048, 0.044, 0.04, 0.036, 0.032, 0.028, 0.025, 
+                              0.022, 0.019, 0.018, 0.015, 0.014, 0.012, 0.011, 0.01, 0.009, 
+                              0.008, 0.008, 0.007, 0.006, 0.005, 0.004, 0.004, 0.003, 0.003, 
+                              0.002, 0.002, 0.002, 0.002, 0.002, 0.001, 0.001, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.001, 0.002, 0.005, 0.01, 0.017, 0.027, 0.038, 
+                              0.049, 0.061, 0.067, 0.072, 0.076, 0.075, 0.071, 0.066, 0.058, 
+                              0.05, 0.045, 0.038, 0.032, 0.026, 0.021, 0.017, 0.014, 0.011, 
+                              0.009, 0.008, 0.007, 0.005, 0.004, 0.003, 0.003, 0.002, 0.002, 
+                              0.002, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.001, 0.003, 0.008, 0.016, 0.027, 0.039, 0.054, 
+                              0.066, 0.073, 0.077, 0.077, 0.073, 0.069, 0.061, 0.054, 0.045, 
+                              0.037, 0.032, 0.026, 0.022, 0.019, 0.017, 0.014, 0.013, 0.011, 
+                              0.009, 0.008, 0.007, 0.007, 0.005, 0.004, 0.003, 0.003, 0.003, 
+                              0.003, 0.002, 0.002, 0.002, 0.002, 0.001, 0.001, 0.001, 0.001, 
+                              0.001, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+            &#39;Y&#39;: {&#39;VALUES&#39;: [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72, 
+                             0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921, 
+                             0.943, 0.962, 0.982, 1.001, 1.021, 1.04, 1.062, 1.081, 1.101, 
+                             1.122, 1.139, 1.161, 1.181, 1.2, 1.219, 1.241, 1.261, 1.282, 
+                             1.302, 1.319, 1.341, 1.36, 1.379, 1.399, 1.418, 1.44, 1.479, 
+                             1.501, 1.52, 1.539, 1.559, 1.578, 1.598, 1.619, 1.639, 1.658, 
+                             1.678, 1.697, 1.719, 1.738, 1.758, 1.777, 1.799, 1.82],
+                  &#39;WEIGHTS&#39;: [0.0, 0.001, 0.001, 0.004, 0.008, 0.014, 0.023, 0.032, 0.038, 
+                              0.045, 0.049, 0.051, 0.051, 0.048, 0.046, 0.043, 0.039, 0.036, 
+                              0.033, 0.031, 0.028, 0.026, 0.023, 0.021, 0.019, 0.018, 0.017, 
+                              0.016, 0.016, 0.014, 0.013, 0.013, 0.012, 0.011, 0.01, 0.01, 
+                              0.01, 0.01, 0.009, 0.008, 0.008, 0.007, 0.008, 0.008, 0.007, 
+                              0.007, 0.007, 0.006, 0.006, 0.006, 0.006, 0.006, 0.005, 0.004, 
+                              0.003, 0.003, 0.002, 0.002, 0.001, 0.001, 0.0, 0.0]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.des_sky_brightness"><code class="name flex">
+<span>def <span class="ident">des_sky_brightness</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the distribution of single epoch sky brightness for DES</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def des_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the distribution of single epoch sky brightness for DES
+    &#34;&#34;&#34;
+    # Figure 4 in https://arxiv.org/pdf/1801.03181.pdf
+    dist = {&#39;g&#39;: {&#39;VALUES&#39;: [21.016, 21.057, 21.106, 21.179, 21.228, 21.269, 21.326, 
+                             21.367, 21.424, 21.465, 21.522, 21.571, 21.62, 21.677, 
+                             21.717, 21.774, 21.823, 21.872, 21.921, 21.97, 22.019, 
+                             22.068, 22.117, 22.174, 22.215, 22.272, 22.321, 22.378, 
+                             22.427, 22.476],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.001, 0.001, 0.001, 0.001, 0.002, 0.003, 
+                              0.005, 0.007, 0.009, 0.012, 0.016, 0.023, 0.034, 0.048, 
+                              0.063, 0.073, 0.081, 0.093, 0.107, 0.099, 0.087, 0.076, 
+                              0.061, 0.05, 0.027, 0.013, 0.005, 0.0]},
+            &#39;r&#39;: {&#39;VALUES&#39;: [20.16, 20.209, 20.266, 20.323, 20.372, 20.421, 20.47, 
+                             20.519, 20.576, 20.625, 20.674, 20.715, 20.772, 20.821, 
+                             20.87, 20.918, 20.976, 21.024, 21.073, 21.122, 21.171, 
+                             21.22, 21.269, 21.326, 21.375, 21.424, 21.473, 21.522, 
+                             21.571, 21.62, 21.668, 21.726],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.001, 0.001, 0.002, 0.002, 0.005, 0.008, 
+                              0.011, 0.011, 0.012, 0.02, 0.023, 0.034, 0.043, 0.046, 
+                              0.056, 0.07, 0.075, 0.083, 0.093, 0.095, 0.092, 0.078, 
+                              0.057, 0.041, 0.024, 0.012, 0.004, 0.001, 0.0, 0.0]},
+            &#39;i&#39;: {&#39;VALUES&#39;: [18.921, 18.978, 19.027, 19.076, 19.125, 19.174, 19.223, 
+                             19.272, 19.321, 19.378, 19.418, 19.476, 19.524, 19.573, 
+                             19.622, 19.671, 19.728, 19.777, 19.826, 19.875, 19.924, 
+                             19.973, 20.022, 20.071, 20.12, 20.177, 20.226, 20.274, 
+                             20.323, 20.372, 20.421, 20.478, 20.527, 20.576, 20.617, 
+                             20.674, 20.723, 20.772, 20.829],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.002, 0.002, 0.001, 0.002, 0.003, 0.005, 
+                              0.013, 0.017, 0.018, 0.026, 0.029, 0.035, 0.036, 0.047, 
+                              0.053, 0.067, 0.078, 0.084, 0.073, 0.073, 0.063, 0.05, 
+                              0.045, 0.039, 0.031, 0.026, 0.021, 0.018, 0.014, 0.009, 
+                              0.009, 0.003, 0.002, 0.002, 0.001, 0.0, 0.0]},
+            &#39;z&#39;: {&#39;VALUES&#39;: [17.715, 17.772, 17.804, 17.861, 17.918, 17.976, 18.024, 
+                             18.073, 18.122, 18.171, 18.228, 18.277, 18.326, 18.375, 
+                             18.424, 18.473, 18.522, 18.579, 18.628, 18.677, 18.726, 
+                             18.774, 18.823, 18.872, 18.921, 18.97, 19.019, 19.076, 
+                             19.125, 19.174, 19.231, 19.264, 19.329, 19.37, 19.427, 
+                             19.467, 19.524, 19.573, 19.63],
+                  &#39;WEIGHTS&#39;: [0.0, 0.0, 0.0, 0.001, 0.001, 0.004, 0.007, 0.008, 
+                              0.012, 0.014, 0.015, 0.022, 0.028, 0.028, 0.033, 0.045, 
+                              0.052, 0.058, 0.064, 0.073, 0.082, 0.078, 0.069, 0.059, 
+                              0.051, 0.044, 0.036, 0.024, 0.019, 0.018, 0.017, 0.015, 
+                              0.01, 0.005, 0.002, 0.002, 0.002, 0.001, 0.0]},
+            &#39;Y&#39;: {&#39;VALUES&#39;: [17.062, 17.128, 17.177, 17.226, 17.274, 17.323, 17.372, 
+                             17.421, 17.47, 17.527, 17.576, 17.625, 17.674, 17.723, 
+                             17.772, 17.821, 17.878, 17.927, 17.976, 18.024, 18.073, 
+                             18.13, 18.179, 18.228, 18.277, 18.326, 18.375, 18.424, 
+                             18.473, 18.53, 18.579, 18.628, 18.668, 18.726, 18.774, 
+                             18.823, 18.88, 18.929, 18.97, 19.027, 19.076],
+                  &#39;WEIGHTS&#39;: [0.001, 0.002, 0.002, 0.003, 0.006, 0.008, 0.011, 0.015, 
+                              0.02, 0.027, 0.032, 0.041, 0.051, 0.051, 0.05, 0.05, 
+                              0.056, 0.066, 0.072, 0.068, 0.056, 0.047, 0.042, 0.033, 
+                              0.032, 0.029, 0.024, 0.022, 0.021, 0.02, 0.014, 0.011, 
+                              0.006, 0.003, 0.002, 0.001, 0.001, 0.0, 0.002, 0.001, 0.0]}
+            }
+    return [random.choices(dist[b][&#39;VALUES&#39;], dist[b][&#39;WEIGHTS&#39;])[0] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.lognormal"><code class="name flex">
+<span>def <span class="ident">lognormal</span></span>(<span>mean, sigma, bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a samle from a lognormal probability distribution
+with specifeid mean and standard deviation</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mean</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The mean of the lognormal distribution to sample</dd>
+<dt><strong><code>sigma</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The standard deviation of the lognormal distribution to sample </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A sample of the specified lognormal distribution for each band in the simulation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lognormal(mean, sigma, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a lognormal probability distribution
+    with specifeid mean and standard deviation
+
+    Args:
+        mean (float or int): The mean of the lognormal distribution to sample
+        sigma (float or int): The standard deviation of the lognormal distribution to sample 
+
+    Returns:
+        A sample of the specified lognormal distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = np.random.lognormal(mean=mean, sigma=sigma)
+    return [draw] * len(bands.split(&#39;,&#39;))</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.lsst_exposure_time"><code class="name flex">
+<span>def <span class="ident">lsst_exposure_time</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the LSST exposure time distribution</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lsst_exposure_time(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST exposure time distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 15.0, &#39;g&#39;: 15.0, &#39;r&#39;: 15.0, &#39;i&#39;: 15.0, &#39;z&#39;: 15.0, &#39;Y&#39;: 15.0}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.lsst_magnitude_zero_point"><code class="name flex">
+<span>def <span class="ident">lsst_magnitude_zero_point</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the LSST zero point distribution</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lsst_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST zero point distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 26.5, &#39;g&#39;: 28.3, &#39;r&#39;: 28.13, &#39;i&#39;: 27.79, &#39;z&#39;: 27.40, &#39;Y&#39;: 26.58}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.lsst_num_exposures"><code class="name flex">
+<span>def <span class="ident">lsst_num_exposures</span></span>(<span>bands='', coadd_years=10)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the LSST number of exposures distribution</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coadd_years</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of years of the survey to utlize</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lsst_num_exposures(bands=&#39;&#39;, coadd_years=10):
+    &#34;&#34;&#34;
+    Sample from the LSST number of exposures distribution
+
+    Args:
+        coadd_years (int): Number of years of the survey to utlize
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 140, &#39;g&#39;: 200, &#39;r&#39;: 460, &#39;i&#39;: 460, &#39;z&#39;: 400, &#39;Y&#39;: 400}
+    return [coadd_years * dist[b] // 10 for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.lsst_seeing"><code class="name flex">
+<span>def <span class="ident">lsst_seeing</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the LSST seeing distribution</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lsst_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST seeing distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 0.81, &#39;g&#39;: 0.77, &#39;r&#39;: 0.73, &#39;i&#39;: 0.71, &#39;z&#39;: 0.69, &#39;Y&#39;: 0.68}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.lsst_sky_brightness"><code class="name flex">
+<span>def <span class="ident">lsst_sky_brightness</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the LSST sky brightness distribution</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lsst_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the LSST sky brightness distribution
+    &#34;&#34;&#34;
+    dist = {&#39;u&#39;: 22.99, &#39;g&#39;: 22.26, &#39;r&#39;: 21.2, &#39;i&#39;: 20.48, &#39;z&#39;: 19.6, &#39;Y&#39;: 18.61}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.normal"><code class="name flex">
+<span>def <span class="ident">normal</span></span>(<span>mean, std, bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a samle from a normal probability distribution
+with specifeid mean and standard deviation</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mean</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The mean of the normal distribution to sample</dd>
+<dt><strong><code>std</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The standard deviation of the normal distribution to sample</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A sample of the specified normal distribution for each band in the simulation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def normal(mean, std, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a normal probability distribution
+    with specifeid mean and standard deviation
+
+    Args:
+        mean (float or int): The mean of the normal distribution to sample
+        std (float or int): The standard deviation of the normal distribution to sample
+
+    Returns:
+        A sample of the specified normal distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = np.random.normal(loc=mean, scale=std)
+    return [draw] * len(bands.split(&#39;,&#39;))</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.poisson_noise"><code class="name flex">
+<span>def <span class="ident">poisson_noise</span></span>(<span>shape, mean)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a grid of values sampled form a Poisson distribution with specifed mean</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>shape</code></strong> :&ensp;<code>List[int]</code> or <code>int</code></dt>
+<dd>Automatically passed based on image shape</dd>
+<dt><strong><code>mean</code></strong></dt>
+<dd>The mean value of the Poisson distirbution to sample from</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A grid of values sampled form a Poisson distribution with specifed mean</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def poisson_noise(shape, mean):
+    &#34;&#34;&#34;
+    Return a grid of values sampled form a Poisson distribution with specifed mean
+
+    Args:
+        shape (List[int] or int): Automatically passed based on image shape
+        mean: The mean value of the Poisson distirbution to sample from
+
+    Returns:
+        A grid of values sampled form a Poisson distribution with specifed mean
+    &#34;&#34;&#34;
+    return poisson.rvs(mu=mean, size=shape)</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.symmetric_uniform_annulus"><code class="name flex">
+<span>def <span class="ident">symmetric_uniform_annulus</span></span>(<span>r1, r2, bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a sample from a uniform probability distribtuion on the interval
+[<code>-r2</code>, <code>-r1</code>] U [<code>r1</code>, <code>r2</code>]. Useful for setting <code>center_x</code>, <code>center_y</code>, <code>sep</code>, etc.
+while
+avoiding zero values in the sample.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>r1</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The minimum radius of the symmetric annulus</dd>
+<dt><strong><code>r2</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The maximum radius of the symmetric annulus</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A sample of the specified uniform symmetric annulus for each band in the simulation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def symmetric_uniform_annulus(r1, r2, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a sample from a uniform probability distribtuion on the interval
+    [`-r2`, `-r1`] U [`r1`, `r2`]. Useful for setting `center_x`, `center_y`, `sep`, etc.  while
+    avoiding zero values in the sample.
+    
+    Args:
+        r1 (float or int): The minimum radius of the symmetric annulus
+        r2 (float or int): The maximum radius of the symmetric annulus
+
+    Returns:
+        A sample of the specified uniform symmetric annulus for each band in the simulation
+    &#34;&#34;&#34;
+    draw = random.uniform(r1, r2) * random.choice([-1.0, 1.0])
+    return [draw] * len(bands.split(&#39;,&#39;))</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.uniform"><code class="name flex">
+<span>def <span class="ident">uniform</span></span>(<span>minimum, maximum, bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a samle from a uniform probability distribution
+on the interval [<code>minimum</code>, <code>maximum</code>]</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>minimum</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The minimum of the interval to sample</dd>
+<dt><strong><code>maximum</code></strong> :&ensp;<code>float</code> or <code>int</code></dt>
+<dd>The maximum of the interval to sample</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A sample of the specified uniform distribution for each band in the simulation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def uniform(minimum, maximum, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a uniform probability distribution
+    on the interval [`minimum`, `maximum`]
+
+    Args:
+        minimum (float or int): The minimum of the interval to sample
+        maximum (float or int): The maximum of the interval to sample
+
+    Returns:
+        A sample of the specified uniform distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = random.uniform(minimum, maximum)
+    return [draw] * len(bands.split(&#39;,&#39;))</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.uniform_int"><code class="name flex">
+<span>def <span class="ident">uniform_int</span></span>(<span>minimum, maximum, bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a samle from a uniform probability distribution
+on the interval [<code>minimum</code>, <code>maximum</code>] rounded to the nearest integer</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>minimum</code></strong> :&ensp;<code>int</code></dt>
+<dd>The minimum of the interval to sample</dd>
+<dt><strong><code>maximum</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum of the interval to sample</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A rounded sample of the specified uniform distribution for each band in the simulation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def uniform_int(minimum, maximum, bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Return a samle from a uniform probability distribution
+    on the interval [`minimum`, `maximum`] rounded to the nearest integer
+
+    Args:
+        minimum (int): The minimum of the interval to sample
+        maximum (int): The maximum of the interval to sample
+
+    Returns:
+        A rounded sample of the specified uniform distribution for each band in the simulation
+    &#34;&#34;&#34;
+    draw = round(random.uniform(minimum, maximum))
+    return [draw] * len(bands.split(&#39;,&#39;))</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.ztf_magnitude_zero_point"><code class="name flex">
+<span>def <span class="ident">ztf_magnitude_zero_point</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the ZTF zeropoint distribution</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ztf_magnitude_zero_point(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the ZTF zeropoint distribution
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 26.325, &#39;r&#39;: 26.275, &#39;i&#39;: 25.660}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.ztf_seeing"><code class="name flex">
+<span>def <span class="ident">ztf_seeing</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the ZTF seeing distribution</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ztf_seeing(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the ZTF seeing distribution
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 2.1, &#39;r&#39;: 2.0, &#39;i&#39;: 2.1}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+<dt id="deeplenstronomy.distributions.ztf_sky_brightness"><code class="name flex">
+<span>def <span class="ident">ztf_sky_brightness</span></span>(<span>bands='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sample from the ZTF sky brightness distribution</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ztf_sky_brightness(bands=&#39;&#39;):
+    &#34;&#34;&#34;
+    Sample from the ZTF sky brightness distribution
+    &#34;&#34;&#34;
+    dist = {&#39;g&#39;: 22.01, &#39;r&#39;: 21.15, &#39;i&#39;: 19.89}
+    return [dist[b] for b in bands.split(&#39;,&#39;)]</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="deeplenstronomy" href="index.html">deeplenstronomy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="deeplenstronomy.distributions.delta_function" href="#deeplenstronomy.distributions.delta_function">delta_function</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.delve_exposure_time" href="#deeplenstronomy.distributions.delve_exposure_time">delve_exposure_time</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.delve_magnitude_zero_point" href="#deeplenstronomy.distributions.delve_magnitude_zero_point">delve_magnitude_zero_point</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.delve_seeing" href="#deeplenstronomy.distributions.delve_seeing">delve_seeing</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.delve_sky_brightness" href="#deeplenstronomy.distributions.delve_sky_brightness">delve_sky_brightness</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.des_ccd_gain" href="#deeplenstronomy.distributions.des_ccd_gain">des_ccd_gain</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.des_exposure_time" href="#deeplenstronomy.distributions.des_exposure_time">des_exposure_time</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.des_magnitude_zero_point" href="#deeplenstronomy.distributions.des_magnitude_zero_point">des_magnitude_zero_point</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.des_num_exposures" href="#deeplenstronomy.distributions.des_num_exposures">des_num_exposures</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.des_seeing" href="#deeplenstronomy.distributions.des_seeing">des_seeing</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.des_sky_brightness" href="#deeplenstronomy.distributions.des_sky_brightness">des_sky_brightness</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.lognormal" href="#deeplenstronomy.distributions.lognormal">lognormal</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.lsst_exposure_time" href="#deeplenstronomy.distributions.lsst_exposure_time">lsst_exposure_time</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.lsst_magnitude_zero_point" href="#deeplenstronomy.distributions.lsst_magnitude_zero_point">lsst_magnitude_zero_point</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.lsst_num_exposures" href="#deeplenstronomy.distributions.lsst_num_exposures">lsst_num_exposures</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.lsst_seeing" href="#deeplenstronomy.distributions.lsst_seeing">lsst_seeing</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.lsst_sky_brightness" href="#deeplenstronomy.distributions.lsst_sky_brightness">lsst_sky_brightness</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.normal" href="#deeplenstronomy.distributions.normal">normal</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.poisson_noise" href="#deeplenstronomy.distributions.poisson_noise">poisson_noise</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.symmetric_uniform_annulus" href="#deeplenstronomy.distributions.symmetric_uniform_annulus">symmetric_uniform_annulus</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.uniform" href="#deeplenstronomy.distributions.uniform">uniform</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.uniform_int" href="#deeplenstronomy.distributions.uniform_int">uniform_int</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.ztf_magnitude_zero_point" href="#deeplenstronomy.distributions.ztf_magnitude_zero_point">ztf_magnitude_zero_point</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.ztf_seeing" href="#deeplenstronomy.distributions.ztf_seeing">ztf_seeing</a></code></li>
+<li><code><a title="deeplenstronomy.distributions.ztf_sky_brightness" href="#deeplenstronomy.distributions.ztf_sky_brightness">ztf_sky_brightness</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

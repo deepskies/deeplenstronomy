@@ -1,4 +1,16 @@
-# A module listing all available distribtuions
+"""Contains all available distributions. Utilize the functions in this module
+by using the `DISTRIBUTION` keyword in your configuration file. As an example:
+
+```
+seeing:
+    DISTRIBUTION:
+        NAME: uniform # function name to call
+        PARAMETERS:
+            minimum: 0 # value to set for function argument
+            maximim: 6 # value to set for function argument
+```
+
+"""
 
 import numpy as np
 import random
@@ -7,31 +19,109 @@ from scipy.stats import poisson
 ## Single parameter sampling distributions
 
 def uniform(minimum, maximum, bands=''):
+    """
+    Return a samle from a uniform probability distribution
+    on the interval [`minimum`, `maximum`]
+
+    Args:
+        minimum (float or int): The minimum of the interval to sample
+        maximum (float or int): The maximum of the interval to sample
+
+    Returns:
+        A sample of the specified uniform distribution for each band in the simulation
+    """
     draw = random.uniform(minimum, maximum)
     return [draw] * len(bands.split(','))
 
 def uniform_int(minimum, maximum, bands=''):
+    """
+    Return a samle from a uniform probability distribution
+    on the interval [`minimum`, `maximum`] rounded to the nearest integer
+
+    Args:
+        minimum (int): The minimum of the interval to sample
+        maximum (int): The maximum of the interval to sample
+
+    Returns:
+        A rounded sample of the specified uniform distribution for each band in the simulation
+    """
     draw = round(random.uniform(minimum, maximum))
     return [draw] * len(bands.split(','))
 
 def normal(mean, std, bands=''):
+    """
+    Return a samle from a normal probability distribution
+    with specifeid mean and standard deviation
+
+    Args:
+        mean (float or int): The mean of the normal distribution to sample
+        std (float or int): The standard deviation of the normal distribution to sample
+
+    Returns:
+        A sample of the specified normal distribution for each band in the simulation
+    """
     draw = np.random.normal(loc=mean, scale=std)
     return [draw] * len(bands.split(','))
 
 def lognormal(mean, sigma, bands=''):
+    """
+    Return a samle from a lognormal probability distribution
+    with specifeid mean and standard deviation
+
+    Args:
+        mean (float or int): The mean of the lognormal distribution to sample
+        sigma (float or int): The standard deviation of the lognormal distribution to sample 
+
+    Returns:
+        A sample of the specified lognormal distribution for each band in the simulation
+    """
     draw = np.random.lognormal(mean=mean, sigma=sigma)
     return [draw] * len(bands.split(','))
 
 def delta_function(value, bands=''):
+    """
+    Use a delta function to set a specific value. Alternatively you can directly set the
+    value of a parameter if it is going to be constant. This functionality is useful if
+    you want to avoid deleting the `DISTRIBUTION` entry for a parameter in your
+    configuration file.
+
+    Args:
+        value : The value to set for this parameter
+
+    Returns:
+        A list of values with one value for each band in the simulation
+    """
     return [value] * len(bands.split(','))
 
 def symmetric_uniform_annulus(r1, r2, bands=''):
-    draw = random.uniform(minimum, maximum) * random.choice([-1.0 * 1.0])
+    """
+    Return a sample from a uniform probability distribtuion on the interval
+    [`-r2`, `-r1`] U [`r1`, `r2`]. Useful for setting `center_x`, `center_y`, `sep`, etc.  while
+    avoiding zero values in the sample.
+    
+    Args:
+        r1 (float or int): The minimum radius of the symmetric annulus
+        r2 (float or int): The maximum radius of the symmetric annulus
+
+    Returns:
+        A sample of the specified uniform symmetric annulus for each band in the simulation
+    """
+    draw = random.uniform(r1, r2) * random.choice([-1.0, 1.0])
     return [draw] * len(bands.split(','))
 
 ## Grid sampling distributions
 
 def poisson_noise(shape, mean):
+    """
+    Return a grid of values sampled form a Poisson distribution with specifed mean
+
+    Args:
+        shape (List[int] or int): Automatically passed based on image shape
+        mean: The mean value of the Poisson distirbution to sample from
+
+    Returns:
+        A grid of values sampled form a Poisson distribution with specifed mean
+    """
     return poisson.rvs(mu=mean, size=shape)
 
 
@@ -39,10 +129,16 @@ def poisson_noise(shape, mean):
 
 # DES
 def des_magnitude_zero_point(bands=''):
+    """
+    Sample from the distribution of single epoch zeropoints for DES
+    """
     dist = {'g': 26.58, 'r': 26.78, 'i': 26.75, 'z': 26.48, 'Y': 25.40}
     return [dist[b] for b in bands.split(',')]
     
 def des_sky_brightness(bands=''):
+    """
+    Sample from the distribution of single epoch sky brightness for DES
+    """
     # Figure 4 in https://arxiv.org/pdf/1801.03181.pdf
     dist = {'g': {'VALUES': [21.016, 21.057, 21.106, 21.179, 21.228, 21.269, 21.326, 
                              21.367, 21.424, 21.465, 21.522, 21.571, 21.62, 21.677, 
@@ -100,10 +196,16 @@ def des_sky_brightness(bands=''):
 
 
 def des_exposure_time(bands=''):
+    """
+    Sample from the single epoch exposure time for DES
+    """
     # https://arxiv.org/pdf/1801.03181.pdf
     return [45.0 if b == 'Y' else 90.0 for b in bands.split(',')]
 
 def des_seeing(bands=''):
+    """
+    Sample from the single epoch seeing for DES
+    """
     #Figure 3 in https://arxiv.org/pdf/1801.03181.pdf
     dist = {'g': {'VALUES': [0.56, 0.579, 0.601, 0.621, 0.642, 0.662, 0.679, 0.703, 0.72,
                              0.742, 0.761, 0.783, 0.822, 0.841, 0.863, 0.882, 0.902, 0.921,
@@ -179,10 +281,16 @@ def des_seeing(bands=''):
     return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
 
 def des_ccd_gain(bands=''):
+    """
+    Sample from the single epoch ccd gain for DECam
+    """
     # Figure 2 in https://arxiv.org/pdf/1501.02802.pdf
     return [5.033 if b == 'Y' else 6.083 for b in bands.split(',')]
 
 def des_num_exposures(bands=''):
+    """
+    Sample from the effective number of exposures for DES
+    """
     # Figure 5 in https://arxiv.org/pdf/1501.02802.pdf
     dist = {'g': {'VALUES': [1, 2, 3, 4, 5, 6, 7, 8, 9],
                   'WEIGHTS': [0.040, 0.113, 0.267, 0.311, 0.178, 0.062, 0.019, 0.007, 0.003]},
@@ -197,9 +305,80 @@ def des_num_exposures(bands=''):
             }
     return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
 
+def des_deep_seeing(bands=''):
+    """
+    Sample the DES deep field seeing distribution
+    """
+    dist = {'g': {'VALUES': [1.018, 1.113, 1.208, 1.304, 1.399, 1.494, 1.590, 1.685, 1.780, 1.876,
+                             1.971, 2.066, 2.162, 2.257, 2.352, 2.448, 2.543, 2.638, 2.734, 2.829,
+                             2.924, 3.020, 3.115, 3.210, 3.306, 3.401, 3.496, 3.592, 3.687, 3.782],
+                  'WEIGHTS': [0.007, 0.038, 0.074, 0.097, 0.112, 0.118, 0.097, 0.075, 0.066, 0.048,
+                             0.035, 0.054, 0.023, 0.027, 0.027, 0.016, 0.009, 0.012, 0.015, 0.012,
+                             0.003, 0.003, 0.019, 0.001, 0.000, 0.006, 0.003, 0.003, 0.000, 0.000]},
+            'r': {'VALUES': [0.949, 1.066, 1.183, 1.300, 1.417, 1.534, 1.651, 1.768, 1.885, 2.002,
+                             2.119, 2.236, 2.353, 2.470, 2.587, 2.704, 2.821, 2.938, 3.055, 3.172,
+                             3.289, 3.406, 3.523, 3.640, 3.757, 3.874, 3.991, 4.107, 4.225, 4.341],
+                  'WEIGHTS': [0.009, 0.090, 0.113, 0.140, 0.154, 0.111, 0.077, 0.077, 0.061, 0.035,
+                             0.036, 0.007, 0.020, 0.013, 0.006, 0.013, 0.010, 0.010, 0.006, 0.004,
+                             0.004, 0.004, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000]},
+            'i': {'VALUES': [0.977, 1.052, 1.127, 1.201, 1.276, 1.351, 1.425, 1.500, 1.575, 1.649,
+                             1.724, 1.799, 1.873, 1.947, 2.022, 2.096, 2.172, 2.246, 2.321, 2.396,
+                             2.471, 2.545, 2.620, 2.695, 2.769, 2.844, 2.919, 2.993, 3.068, 3.143],
+                  'WEIGHTS': [0.034, 0.078, 0.087, 0.075, 0.098, 0.098, 0.108, 0.075, 0.061, 0.050,
+                             0.035, 0.030, 0.031, 0.025, 0.023, 0.006, 0.014, 0.011, 0.006, 0.007,
+                             0.005, 0.007, 0.006, 0.003, 0.001, 0.010, 0.005, 0.007, 0.001, 0.007]},
+            'z': {'VALUES': [0.937, 1.012, 1.086, 1.160, 1.235, 1.309, 1.383, 1.458, 1.532, 1.606,
+                             1.681, 1.755, 1.829, 1.903, 1.978, 2.052, 2.127, 2.201, 2.275, 2.349,
+                             2.424, 2.498, 2.572, 2.647, 2.721, 2.796, 2.870, 2.944, 3.018, 3.093],
+                  'WEIGHTS': [0.026, 0.074, 0.101, 0.075, 0.110, 0.102, 0.076, 0.087, 0.067, 0.047,
+                             0.027, 0.041, 0.029, 0.017, 0.012, 0.002, 0.023, 0.012, 0.011, 0.008,
+                             0.005, 0.008, 0.007, 0.002, 0.012, 0.004, 0.004, 0.005, 0.002, 0.004]}}
+    return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
+
+def des_deep_magnitude_zero_point(bands=''):
+    """
+    Sample the DES deep field magnitude zero point distribution
+    """
+    dist = {'g': {'VALUES': [28.199, 28.337, 28.476, 28.614, 28.752, 28.891, 29.029, 29.167, 29.306, 29.444,
+                             29.582, 29.721, 29.859, 29.998, 30.136, 30.274, 30.413, 30.551, 30.689, 30.828,
+                             30.966, 31.104, 31.242, 31.381, 31.519, 31.657, 31.796, 31.934, 32.072, 32.211],
+                  'WEIGHTS': [0.003, 0.001, 0.000, 0.000, 0.000, 0.000, 0.002, 0.004, 0.003, 0.002,
+                             0.002, 0.007, 0.002, 0.009, 0.006, 0.009, 0.016, 0.049, 0.276, 0.438,
+                             0.003, 0.000, 0.000, 0.000, 0.004, 0.004, 0.006, 0.018, 0.080, 0.056]},
+            'r': {'VALUES': [27.949, 28.127, 28.304, 28.482, 28.659, 28.837, 29.015, 29.192, 29.370, 29.548,
+                             29.726, 29.903, 30.081, 30.258, 30.436, 30.614, 30.791, 30.969, 31.147, 31.325,
+                             31.502, 31.680, 31.857, 32.035, 32.213, 32.390, 32.568, 32.746, 32.923, 33.101],
+                  'WEIGHTS': [0.003, 0.001, 0.003, 0.000, 0.003, 0.003, 0.001, 0.000, 0.006, 0.003,
+                             0.006, 0.000, 0.004, 0.019, 0.027, 0.052, 0.676, 0.027, 0.000, 0.000,
+                             0.003, 0.001, 0.000, 0.000, 0.000, 0.000, 0.008, 0.007, 0.017, 0.130]},
+            'i': {'VALUES': [28.576, 28.749, 28.922, 29.096, 29.268, 29.441, 29.614, 29.788, 29.960, 30.133,
+                             30.306, 30.480, 30.652, 30.825, 30.998, 31.172, 31.344, 31.517, 31.691, 31.864,
+                             32.036, 32.209, 32.383, 32.555, 32.728, 32.901, 33.075, 33.248, 33.421, 33.593],
+                  'WEIGHTS': [0.004, 0.003, 0.000, 0.001, 0.003, 0.000, 0.012, 0.012, 0.003, 0.000,
+                             0.004, 0.007, 0.014, 0.017, 0.400, 0.335, 0.000, 0.000, 0.000, 0.000,
+                             0.000, 0.000, 0.000, 0.004, 0.004, 0.004, 0.007, 0.006, 0.128, 0.032]},
+            'z': {'VALUES': [28.241, 28.442, 28.643, 28.843, 29.044, 29.245, 29.447, 29.648, 29.849, 30.050,
+                             30.251, 30.451, 30.652, 30.854, 31.055, 31.256, 31.457, 31.658, 31.859, 32.059,
+                             32.261, 32.462, 32.663, 32.864, 33.064, 33.266, 33.466, 33.668, 33.868, 34.070],
+                  'WEIGHTS': [0.003, 0.001, 0.000, 0.004, 0.003, 0.004, 0.003, 0.003, 0.004, 0.000,
+                             0.002, 0.013, 0.010, 0.001, 0.005, 0.080, 0.604, 0.067, 0.000, 0.000,
+                             0.004, 0.004, 0.000, 0.000, 0.004, 0.000, 0.004, 0.025, 0.141, 0.011]}}
+    return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
+
+def des_deep_exposure_time(bands=''):
+    """
+    Sample from the DES deep field exposure time distribution
+    """
+    # using shallow exposure times
+    dist = {'g': 175, 'r': 150, 'i': 200, 'z': 400}
+    return [dist[b] for b in bands.split(',')]
+
 
 # DELVE
 def delve_seeing(bands=''):
+    """
+    Sample from the seeing distribution for DELVE observations
+    """
     # Erik Zaborowski and Alex Drlica-Wagner
     dist = {'g': {'VALUES': [0.036, 0.107, 0.178, 0.249, 0.32, 0.392, 0.463, 0.534, 0.605, 0.676,
                              0.748, 0.819, 0.89, 0.961, 1.032, 1.104, 1.175, 1.246, 1.317, 1.388,
@@ -229,6 +408,9 @@ def delve_seeing(bands=''):
     return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
 
 def delve_sky_brightness(bands=''):
+    """
+    Sample from the sky brightness distribution for DELVE observaitons
+    """
     # Erik Zaborowski and Alex Drlica-Wagner
     dist = {'g': {'VALUES': [18.201, 18.362, 18.524, 18.685, 18.847, 19.008, 19.17, 19.331, 19.493, 19.654,
                              19.816, 19.977, 20.138, 20.3, 20.461, 20.623, 20.784, 20.946, 21.107, 21.269,
@@ -256,13 +438,12 @@ def delve_sky_brightness(bands=''):
                               0.007, 0.002, 0.0]}
             }
 
-    for b in dist.keys():
-        print(len(dist[b]['VALUES']) == len(dist[b]['WEIGHTS']))
-        print(sum(dist[b]['WEIGHTS']))
-    
     return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
 
 def delve_exposure_time(bands=''):
+    """
+    Sample from the exposure time distribtuion for DELVE observations
+    """
     # Erik Zaborowski and Alex Drlica-Wagner
     dist = {'g': {'VALUES': [35.333, 46.0, 56.667, 67.333, 78.0, 88.667, 99.333,
 			     110.0, 120.667, 131.333, 142.0, 152.667, 163.333, 174.0,
@@ -298,41 +479,71 @@ def delve_exposure_time(bands=''):
     return [random.choices(dist[b]['VALUES'], dist[b]['WEIGHTS'])[0] for b in bands.split(',')]
 
 def delve_magnitude_zero_point(bands=''):
+    """
+    Sample from the zero point distribtutions for DELVE observaitons
+    """
     # Erik Zaborowski and Alex Drlica-Wagner
     dist = {'g': 31.550, 'r': 31.284, 'i': 31.608, 'z': 31.262}
     return [dist[b] for b in bands.split(',')]
 
 # LSST at the Vera C. Rubin Observatory
 def lsst_num_exposures(bands='', coadd_years=10):
+    """
+    Sample from the LSST number of exposures distribution
+
+    Args:
+        coadd_years (int): Number of years of the survey to utlize
+    """
     dist = {'u': 140, 'g': 200, 'r': 460, 'i': 460, 'z': 400, 'Y': 400}
     return [coadd_years * dist[b] // 10 for b in bands.split(',')]
 
 def lsst_exposure_time(bands=''):
+    """
+    Sample from the LSST exposure time distribution
+    """
     dist = {'u': 15.0, 'g': 15.0, 'r': 15.0, 'i': 15.0, 'z': 15.0, 'Y': 15.0}
     return [dist[b] for b in bands.split(',')]
 
 def lsst_magnitude_zero_point(bands=''):
+    """
+    Sample from the LSST zero point distribution
+    """
     dist = {'u': 26.5, 'g': 28.3, 'r': 28.13, 'i': 27.79, 'z': 27.40, 'Y': 26.58}
     return [dist[b] for b in bands.split(',')]
 
 def lsst_sky_brightness(bands=''):
+    """
+    Sample from the LSST sky brightness distribution
+    """
     dist = {'u': 22.99, 'g': 22.26, 'r': 21.2, 'i': 20.48, 'z': 19.6, 'Y': 18.61}
     return [dist[b] for b in bands.split(',')]
 
 def lsst_seeing(bands=''):
+    """
+    Sample from the LSST seeing distribution
+    """
     dist = {'u': 0.81, 'g': 0.77, 'r': 0.73, 'i': 0.71, 'z': 0.69, 'Y': 0.68}
     return [dist[b] for b in bands.split(',')]
 
 # ZTF
 def ztf_magnitude_zero_point(bands=''):
+    """
+    Sample from the ZTF zeropoint distribution
+    """
     dist = {'g': 26.325, 'r': 26.275, 'i': 25.660}
     return [dist[b] for b in bands.split(',')]
 
 def ztf_seeing(bands=''):
+    """
+    Sample from the ZTF seeing distribution
+    """
     dist = {'g': 2.1, 'r': 2.0, 'i': 2.1}
     return [dist[b] for b in bands.split(',')]
 
 def ztf_sky_brightness(bands=''):
+    """
+    Sample from the ZTF sky brightness distribution
+    """
     dist = {'g': 22.01, 'r': 21.15, 'i': 19.89}
     return [dist[b] for b in bands.split(',')]
     

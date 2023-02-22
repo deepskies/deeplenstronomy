@@ -108,3 +108,15 @@ venv.bak/
 
 # emacs files
 *~
+
+# Testing
+test/TestResults/
+test/old
+test/status.txt
+test/*_config.yaml
+
+# Binary release files
+deeplenstronomy_v0.0.1.0.tar.gz
+
+# documentation staging directory
+html/
