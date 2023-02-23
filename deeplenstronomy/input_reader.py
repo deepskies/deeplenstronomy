@@ -592,121 +592,195 @@ class Organizer():
 #                            warned = True
                             
         return output_dict
-
-
-    def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid, peakshift, inputs):
+    
+    def brighten_everything(output_dict, light_profile_mag, bands):
         """
-        Generate an image info dictionary for each step in the time series
+        Brighten everything in a light profile by a given number of mags.
 
-        :param config_dict: dictionary built up by self.breakup()
-        :param configuration: CONFIGURATION_1, CONFIGURATION_2, etc.
-        :param obj_string: list of the strings targetting the object in the flattened dictionary (e.g. ['PLANE_2-OBJECT_2'])
-        :param peakshifts: int or float in units of NITES to shift the peak
-        :return: flattened_and_filled dictionary: dict ready for individual image sim  
+        Args:
+            output_dict (dict): flat dictionary being used to simulate images
+            light_profile_mag (str): light profile id to be recolored + '-' + mags to brighten. E.g. 'LIGHT_PROFILE_1-2.5'
+            bands (str): comma-separated string of bands used
+        
+        Returns:
+            output_dict: the same dictionary with some overwritten values
         """
-        
-        output_dicts = []
-        bands = self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
-        # Get flattened and filled dictionary
-        base_output_dict = self._flatten_and_fill(config_dict, cosmo, inputs, objid)
 
-        # Model the lens for time delay calculations
-        td_dict = {}
-        for obj_string in obj_strings:
-            td_dict[obj_string] = None
-            plane_num = int(obj_string.split('_')[1].split('-')[0])
-            if plane_num >= 2:
-                im_gen = image_generator.ImageGenerator(self.main_dict['SURVEY']['PARAMETERS']['BANDS'])
-                params = im_gen.parse_single_band_info_dict(base_output_dict[bands[0]], cosmo)
-                kwargs_lens_model_list = params[6]
-                kwargs_model = params[1]
-                kwargs_point_source_list = params[5] 
-                # use sim API in case sigma_v is used for mass profiles
-                sim = SimAPI(numpix=self.main_dict['IMAGE']['PARAMETERS']['numPix'],
-                         kwargs_single_band=params[0],
-                         kwargs_model=kwargs_model)
-                kwargs_lens_model_list = sim.physical2lensing_conversion(kwargs_mass=kwargs_lens_model_list)
-
-                try:
-                    z_lens = kwargs_model['lens_redshift_list'][0]
-                    z_source = kwargs_model['z_source']
-                    td_cosmo = TDCosmography(z_lens, z_source, kwargs_model, cosmo_fiducial=cosmo)
-                    td_dict[obj_string] = td_cosmo.time_delays(kwargs_lens_model_list, kwargs_point_source_list, kappa_ext=0).round().astype(int)
-                except IndexError:
-                    pass
+        light_profile = light_profile_mag.split('-')[0]
+        mag = float(light_profile_mag.split('-')[1])
         
-        pointing = base_output_dict[bands[0]]['POINTING']
-        closest_redshift_lcs = []
-        for obj_name, obj_string in zip(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['OBJECTS'], obj_strings):
-            # determine closest lc in library to redshift
-            redshift = base_output_dict[bands[0]][obj_string + '-REDSHIFT']
-            lcs = eval('self.{0}_{1}_lightcurves_{2}'.format(configuration, obj_name, pointing))
-            closest_redshift_lcs.append(lcs['library'][np.argmin(np.abs(redshift - lcs['redshifts']))])
+        for band, sim_dict in output_dict.items():
+            for k in sim_dict.keys():
+                if k.find(light_profile + '-magnitude') != -1:
+                    output_dict[band][k] = output_dict[band][k] - mag
+
+        return output_dict
+
+
+    def make_blueer(output_dict, light_profile_mag, bands):
+        """
+        Brighten the blue bands in a survey, using des, delve, and lsst as examples.
+
+        Args:
+            output_dict (dict): flat dictionary being used to simulate images
+            light_profile_mag (str): light profile id to be recolored + '-' + mags to brighten. E.g. 'LIGHT_PROFILE_1-2.5'
+            bands (str): comma-separated string of bands used
+        
+        Returns: 
+            output_dict: the same dictionary with some overwritten values
+        """
+        # brighten g and r
+
+        light_profile = light_profile_mag.split('-')[0]
+        mag = float(light_profile_mag.split('-')[1])
+        mag_correction = {'g': mag, 'r': 0.5 * mag, 'i': 0.0, 'z': 0.0, 'Y': 0.0}
+
+        for band, sim_dict in output_dict.items():
+            for k in sim_dict.keys():
+                if k.find(light_profile + '-magnitude') != -1:
+                    output_dict[band][k] = output_dict[band][k] - mag_correction[band]
+
+        return output_dict
+
+    def make_redder(output_dict, light_profile_mag, bands):
+        """
+        Brighten the red bands in a survey, using des, delve, and lsst as examples.
+
+        Args:
+            output_dict (dict): flat dictionary being used to simulate images
+            light_profile_mag (str): light profile id to be recolored + '-' + mags to brighten. E.g. 'LIGHT_PROFILE_1-2.5'
+            bands (str): comma-separated string of bands used
+        
+        Returns: 
+            output_dict: the same dictionary with some overwritten values
+        """
+        # brighten i, z, and Y
+        
+        light_profile = light_profile_mag.split('-')[0]
+        mag = float(light_profile_mag.split('-')[1])
+        mag_correction = {'g': 0.0, 'r': 0.0, 'i': 0.5 * mag, 'z': mag, 'Y': 1.5 * mag}
+
+        for band, sim_dict in output_dict.items():
+            for k in sim_dict.keys():
+                if k.find(light_profile + '-magnitude') != -1:
+                    output_dict[band][k] = output_dict[band][k] - mag_correction[band]
+
+        return output_dic
+
+
+        def _flatten_and_fill_time_series(self, config_dict, cosmo, configuration, obj_strings, objid, peakshift, inputs):
+            """
+            Generate an image info dictionary for each step in the time series
+
+            :param config_dict: dictionary built up by self.breakup()
+            :param configuration: CONFIGURATION_1, CONFIGURATION_2, etc.
+            :param obj_string: list of the strings targetting the object in the flattened dictionary (e.g. ['PLANE_2-OBJECT_2'])
+            :param peakshifts: int or float in units of NITES to shift the peak
+            :return: flattened_and_filled dictionary: dict ready for individual image sim  
+            """
             
-        # overwrite the image sim dictionary
-        nite_dict = self.cadence_dict[pointing]
-        for nite_idx in range(len(nite_dict[bands[0]])):
-            for band in bands:
-                orig_nite = nite_dict[band][nite_idx]
-                #for orig_nite in nite_dict[band]:
-                nite_ = orig_nite - peakshift
-                output_dict = base_output_dict.copy()
-                for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
+            output_dicts = []
+            bands = self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
+            # Get flattened and filled dictionary
+            base_output_dict = self._flatten_and_fill(config_dict, cosmo, inputs, objid)
 
-                    # account for time delay
-                    td_shift = td_dict[obj_string]
-                    if td_shift is None or len(td_shift) == 0:
-                        shifted_nites = [nite_]
-                    else:
-                        shifted_nites = [nite_] + [nite_ + x for x in list(td_shift[1:] - td_shift[0])]
+            # Model the lens for time delay calculations
+            td_dict = {}
+            for obj_string in obj_strings:
+                td_dict[obj_string] = None
+                plane_num = int(obj_string.split('_')[1].split('-')[0])
+                if plane_num >= 2:
+                    im_gen = image_generator.ImageGenerator(self.main_dict['SURVEY']['PARAMETERS']['BANDS'])
+                    params = im_gen.parse_single_band_info_dict(base_output_dict[bands[0]], cosmo)
+                    kwargs_lens_model_list = params[6]
+                    kwargs_model = params[1]
+                    kwargs_point_source_list = params[5] 
+                    # use sim API in case sigma_v is used for mass profiles
+                    sim = SimAPI(numpix=self.main_dict['IMAGE']['PARAMETERS']['numPix'],
+                            kwargs_single_band=params[0],
+                            kwargs_model=kwargs_model)
+                    kwargs_lens_model_list = sim.physical2lensing_conversion(kwargs_mass=kwargs_lens_model_list)
 
-                    for idx, nite in enumerate(shifted_nites):
+                    try:
+                        z_lens = kwargs_model['lens_redshift_list'][0]
+                        z_source = kwargs_model['z_source']
+                        td_cosmo = TDCosmography(z_lens, z_source, kwargs_model, cosmo_fiducial=cosmo)
+                        td_dict[obj_string] = td_cosmo.time_delays(kwargs_lens_model_list, kwargs_point_source_list, kappa_ext=0).round().astype(int)
+                    except IndexError:
+                        pass
+            
+            pointing = base_output_dict[bands[0]]['POINTING']
+            closest_redshift_lcs = []
+            for obj_name, obj_string in zip(self.main_dict['GEOMETRY'][configuration]['TIMESERIES']['OBJECTS'], obj_strings):
+                # determine closest lc in library to redshift
+                redshift = base_output_dict[bands[0]][obj_string + '-REDSHIFT']
+                lcs = eval('self.{0}_{1}_lightcurves_{2}'.format(configuration, obj_name, pointing))
+                closest_redshift_lcs.append(lcs['library'][np.argmin(np.abs(redshift - lcs['redshifts']))])
+                
+            # overwrite the image sim dictionary
+            nite_dict = self.cadence_dict[pointing]
+            for nite_idx in range(len(nite_dict[bands[0]])):
+                for band in bands:
+                    orig_nite = nite_dict[band][nite_idx]
+                    #for orig_nite in nite_dict[band]:
+                    nite_ = orig_nite - peakshift
+                    output_dict = base_output_dict.copy()
+                    for obj_sting, closest_redshift_lc in zip(obj_strings, closest_redshift_lcs):
 
-                        if idx == 0:
-                            suffix = ''
+                        # account for time delay
+                        td_shift = td_dict[obj_string]
+                        if td_shift is None or len(td_shift) == 0:
+                            shifted_nites = [nite_]
                         else:
-                            suffix = f"_shift_{idx}"
+                            shifted_nites = [nite_] + [nite_ + x for x in list(td_shift[1:] - td_shift[0])]
 
-                        output_dict[band][obj_string + '-tdshift_' + str(idx)] = nite
-                            
-                        try:
-                            #try using the exact night
-                            output_dict[band][obj_string + '-magnitude' + suffix] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
-                        except:
-                            band_df = closest_redshift_lc['lc'][closest_redshift_lc['lc']['BAND'].values == band].copy().reset_index(drop=True)
-                            # set mag to 99 if nite is outside the SED
-                            if nite < band_df['NITE'].values.min() or nite > band_df['NITE'].values.max():
-                                mag = 99.0
-                            # if nite is within bounds of SED, linearly interpolate
+                        for idx, nite in enumerate(shifted_nites):
+
+                            if idx == 0:
+                                suffix = ''
                             else:
-                                closest_nite_indices = np.abs(nite - band_df['NITE'].values).argsort()[:2]
-                                mag = (band_df['MAG'].values[closest_nite_indices[1]] - band_df['MAG'].values[closest_nite_indices[0]]) * (nite - band_df['NITE'].values[closest_nite_indices[1]]) / (band_df['NITE'].values[closest_nite_indices[1]] - band_df['NITE'].values[closest_nite_indices[0]]) + band_df['MAG'].values[closest_nite_indices[1]]
+                                suffix = f"_shift_{idx}"
+
+                            output_dict[band][obj_string + '-tdshift_' + str(idx)] = nite
                                 
-                            output_dict[band][obj_string + '-magnitude' + suffix] = mag
-                            output_dict[band][obj_string + '-magnitude_measured' + suffix] = np.random.normal(loc=mag, scale=0.03)
-                                
+                            try:
+                                #try using the exact night
+                                output_dict[band][obj_string + '-magnitude' + suffix] = closest_redshift_lc['lc']['MAG'].values[(closest_redshift_lc['lc']['BAND'].values == band) & (closest_redshift_lc['lc']['NITE'].values == nite)][0] + fake_noise[noise_idx]
+                            except:
+                                band_df = closest_redshift_lc['lc'][closest_redshift_lc['lc']['BAND'].values == band].copy().reset_index(drop=True)
+                                # set mag to 99 if nite is outside the SED
+                                if nite < band_df['NITE'].values.min() or nite > band_df['NITE'].values.max():
+                                    mag = 99.0
+                                # if nite is within bounds of SED, linearly interpolate
+                                else:
+                                    closest_nite_indices = np.abs(nite - band_df['NITE'].values).argsort()[:2]
+                                    mag = (band_df['MAG'].values[closest_nite_indices[1]] - band_df['MAG'].values[closest_nite_indices[0]]) * (nite - band_df['NITE'].values[closest_nite_indices[1]]) / (band_df['NITE'].values[closest_nite_indices[1]] - band_df['NITE'].values[closest_nite_indices[0]]) + band_df['MAG'].values[closest_nite_indices[1]]
+                                    
+                                output_dict[band][obj_string + '-magnitude' + suffix] = mag
+                                output_dict[band][obj_string + '-magnitude_measured' + suffix] = np.random.normal(loc=mag, scale=0.03)
+                                    
+                            
+                        output_dict[band][obj_string + '-nite'] = orig_nite
+                        output_dict[band][obj_string + '-peaknite'] = peakshift
+                        output_dict[band][obj_string + '-id'] = closest_redshift_lc['sed']
+                        output_dict[band][obj_string + '-type'] = closest_redshift_lc['obj_type']
+
+                    # Use independent observing conditions for each nite if conditions are drawn from distributions
+                    # seeing
+                    if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"], dict):
+                        output_dict[band]["seeing"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"]["DISTRIBUTION"], bands=band)[0]
+                    # sky_brightness
+                    if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"], dict):
+                        output_dict[band]["sky_brightness"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"]["DISTRIBUTION"], bands=band)[0]
+                    # magnitude_zero_point
+                    if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"], dict):
+                        output_dict[band]["magnitude_zero_point"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"]["DISTRIBUTION"], bands=band)[0]
+
                         
-                    output_dict[band][obj_string + '-nite'] = orig_nite
-                    output_dict[band][obj_string + '-peaknite'] = peakshift
-                    output_dict[band][obj_string + '-id'] = closest_redshift_lc['sed']
-                    output_dict[band][obj_string + '-type'] = closest_redshift_lc['obj_type']
-
-                # Use independent observing conditions for each nite if conditions are drawn from distributions
-                # seeing
-                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"], dict):
-                    output_dict[band]["seeing"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["seeing"]["DISTRIBUTION"], bands=band)[0]
-                # sky_brightness
-                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"], dict):
-                    output_dict[band]["sky_brightness"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["sky_brightness"]["DISTRIBUTION"], bands=band)[0]
-                # magnitude_zero_point
-                if isinstance(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"], dict):
-                    output_dict[band]["magnitude_zero_point"] = self._draw(self.main_dict["SURVEY"]["PARAMETERS"]["magnitude_zero_point"]["DISTRIBUTION"], bands=band)[0]
-
-                    
-            output_dicts.append(copy.deepcopy(output_dict))
-            del output_dict
-                    
-        return output_dicts
+                output_dicts.append(copy.deepcopy(output_dict))
+                del output_dict
+                        
+            return output_dicts
 
     def generate_time_series(self, configuration, nites, objects, redshift_dicts, cosmo):
         """
