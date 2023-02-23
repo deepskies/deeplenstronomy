@@ -13,7 +13,7 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
 
-class LCGen():
+class TimeSeries():
     """Light Curve Generation"""    
     def __init__(self, bands=''):
         """

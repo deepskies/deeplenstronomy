@@ -12,13 +12,14 @@ from lenstronomy.SimulationAPI.sim_api import SimAPI
 import numpy as np
 import pandas as pd
 
-import deeplenstronomy.timeseries as timeseries
+
 from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_user_dist, KeyPathDict, read_cadence_file
 import deeplenstronomy.distributions as distributions
 import deeplenstronomy.special as special
 import deeplenstronomy.surveys as surveys
 import deeplenstronomy.check as big_check
 import deeplenstronomy.image_generator as image_generator
+import deeplenstronomy.timeseries as timeseries
 
 class Parser():
     """ 
@@ -806,7 +807,7 @@ class Organizer():
         shifted_cadence_dict = {k: {b: [x - cadence_dict['REFERENCE_MJD'] for x in cadence_dict[k][b]] for b in self.main_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')} for k in cadence_dict.keys() if k.startswith('POINTING_')}
             
         # instantiate an LCGen object
-        lc_gen = timeseries.LCGen(bands=self.main_dict['SURVEY']['PARAMETERS']['BANDS'])
+        lc_gen = timeseries.TimeSeries(bands=self.main_dict['SURVEY']['PARAMETERS']['BANDS'])
 
         # make a library for each pointing - need to speed this up (horrible performance for non-fixed redshifts and many pointings)
         for pointing, nite_dict in shifted_cadence_dict.items():
