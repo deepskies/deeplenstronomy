@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "deeplenstronomy"
+version = "0.1.0"
+description = ""
+authors = ["Ashia Lewis <pantagruelspendulum@protonmail.com>"]
+readme = "README.md"
+packages = [{include = "deeplenstronomy_project"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+cleo = "^2.0.1"
+astropy = "^5.2.1"
+pandas = "^1.5.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
