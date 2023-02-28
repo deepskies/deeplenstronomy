@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from deeplenstronomy.configuration.config_constructor import ConfigConstructor
 from typing import Union
 
-class SurveyConfigConstructur(ConfigConstructor):
+class SurveyConfigConstructor(ConfigConstructor):
 
     def __init__(self, survey_name: Union[None, str]):
         super().__init__()

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from deeplenstronomy.configuration.config_constructor import ConfigConstructor
 from typing import Union
 
-class PhysicsConfigConstructur(ConfigConstructor):
+class PhysicsConfigConstructor(ConfigConstructor):
 
     def __init__(self, input_name: Union[None, str]):
         super().__init__()
