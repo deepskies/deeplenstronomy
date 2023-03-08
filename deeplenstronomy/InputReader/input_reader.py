@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 
 class InputReader(ABC):
-    def __init__(self, configuration: str = None):
+    def __init__(self, configuration: dict = None):
         self.configuration = configuration
 
         # Break that dictionary into segments that can be used by the input reader
