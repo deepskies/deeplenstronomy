@@ -2,28 +2,11 @@ from abc import ABC, abstractmethod
 
 
 class InputReader(ABC):
-    def __init__(self, input_source: str = None):
-        self.dataset_parameters = self.read_input(input_source)
+    def __init__(self, configuration: str = None):
+        self.configuration = configuration
 
         # Break that dictionary into segments that can be used by the input reader
         # Without parsing through the whole dic every time a parameters is set
-
-    def read_input(self, input_source):
-        # Opens and validates and sets all the params given by the input
-        if input_source is None:
-            input_source = {"DEFAULT PARAMS"} # Todo. Fill these in.
-        dataset_params = self._open_input_source(input_source)
-        self._input_source_is_valid()
-
-        return dataset_params
-
-    def _open_input_source(self, input_source):
-        # How the open input is read in.
-        raise NotImplementedError
-
-    def _input_source_is_valid(self):
-        # Verify the given input source matches the requirements of the program
-        raise NotImplementedError
 
     # Methods to set each param individually
     # Making using the input_source optional
