@@ -20,8 +20,6 @@ class InputReader(ABC):
     def objects(self, object_id=None, **kwargs):
         pass
 
-    # Timeseries Input (pointings added) a subclass of the I/O
-
     def cosmology(self, *kwargs):
         # I don't know what sort of things are allowed for cosmology
         # TODO Consult Brian or docs on cosmo parameters
@@ -61,7 +59,7 @@ class InputReader(ABC):
         # Add all these parameters to the dictionary, used when calling the reader
         # Will work with all these default ones,
         # and let it be extended into different types of survey
-        pass
+        raise NotImplementedError
 
     def save(self, output_path):
         # Save results as {preformed config that can be re-run by feeding it to the io}
