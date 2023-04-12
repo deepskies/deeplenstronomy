@@ -1,6 +1,6 @@
 """Generate images from the organized user inputs."""
 
-from astropy.cosmology import FlatLambdaCDM
+from astropy.cosmology import FlatLambdaCDM, wCDM
 from lenstronomy.SimulationAPI.sim_api import SimAPI
 from lenstronomy.LensModel.Solver import lens_equation_solver
 from lenstronomy.LensModel.lens_model import LensModel
@@ -48,7 +48,7 @@ class ImageGenerator():
 
         ### Geometry-independent image properties
         output_metadata = []
-            
+
         # Single Band Info
         single_band_info = ['read_noise', 'pixel_scale', 'ccd_gain', 'exposure_time',
                             'sky_brightness', 'seeing', 'magnitude_zero_point',
@@ -178,8 +178,10 @@ class ImageGenerator():
         output_metadata = []
 
         #set the cosmology
-        cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
-        cosmo = FlatLambdaCDM(**dict_select_choose(list(info_dict.values())[0], cosmology_info))
+        #cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+        #cosmo = FlatLambdaCDM(**dict_select_choose(list(info_dict.values())[0], cosmology_info))
+        cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0', 'w0', 'Ode0']
+        cosmo = wCDM(**dict_select_choose(list(info_dict.values())[0], cosmology_info))
         
         for band, sim_dict in info_dict.items():
 

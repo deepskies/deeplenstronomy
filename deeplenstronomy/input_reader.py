@@ -6,7 +6,7 @@ import os
 import sys
 import yaml
 
-from astropy.cosmology import FlatLambdaCDM
+from astropy.cosmology import FlatLambdaCDM, wCDM
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from lenstronomy.SimulationAPI.sim_api import SimAPI
 import numpy as np
@@ -309,10 +309,11 @@ class Organizer():
                 for band, draw in zip(bands, draws):
                     output_dict[band][k] = draw
         cosmo_dict_draw = {k: output_dict[band][k] for k in config_dict['COSMOLOGY_DICT'].keys()}
-        # print(cosmo_dict_draw)
         # Set cosmology information
-        cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
-        cosmo_draw = FlatLambdaCDM(**dict_select_choose(cosmo_dict_draw, cosmology_info))
+        #cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+        #cosmo_draw = FlatLambdaCDM(**dict_select_choose(cosmo_dict_draw, cosmology_info))
+        cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0', 'w0', 'Ode0']
+        cosmo_draw = wCDM(**dict_select_choose(cosmo_dict_draw, cosmology_info))
 
         #IMAGE
         for k, v in config_dict['IMAGE_DICT'].items():
@@ -915,8 +916,8 @@ class Organizer():
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
                     # configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, input_df.loc[objid] if len(input_df) != 0 else None, objid)) 
-                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), input_df.loc[objid] if len(input_df) != 0 else None, objid)) 
-                    
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), input_df.loc[objid] if len(input_df) != 0 else None, objid))
+
         self.configuration_sim_dicts = configuration_sim_dicts
 
 
