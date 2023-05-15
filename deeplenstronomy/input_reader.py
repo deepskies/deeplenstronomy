@@ -395,6 +395,7 @@ class Organizer():
                     for band, draw in zip(bands, draws):
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, k_param)] = draw
+                            output_dict[band]['PLANE_{0}-{2}'.format(plane_num, obj_num, k_param)] = draw
                 else:
                     # Set the PLANE's redshift in the config_dict
                     if k_param == 'REDSHIFT':
