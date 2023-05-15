@@ -14,6 +14,7 @@ seeing:
 
 import numpy as np
 import random
+import scipy.stats
 from scipy.stats import poisson
 
 ## Single parameter sampling distributions
@@ -61,6 +62,21 @@ def normal(mean, std, bands=''):
         A sample of the specified normal distribution for each band in the simulation
     """
     draw = np.random.normal(loc=mean, scale=std)
+    return [draw] * len(bands.split(','))
+
+def loguniform(minimum, maximum, bands=''):
+    """
+    Return a sample from a loguniform probability distribution
+    with specified mean and standard deviation
+
+    Args:
+        minimum (float or int): The minimum of the interval to sample
+        maximum (float or int): The maximum of the interval to sample
+
+    Returns:
+        A sample of the specified loguniform distribution for each band in the simulation
+    """
+    draw = scipy.stats.loguniform.rvs(minimum, maximum)
     return [draw] * len(bands.split(','))
 
 def lognormal(mean, sigma, bands=''):
