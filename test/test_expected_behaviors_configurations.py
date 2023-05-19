@@ -5,7 +5,11 @@ Parsed Config File Produces Expected Behaviors - configurations
 import inspect
 import os
 import sys
+<<<<<<< HEAD
 sys.path.insert(1, '../')
+=======
+#sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
+>>>>>>> 7067adb (testing workflow)
 import deeplenstronomy.deeplenstronomy as dl
 
 
@@ -91,7 +95,9 @@ def test_configuration_existence():
 def test_configuration_fractions():
     for conf in dataset.configurations:
         frac = dataset.config_dict['GEOMETRY'][conf]['FRACTION']
+        print(frac,dataset.size)
         simulated_images = int(frac * dataset.size)
+        print(simulated_images)
         
         if all(has_images):
             assert eval(f'dataset.{conf}_images').shape[0] == simulated_images
