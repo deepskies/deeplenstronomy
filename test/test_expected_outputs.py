@@ -3,7 +3,8 @@ Arguments Produce Expected Outputs
 """
 import inspect
 import os
-
+import sys
+#sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
 import deeplenstronomy.deeplenstronomy as dl
 
 

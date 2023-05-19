@@ -774,6 +774,8 @@ class Organizer():
         for k, v in self.main_dict['GEOMETRY'].items():
             configurations[k] = v
             configurations[k]['SIZE'] = int(global_size * v['FRACTION'])
+            print(v['FRACTION'])
+            print(configurations[k]['SIZE'])
 
         # Determine objects and their planes, store in SIM_DICT key
         for k, v in configurations.items():

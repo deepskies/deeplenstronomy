@@ -4,7 +4,8 @@ Parsed Config File Produces Expected Behaviors - configurations
 
 import inspect
 import os
-
+import sys
+#sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
 import deeplenstronomy.deeplenstronomy as dl
 
 
@@ -19,7 +20,6 @@ doc = """
 \tconfiguration were simulated as expected. These properties include the 
 \texpected size of each configuration, the objects and planes included, and
 \twhether time-series functionalities appear as expected. The functions are:
-
 \t\t- test_configuration_existence
 \t\t\tTesting that all configurations present in the config file are found by 
 \t\t\tdeeplenstronomy and are present in the simulation outputs
@@ -89,7 +89,9 @@ def test_configuration_existence():
 def test_configuration_fractions():
     for conf in dataset.configurations:
         frac = dataset.config_dict['GEOMETRY'][conf]['FRACTION']
+        print(frac,dataset.size)
         simulated_images = int(frac * dataset.size)
+        print(simulated_images)
         
         if all(has_images):
             assert eval(f'dataset.{conf}_images').shape[0] == simulated_images
