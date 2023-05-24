@@ -4,13 +4,10 @@ Parsed Config File Produces Expected Behaviors - configurations
 
 import inspect
 import os
-import sys
-sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
+# import sys
+# sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
 import deeplenstronomy.deeplenstronomy as dl
 import pytest
-
-import deeplenstronomy
-print('Deeplenstronomy version:', deeplenstronomy.deeplenstronomy)
 
 
 doc = """
