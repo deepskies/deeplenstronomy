@@ -21,8 +21,7 @@ IMAGE:
 
 SURVEY:
     PARAMETERS:
-        #BANDS: g,r,i,z,Y
-        BANDS: g
+        BANDS: g,r,i,z,Y
         seeing: 0.9
         magnitude_zero_point: 30.0
         sky_brightness: 23.5
@@ -115,7 +114,7 @@ SPECIES:
 GEOMETRY:
     CONFIGURATION_1:
         NAME: GALAXY_AGN
-        FRACTION: 0.5
+        FRACTION: 0.25
         PLANE_1:
             OBJECT_1: LENS
             PARAMETERS:
@@ -124,13 +123,19 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: AGN
             PARAMETERS:
-                REDSHIFT: 0.7                  
+                REDSHIFT: 0.7  
+                # REDSHIFT: 
+                #     DISTRIBUTION:
+                #         NAME: uniform
+                #         PARAMETERS:
+                #             minimum: 0.5
+                #             maximum: 1.0                
         NOISE_SOURCE_1: POISSON_NOISE
 
 
     CONFIGURATION_2:
         NAME: GALAXY_AGN_NOISELESS
-        FRACTION: 0.5
+        FRACTION: 0.25
         PLANE_1:
             OBJECT_1: LENS
             PARAMETERS:
@@ -139,39 +144,63 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: AGN
             PARAMETERS:
-                REDSHIFT: 0.7         
+                # REDSHIFT: 0.7   
+                REDSHIFT: 
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: 0.5
+                            maximum: 1.0      
 
-    # CONFIGURATION_3:
-    #     NAME: LENSED_SNE
-    #     FRACTION: 0.25
-    #     PLANE_1:
-    #         OBJECT_1: LENS
-    #         PARAMETERS:
-    #             REDSHIFT: 0.2                    
-    #     PLANE_2:
-    #         OBJECT_1: SOURCE
-    #         OBJECT_2: SUPERNOVA
-    #         PARAMETERS:
-    #             REDSHIFT: 0.7      
-    #     NOISE_SOURCE_1: POISSON_NOISE   
+    CONFIGURATION_3:
+        NAME: LENSED_SNE
+        FRACTION: 0.25
+        PLANE_1:
+            OBJECT_1: LENS
+            PARAMETERS:
+                REDSHIFT: 0.2                    
+        PLANE_2:
+            OBJECT_1: SOURCE
+            OBJECT_2: SUPERNOVA
+            PARAMETERS:
+                REDSHIFT: 0.7 
+                # REDSHIFT: 
+                #     DISTRIBUTION:
+                #         NAME: uniform
+                #         PARAMETERS:
+                #             minimum: 0.5
+                #             maximum: 1.0     
+        NOISE_SOURCE_1: POISSON_NOISE   
 
-    # CONFIGURATION_4:
-    #     NAME: SPICY_LIFE
-    #     FRACTION: 0.25
-    #     PLANE_1:
-    #         OBJECT_1: LENS
-    #         OBJECT_2: STAR
-    #         OBJECT_3: STAR
-    #         PARAMETERS:
-    #             REDSHIFT: 0.2                    
-    #     PLANE_2:
-    #         OBJECT_1: LENS
-    #         PARAMETERS:
-    #             REDSHIFT: 0.7
-    #     PLANE_3:
-    #         OBJECT_1: SOURCE
-    #         OBJECT_2: SUPERNOVA
-    #         OBJECT_3: AGN
-    #         PARAMETERS:
-    #             REDSHIFT: 1.3      
-    #     NOISE_SOURCE_1: POISSON_NOISE     
+    CONFIGURATION_4:
+        NAME: SPICY_LIFE
+        FRACTION: 0.25
+        PLANE_1:
+            OBJECT_1: LENS
+            OBJECT_2: STAR
+            OBJECT_3: STAR
+            PARAMETERS:
+                REDSHIFT: 0.2                    
+        PLANE_2:
+            OBJECT_1: LENS
+            PARAMETERS:
+                REDSHIFT: 0.7
+                # REDSHIFT: 
+                #     DISTRIBUTION:
+                #         NAME: uniform
+                #         PARAMETERS:
+                #             minimum: 0.5
+                #             maximum: 1.0
+        # PLANE_3:
+        #     OBJECT_1: SOURCE
+        #     OBJECT_2: SUPERNOVA
+        #     OBJECT_3: AGN
+        #     PARAMETERS:
+        #         REDSHIFT: 1.3
+        #         # REDSHIFT: 
+        #         #     DISTRIBUTION:
+        #         #             NAME: uniform
+        #         #             PARAMETERS:
+        #         #                 minimum: 0.5
+        #         #                 maximum: 1.0     
+        NOISE_SOURCE_1: POISSON_NOISE     
