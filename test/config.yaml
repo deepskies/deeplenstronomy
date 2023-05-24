@@ -123,13 +123,12 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: AGN
             PARAMETERS:
-                REDSHIFT: 0.7  
-                # REDSHIFT: 
-                #     DISTRIBUTION:
-                #         NAME: uniform
-                #         PARAMETERS:
-                #             minimum: 0.5
-                #             maximum: 1.0                
+                REDSHIFT: 
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: 0.5
+                            maximum: 1.0                
         NOISE_SOURCE_1: POISSON_NOISE
 
 
@@ -144,13 +143,7 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: AGN
             PARAMETERS:
-                # REDSHIFT: 0.7   
-                REDSHIFT: 
-                    DISTRIBUTION:
-                        NAME: uniform
-                        PARAMETERS:
-                            minimum: 0.5
-                            maximum: 1.0      
+                REDSHIFT: 0.7    
 
     CONFIGURATION_3:
         NAME: LENSED_SNE
@@ -163,13 +156,7 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: SUPERNOVA
             PARAMETERS:
-                REDSHIFT: 0.7 
-                # REDSHIFT: 
-                #     DISTRIBUTION:
-                #         NAME: uniform
-                #         PARAMETERS:
-                #             minimum: 0.5
-                #             maximum: 1.0     
+                REDSHIFT: 0.7    
         NOISE_SOURCE_1: POISSON_NOISE   
 
     CONFIGURATION_4:
@@ -185,22 +172,10 @@ GEOMETRY:
             OBJECT_1: LENS
             PARAMETERS:
                 REDSHIFT: 0.7
-                # REDSHIFT: 
-                #     DISTRIBUTION:
-                #         NAME: uniform
-                #         PARAMETERS:
-                #             minimum: 0.5
-                #             maximum: 1.0
-        # PLANE_3:
-        #     OBJECT_1: SOURCE
-        #     OBJECT_2: SUPERNOVA
-        #     OBJECT_3: AGN
-        #     PARAMETERS:
-        #         REDSHIFT: 1.3
-        #         # REDSHIFT: 
-        #         #     DISTRIBUTION:
-        #         #             NAME: uniform
-        #         #             PARAMETERS:
-        #         #                 minimum: 0.5
-        #         #                 maximum: 1.0     
+        PLANE_3:
+            OBJECT_1: SOURCE
+            OBJECT_2: SUPERNOVA
+            OBJECT_3: AGN
+            PARAMETERS:
+                REDSHIFT: 1.3    
         NOISE_SOURCE_1: POISSON_NOISE     
