@@ -20,4 +20,5 @@ jobs:
         python -m pip install -U pytest
     - name: Test with pytest
       run: |
+       cd ./test
        pytest
