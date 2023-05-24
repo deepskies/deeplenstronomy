@@ -22,6 +22,7 @@ jobs:
         pip install pandas
         pip install PyYAML
         pip install astropy
+        pip install lenstronomy
     - name: Test with pytest
       run: |
        cd ./test
