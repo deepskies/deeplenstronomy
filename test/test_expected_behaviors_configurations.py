@@ -58,10 +58,9 @@ kwargs_sets = {0: {}, # default arguments
                8: {'return_planes': True}
                }
 
-# f = open('status.txt', 'r')
-# current_test = int(f.read().strip())
-# f.close()
-current_test = 7
+f = open('status.txt', 'r')
+current_test = int(f.read().strip())
+f.close()
 print('current test: ',current_test)
 
 
@@ -98,14 +97,12 @@ def test_configuration_fractions():
         simulated_images = int(frac * dataset.size)
         
         if all(has_images):
-            print('Has images length: ',eval(f'dataset.{conf}_images').shape[0])
             assert eval(f'dataset.{conf}_images').shape[0] == simulated_images
 
         if all(has_metadata):
         #if all(metadata_exist):
             # not time-series
             if 'TIMESERIES' not in dataset.config_dict['GEOMETRY'][conf].keys():
-                print('Has Metadata length: ',len(eval(f'dataset.{conf}_metadata')))
                 assert len(eval(f'dataset.{conf}_metadata')) == simulated_images
 
             # time-series

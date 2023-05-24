@@ -404,7 +404,6 @@ class Organizer():
                         if plane_num >= 2:
                             prev_plane_num = plane_num - 1
                             if v_param < config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)]:
-                                print('Source redshift less than Lens redshift!')
                                 if config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] >= 10:
                                     config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)] = config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] + 1
                                     redshift = config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(prev_plane_num)] + 1
