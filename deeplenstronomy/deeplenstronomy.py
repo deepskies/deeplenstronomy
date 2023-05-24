@@ -536,7 +536,6 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                 if return_planes:
                     np.save('{0}/{1}_planes.npy'.format(dataset.outdir, configuration), configuration_planes)
             elif image_file_format == 'h5':
-                print('Length of configuration_images: ', configuration_images.shape[0])
                 hf = h5py.File('{0}/{1}_images.h5'.format(dataset.outdir, configuration), 'w')
                 hf.create_dataset(dataset.name, data=configuration_images)
                 hf.close()
@@ -551,7 +550,6 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
         # Store the images and metadata to the Dataset object (ideal for small scale testing)
         if store_in_memory:
-            print('Length of configuration_images: ', len(configuration_images))
             setattr(dataset, '{0}_images'.format(configuration), configuration_images)
             setattr(dataset, '{0}_metadata'.format(configuration), metadata_df)
             if return_planes:

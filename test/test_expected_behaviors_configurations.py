@@ -55,20 +55,19 @@ kwargs_sets = {0: {}, # default arguments
                5: {'store_sample': True},
                6: {'skip_image_generation': False, 'survey': 'des'},
                7: {'solve_lens_equation': True},
-               8: {'return_planes': True},
-               9: {'verbose':True, 'save_to_disk': True, 'image_file_format': 'h5'}
-}
+               8: {'return_planes': True}
+               }
 
-f = open('status.txt', 'r')
-current_test = int(f.read().strip())
-f.close()
-#current_test = 9
+# f = open('status.txt', 'r')
+# current_test = int(f.read().strip())
+# f.close()
+current_test = 7
 print('current test: ',current_test)
+
 
 # Generate the dataset
 kwargs_set = kwargs_sets[current_test]
-#config_filename = 'config.yaml'
-config_filename = '/Users/jarugula/Research/Deeplenstronomy_issues/github_issues/issue_57.yml'
+config_filename = 'config.yaml'
 dataset = dl.make_dataset(config_filename, **kwargs_set)
 
 has_images = [hasattr(dataset, x + '_images') for x in dataset.configurations]
@@ -97,17 +96,16 @@ def test_configuration_fractions():
     for conf in dataset.configurations:
         frac = dataset.config_dict['GEOMETRY'][conf]['FRACTION']
         simulated_images = int(frac * dataset.size)
-        print('test_all size: ',simulated_images)
         
         if all(has_images):
-            print('Dataset length: ',eval(f'dataset.{conf}_images').shape[0])
+            print('Has images length: ',eval(f'dataset.{conf}_images').shape[0])
             assert eval(f'dataset.{conf}_images').shape[0] == simulated_images
 
         if all(has_metadata):
         #if all(metadata_exist):
             # not time-series
             if 'TIMESERIES' not in dataset.config_dict['GEOMETRY'][conf].keys():
-                print('Metadata length: ',len(eval(f'dataset.{conf}_metadata')))
+                print('Has Metadata length: ',len(eval(f'dataset.{conf}_metadata')))
                 assert len(eval(f'dataset.{conf}_metadata')) == simulated_images
 
             # time-series
