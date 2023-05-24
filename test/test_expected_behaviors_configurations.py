@@ -4,7 +4,7 @@ Parsed Config File Produces Expected Behaviors - configurations
 
 import inspect
 import os
-# import sys
+import sys
 # sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
 import sys
 sys.path.insert(1, '../')
