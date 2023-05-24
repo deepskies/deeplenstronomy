@@ -5,7 +5,6 @@ import inspect
 import os
 import sys
 sys.path.insert(1, '../')
-# import deeplenstronomy as dl
 import deeplenstronomy.deeplenstronomy as dl
 
 

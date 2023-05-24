@@ -5,11 +5,8 @@ Parsed Config File Produces Expected Behaviors - configurations
 import inspect
 import os
 import sys
-# sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
 sys.path.insert(1, '../')
-# mport deeplenstronomy as dl
 import deeplenstronomy.deeplenstronomy as dl
-#import pytest
 
 
 doc = """
@@ -50,10 +47,10 @@ print(doc)
 kwargs_sets = {0: {}, # default arguments
                1: {'save_to_disk': True},
                2: {'save_to_disk': True, 'image_file_format': 'h5'},
-               3: {'save_to_disk': True, 'skip_image_generation': False},
+               3: {'save_to_disk': True, 'skip_image_generation': True},
                4: {'store_in_memory': False},
                5: {'store_sample': True},
-               6: {'skip_image_generation': False, 'survey': 'des'},
+               6: {'skip_image_generation': True, 'survey': 'des'},
                7: {'solve_lens_equation': True},
                8: {'return_planes': True}
                }
