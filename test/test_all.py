@@ -2,8 +2,6 @@
 
 import os
 os.system('rm -rf TestResults') # fresh start
-import sys
-sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
 
 
 kwargs_sets = {0: {}, # default arguments
