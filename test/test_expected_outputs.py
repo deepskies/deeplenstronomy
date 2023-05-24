@@ -4,8 +4,9 @@ Arguments Produce Expected Outputs
 import inspect
 import os
 import sys
-#sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
-import deeplenstronomy.deeplenstronomy as dl
+sys.path.insert(1, '../deeplenstronomy')
+import deeplenstronomy as dl
+#import deeplenstronomy.deeplenstronomy as dl
 
 
 doc = """
