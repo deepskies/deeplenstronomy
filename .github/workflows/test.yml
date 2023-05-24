@@ -20,6 +20,8 @@ jobs:
         python -m pip install -U pytest
         python -m pip install h5py
         pip install pandas
+        pip install PyYAML
+        pip install astropy
     - name: Test with pytest
       run: |
        cd ./test
