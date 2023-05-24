@@ -21,7 +21,8 @@ IMAGE:
 
 SURVEY:
     PARAMETERS:
-        BANDS: g,r,i,z,Y
+        #BANDS: g,r,i,z,Y
+        BANDS: g
         seeing: 0.9
         magnitude_zero_point: 30.0
         sky_brightness: 23.5
@@ -114,7 +115,7 @@ SPECIES:
 GEOMETRY:
     CONFIGURATION_1:
         NAME: GALAXY_AGN
-        FRACTION: 0.25
+        FRACTION: 0.5
         PLANE_1:
             OBJECT_1: LENS
             PARAMETERS:
@@ -134,7 +135,7 @@ GEOMETRY:
 
     CONFIGURATION_2:
         NAME: GALAXY_AGN_NOISELESS
-        FRACTION: 0.25
+        FRACTION: 0.5
         PLANE_1:
             OBJECT_1: LENS
             PARAMETERS:

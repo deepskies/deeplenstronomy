@@ -784,8 +784,8 @@ class Organizer():
         for k, v in self.main_dict['GEOMETRY'].items():
             configurations[k] = v
             configurations[k]['SIZE'] = int(global_size * v['FRACTION'])
-            print(v['FRACTION'])
-            print(configurations[k]['SIZE'])
+            print('input_reader fraction: ', v['FRACTION'])
+            print('input_reader size: ',configurations[k]['SIZE'])
 
         # Determine objects and their planes, store in SIM_DICT key
         for k, v in configurations.items():
@@ -927,6 +927,7 @@ class Organizer():
                     
             
             for objid in range(v['SIZE']):
+                print(objid)
 
                 if time_series:
                     flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid, peakshifts[objid], inputs=input_df.loc[objid] if len(input_df) != 0 else None)
