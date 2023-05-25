@@ -386,6 +386,7 @@ class Organizer():
                     for band, draw in zip(bands, draws):
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, k_param)] = draw
+                            output_dict[band]['PLANE_{0}-{2}'.format(plane_num, obj_num, k_param)] = draw
                 else:
                     # Set the PLANE's redshift in the config_dict
                     if k_param == 'REDSHIFT':
@@ -408,6 +409,7 @@ class Organizer():
                     for band in bands:
                         for obj_num in range(1, config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)] + 1):
                             output_dict[band]['PLANE_{0}-OBJECT_{1}-{2}'.format(plane_num, obj_num, k_param)] = v_param
+                            output_dict[band]['PLANE_{0}-{2}'.format(plane_num, obj_num, k_param)] = v_param
 
             for obj_idx in range(config_dict['SIM_DICT']['PLANE_{0}-NUMBER_OF_OBJECTS'.format(plane_num)]):
                 obj_num = obj_idx + 1
@@ -902,7 +904,6 @@ class Organizer():
                     
             
             for objid in range(v['SIZE']):
-
                 if time_series:
                     flattened_image_infos = self._flatten_and_fill_time_series(v.copy(), cosmo, k, obj_strings, objid, peakshifts[objid], inputs=input_df.loc[objid] if len(input_df) != 0 else None)
                     for flattened_image_info in flattened_image_infos:

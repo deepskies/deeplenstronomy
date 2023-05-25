@@ -4,7 +4,8 @@ Parsed Config File Produces Expected Behaviors - configurations
 
 import inspect
 import os
-
+import sys
+sys.path.insert(1, '../')
 import deeplenstronomy.deeplenstronomy as dl
 
 
@@ -19,7 +20,6 @@ doc = """
 \tconfiguration were simulated as expected. These properties include the 
 \texpected size of each configuration, the objects and planes included, and
 \twhether time-series functionalities appear as expected. The functions are:
-
 \t\t- test_configuration_existence
 \t\t\tTesting that all configurations present in the config file are found by 
 \t\t\tdeeplenstronomy and are present in the simulation outputs
@@ -53,11 +53,13 @@ kwargs_sets = {0: {}, # default arguments
                6: {'skip_image_generation': True, 'survey': 'des'},
                7: {'solve_lens_equation': True},
                8: {'return_planes': True}
-}
+               }
 
 f = open('status.txt', 'r')
 current_test = int(f.read().strip())
 f.close()
+print('current test: ',current_test)
+
 
 # Generate the dataset
 kwargs_set = kwargs_sets[current_test]
@@ -95,6 +97,7 @@ def test_configuration_fractions():
             assert eval(f'dataset.{conf}_images').shape[0] == simulated_images
 
         if all(has_metadata):
+        #if all(metadata_exist):
             # not time-series
             if 'TIMESERIES' not in dataset.config_dict['GEOMETRY'][conf].keys():
                 assert len(eval(f'dataset.{conf}_metadata')) == simulated_images
