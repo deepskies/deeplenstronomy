@@ -25,5 +25,9 @@ jobs:
         pip install lenstronomy
     - name: Test with pytest
       run: |
+<<<<<<< HEAD
        cd ./test
        python test_all.py
+=======
+       pytest
+>>>>>>> 1bba66a (add pytest)

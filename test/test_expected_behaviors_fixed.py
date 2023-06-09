@@ -4,11 +4,7 @@ Parsed Config File Produces Expected Behaviors - fixed parameters
 import inspect
 import os
 import sys
-<<<<<<< HEAD
 sys.path.insert(1, '../')
-=======
-#sys.path.insert(1, '/Users/jarugula/Research/Deeplenstronomy_issues')
->>>>>>> 7067adb (testing workflow)
 import deeplenstronomy.deeplenstronomy as dl
 
 doc = """
