@@ -6,7 +6,7 @@ import os
 import sys
 import yaml
 
-from astropy.cosmology import FlatLambdaCDM
+import astropy.cosmology as cosmology
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from lenstronomy.SimulationAPI.sim_api import SimAPI
 import numpy as np
@@ -278,7 +278,7 @@ class Organizer():
         #return [x.replace('.', '-') for x in d.keypaths() if eval("d['" + "']['".join(x.split('.')) + "']") == obj_name][0]
 
     
-    def _flatten_and_fill(self, config_dict, cosmo, inputs, objid=0):
+    def _flatten_and_fill(self, config_dict, inputs, objid=0):
         """
         Flatten input dictionary, and sample from any specified distributions
         
@@ -300,6 +300,11 @@ class Organizer():
                 output_dict[band]['POINTING'] = pointing
         
         #COSMOLOGY
+        cosmo_import = {'FlatLambdaCDM': cosmology.FlatLambdaCDM,
+        'LambdaCDM': cosmology.LambdaCDM,
+        'FlatwCDM': cosmology.FlatwCDM,
+        'wCDM': cosmology.wCDM}
+        
         for k, v in config_dict['COSMOLOGY_DICT'].items():
             if v != 'DISTRIBUTION':
                 for band in bands:
@@ -308,6 +313,10 @@ class Organizer():
                 draws = self._draw(self.main_dict['COSMOLOGY']['PARAMETERS'][k]['DISTRIBUTION'], bands)
                 for band, draw in zip(bands, draws):
                     output_dict[band][k] = draw
+
+        cosmo_dict_draw = {k: output_dict[band][k] for k in config_dict['COSMOLOGY_DICT'].keys()}
+        cosmology_info = ['H0', 'Om0', 'Ode0', 'w0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+        cosmo_draw = cosmo_import[cosmo_dict_draw['NAME']](**dict_select_choose(cosmo_dict_draw, cosmology_info))
 
         #IMAGE
         for k, v in config_dict['IMAGE_DICT'].items():
@@ -447,7 +456,8 @@ class Organizer():
                                 angle = None
                                 
                             ##convert image separation into ra and dec
-                            ra, dec = self._choose_position(ra_host, dec_host, sep, sep_unit, cosmo, config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)], angle)
+                            # ra, dec = self._choose_position(ra_host, dec_host, sep, sep_unit, cosmo, config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)], angle)
+                            ra, dec = self._choose_position(ra_host, dec_host, sep, sep_unit, cosmo_draw, config_dict['SIM_DICT']['PLANE_{0}-REDSHIFT'.format(plane_num)], angle)
 
                         else:
                             #set ra and dec to host center
@@ -810,16 +820,28 @@ class Organizer():
         #survey_dict['NAME'] = self.main_dict['SURVEY']['NAME']
         for k in configurations.keys():
             configurations[k]['SURVEY_DICT'] = survey_dict
-            
+          
         # Add cosmology metadata
+        cosmo_import = {'FlatLambdaCDM': cosmology.FlatLambdaCDM,
+        'LambdaCDM': cosmology.LambdaCDM,
+        'FlatwCDM': cosmology.FlatwCDM,
+        'wCDM': cosmology.wCDM}
+
         cosmo_dict = {k: v if not isinstance(v, dict) else 'DISTRIBUTION' for k, v in self.main_dict['COSMOLOGY']['PARAMETERS'].items()}
-        #cosmo_dict['NAME'] = self.main_dict['COSMOLOGY']['NAME']
+
+        if 'NAME' in self.main_dict['COSMOLOGY'].keys():
+            cosmo_dict['NAME'] = self.main_dict['COSMOLOGY']['NAME']
+            print(cosmo_dict['NAME'])
+        else:
+            cosmo_dict['NAME'] = 'FlatLambdaCDM'
+
         for k in configurations.keys():
             configurations[k]['COSMOLOGY_DICT'] = cosmo_dict
-
+        
         # Set cosmology information
-        cosmology_info = ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
-        cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
+        # cosmology_info = ['H0', 'Om0', 'Ode0', 'w0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+        # cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
+        # cosmo = cosmo_import[cosmo_dict['NAME']](**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
             
         # Add noise metadata
         for k in configurations.keys():
@@ -908,7 +930,7 @@ class Organizer():
                     for flattened_image_info in flattened_image_infos:
                         configuration_sim_dicts[k].append(flattened_image_info)
                 else:
-                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), cosmo, input_df.loc[objid] if len(input_df) != 0 else None, objid))    
+                    configuration_sim_dicts[k].append(self._flatten_and_fill(v.copy(), input_df.loc[objid] if len(input_df) != 0 else None, objid))    
 
         self.configuration_sim_dicts = configuration_sim_dicts
 

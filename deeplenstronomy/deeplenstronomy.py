@@ -88,7 +88,7 @@ class Dataset():
         if param in ['SIZE', 'OUTDIR']:
             return "['DATASET']['PARAMETERS']['{0}']".format(param)
         # COSMOLOGY
-        elif param in ['H0', 'Om0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']:
+        elif param in ['H0', 'Om0', 'Ode0', 'w0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']:
             return "['COSMOLOGY']['PARAMETERS']['{0}']".format(param)
         # IMAGE
         elif param in ['exposure_time', 'numPix', 'pixel_scale', 'psf_type', 'read_noise', 'ccd_gain']:
