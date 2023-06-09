@@ -4,7 +4,8 @@ Parsed Config File Produces Expected Behaviors - configurations
 
 import inspect
 import os
-
+import sys
+sys.path.insert(1, '../')
 import deeplenstronomy.deeplenstronomy as dl
 
 

@@ -1,0 +1,29 @@
+name: test
+
+on: push
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m ensurepip
+        python -m pip install --upgrade pip
+        python -m pip install -U pytest
+        python -m pip install h5py
+        pip install pandas
+        pip install PyYAML
+        pip install astropy
+        pip install lenstronomy
+    - name: Test with pytest
+      run: |
+       cd ./test
+       python test_all.py
