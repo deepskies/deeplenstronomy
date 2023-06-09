@@ -3,7 +3,7 @@ DATASET:
     PARAMETERS:
         SIZE: 10
         OUTDIR: TestResults
-        SEED: 6
+    SEED: 22
 
 COSMOLOGY:
     PARAMETERS:
@@ -79,7 +79,15 @@ SPECIES:
             NAME: SHEAR
             PARAMETERS:
                 gamma1: 0.08
-                gamma2: 0.01               
+                gamma2: 0.01   
+        MASS_PROFILE_1:
+            NAME: SIE
+            PARAMETERS:
+                theta_E: 2.0
+                e1: 0.1
+                e2: -0.1
+                center_x: 0.0
+                center_y: 0.0            
     POINTSOURCE_1:
         NAME: AGN
         HOST: SOURCE
@@ -115,7 +123,12 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: AGN
             PARAMETERS:
-                REDSHIFT: 0.7                  
+                REDSHIFT: 
+                    DISTRIBUTION:
+                        NAME: uniform
+                        PARAMETERS:
+                            minimum: 0.5
+                            maximum: 1.0                
         NOISE_SOURCE_1: POISSON_NOISE
 
 
@@ -130,7 +143,7 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: AGN
             PARAMETERS:
-                REDSHIFT: 0.7         
+                REDSHIFT: 0.7    
 
     CONFIGURATION_3:
         NAME: LENSED_SNE
@@ -143,7 +156,7 @@ GEOMETRY:
             OBJECT_1: SOURCE
             OBJECT_2: SUPERNOVA
             PARAMETERS:
-                REDSHIFT: 0.7      
+                REDSHIFT: 0.7    
         NOISE_SOURCE_1: POISSON_NOISE   
 
     CONFIGURATION_4:
@@ -164,5 +177,5 @@ GEOMETRY:
             OBJECT_2: SUPERNOVA
             OBJECT_3: AGN
             PARAMETERS:
-                REDSHIFT: 1.3      
-        NOISE_SOURCE_1: POISSON_NOISE     
+                REDSHIFT: 1.3    
+        NOISE_SOURCE_1: POISSON_NOISE         
