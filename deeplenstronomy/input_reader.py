@@ -785,8 +785,6 @@ class Organizer():
         for k, v in self.main_dict['GEOMETRY'].items():
             configurations[k] = v
             configurations[k]['SIZE'] = int(global_size * v['FRACTION'])
-            print(v['FRACTION'])
-            print(configurations[k]['SIZE'])
 
         # Determine objects and their planes, store in SIM_DICT key
         for k, v in configurations.items():
@@ -835,7 +833,6 @@ class Organizer():
 
         if 'NAME' in self.main_dict['COSMOLOGY'].keys():
             cosmo_dict['NAME'] = self.main_dict['COSMOLOGY']['NAME']
-            print(cosmo_dict['NAME'])
         else:
             cosmo_dict['NAME'] = 'FlatLambdaCDM'
 
