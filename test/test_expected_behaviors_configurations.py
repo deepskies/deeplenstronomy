@@ -91,9 +91,7 @@ def test_configuration_existence():
 def test_configuration_fractions():
     for conf in dataset.configurations:
         frac = dataset.config_dict['GEOMETRY'][conf]['FRACTION']
-        print(frac,dataset.size)
         simulated_images = int(frac * dataset.size)
-        print(simulated_images)
         
         if all(has_images):
             assert eval(f'dataset.{conf}_images').shape[0] == simulated_images
