@@ -839,11 +839,6 @@ class Organizer():
         for k in configurations.keys():
             configurations[k]['COSMOLOGY_DICT'] = cosmo_dict
         
-        # Set cosmology information
-        # cosmology_info = ['H0', 'Om0', 'Ode0', 'w0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
-        # cosmo = FlatLambdaCDM(**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
-        # cosmo = cosmo_import[cosmo_dict['NAME']](**dict_select_choose(configurations[k]['COSMOLOGY_DICT'], cosmology_info))
-            
         # Add noise metadata
         for k in configurations.keys():
             noise_dict = {}
