@@ -32,9 +32,9 @@ f.write(str(next_test))
 f.close()
 
 # Run tests
-# os.system("pytest test_existance_and_attributes.py -v --capture=tee-sys")
-# os.system("pytest test_expected_outputs.py -v --capture=tee-sys")
-# os.system("pytest test_expected_behaviors_fixed.py -v --capture=tee-sys")
+os.system("pytest test_existance_and_attributes.py -v --capture=tee-sys")
+os.system("pytest test_expected_outputs.py -v --capture=tee-sys")
+os.system("pytest test_expected_behaviors_fixed.py -v --capture=tee-sys")
 os.system("pytest test_expected_behaviors_configurations.py -v --capture=tee-sys")
 
 
