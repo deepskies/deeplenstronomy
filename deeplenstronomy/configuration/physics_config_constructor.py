@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from deeplenstronomy.configuration.config_constructor import ConfigConstructor
+from deeplenstronomy.configuration.yaml_object import ConfigConstructor
 from typing import Union
 
 class PhysicsConfigConstructor(ConfigConstructor):

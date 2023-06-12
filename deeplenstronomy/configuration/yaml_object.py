@@ -1,30 +1,32 @@
-from abc import ABC, abstractmethod
 from typing import Union
 import yaml
 import os
+from deeplenstronomy.settings import config_template
 
-
-class ConfigConstructor(ABC):
+class YAMLObject():
     """
     ConfigConstructor is an abstract class that defines the interface for all configuration files.
     """
     def __init__(self, config_file_path: str):
         """
         """
+        self.__check_file_path_exists__(config_file_path)
+
         self.file_path = config_file_path    
-    
-    @abstractmethod
-    def create_config_template(self, param_dict: dict, template_type: str):
-        """
 
-        """
-        pass
+    def create_yaml_template(self, variables: dict, filename='default_config.yaml'):
+        
+        if not os.path.exists((self.file_path + filename)):
+            with open(self.file_path, 'w') as yaml_file:
+                yaml_file.write(yaml.dump(variables, default_flow_style=False))
+        else:
+            raise ValueError(f"The file {self.file_path} already exists. If you'd like to use another config file, you need to change the file name.")
 
-    def parse_yaml(self):
+    def parse_yaml(self, file_path):
         """
         Parse the configuration YAML.
         """
-        with open(self.file_path, 'r') as stream:
+        with open(file_path, 'r') as stream:
             try:
                 return yaml.safe_load(stream)
             except yaml.YAMLError as exc:
@@ -75,14 +77,12 @@ class ConfigConstructor(ABC):
 
         return yaml_key_list
 
-    # TODO: Fill with the configuration yaml format in the settings file.
-    def create_initial_template(self, variables: dict, filename='default_config.yaml'):
-        
-        if not os.path.exists((self.file_path + filename)):
-            with open(self.file_path, 'w') as yaml_file:
-                yaml_file.write(yaml.dump(variables, default_flow_style=False))
-        else:
-            raise ValueError(f"The file {self.file_path} already exists. If you'd like to use another config file, you need to change the file name.")
+    def __check_file_path_exists__(self, file_path):
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError("A configuration file at the path: {file_path} doesn't exist. \
+                                    Please choose a new path or create a file using appropriate function.")
+
                 
 
 

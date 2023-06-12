@@ -1,6 +1,6 @@
 # CONFIGURATION TEMPLATE DICTIONARY 
 
-config_template = {
+general_config_template = {
     'DATASET': {
         'NAME': 'value',
         'SIZE': 100,
