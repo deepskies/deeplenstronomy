@@ -17,7 +17,7 @@ from deeplenstronomy.utils import dict_select, dict_select_choose, draw_from_use
 import deeplenstronomy.distributions as distributions
 import deeplenstronomy.special as special
 import deeplenstronomy.surveys as surveys
-import deeplenstronomy.check as big_check
+import deeplenstronomy.configuration.check as big_check
 import deeplenstronomy.image_generator as image_generator
 
 class Parser():

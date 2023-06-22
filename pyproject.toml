@@ -11,6 +11,7 @@ python = "^3.9"
 cleo = "^2.0.1"
 astropy = "^5.2.1"
 pandas = "^1.5.3"
+python-benedict = "^0.31.0"
 
 
 [build-system]
