@@ -27,7 +27,7 @@ class Dataset():
         """
         
         if config:
-            make_dataset(config, dataset=self, save=save, store=store)
+            make_dataset(config, dataset=self, save_to_disk=save, store_in_memory=store)
         return
 
     def update_param(self, new_param_dict, configuration):
@@ -267,29 +267,29 @@ def _format_time(elapsed_time):
 def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
                  verbose=False, store_sample=False, image_file_format='npy',
                  survey=None, return_planes=False, skip_image_generation=False,
-                 solve_lens_equation=False):
+                 solve_lens_equation=False, random_seed=None):
     """
     Generate a dataset from a config file.
 
     Args:
         config (str or dict): name of yaml file specifying dataset characteristics or pre-parsed yaml file as dictionary
         verbose (bool, optional, default=False): print progress and status  updates at runtime
-        store_in_memory (bool, optional, default=True): save images and metadata as attributes 
-        save_to_disk (bool, optional, default=False): save images and metadata to disk   
-        store_sample (bool, optional, default=False): save five images and metadata as attribute 
+        store_in_memory (bool, optional, default=True): save images and metadata as attributes
+        save_to_disk (bool, optional, default=False): save images and metadata to disk
+        store_sample (bool, optional, default=False): save five images and metadata as attribute
         image_file_format (str, optional, default='npy'): outfile format type, options include ('npy', 'h5')
-        survey (str or None, optional, default=None): a default astronomical survey to use 
+        survey (str or None, optional, default=None): a default astronomical survey to use
         return_planes (bool, optional, default=False): return the lens, source, noise, and point source planes of the simulated images
         skip_image_generation (bool, optional, default=False): skip image generation
         solve_lens_equation (bool, optional, default=False): calculate the source positions
-        
+        random_seed: unit (seed of random generation used in case if dataset.seed is not specified )
     Returns:
         dataset (Dataset): and instance of the Dataset class
 
     Raises:
         RuntimeError: If `skip_image_generation == True` and `solve_lens_equation == True`
         RuntimeError: If `survey` is not a valid survey name
-        
+
     """
 
     if solve_lens_equation and skip_image_generation:
@@ -305,6 +305,21 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
     if isinstance(config, dict):
         dataset.config_dict = config
+
+        # paths and configurations of 'BACKGROUNDS' images (copy-paste from Parser._get_image_locations)
+        image_paths = []
+        image_configurations = []
+        if "BACKGROUNDS" in config.keys():
+            image_paths.append(config['BACKGROUNDS']['PATH'])
+            # probably there also should be append. It is really worth testing how Parser will behave
+            # in case of several background files
+            image_configurations = config['BACKGROUNDS']['CONFIGURATIONS'][:]
+
+        # paths and configurations of 'DISTRIBUTIONS' images (copy-paste from Parser._get_image_locations)
+        file_paths = []
+        if "DISTRIBUTIONS" in config.keys():
+            for k in config['DISTRIBUTIONS'].keys():
+                file_paths.append('DISTRIBUTIONS.' + k)
     else:    
         # Store config file
         dataset.config_file = config
@@ -315,18 +330,28 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
         parser = Parser(config, survey=survey)
         dataset.config_dict = parser.config_dict
 
+        image_paths=parser.image_paths
+        if len(parser.image_paths)>0:
+            image_configurations=parser.image_configurations
+        file_paths=parser.file_paths
+
     # store parser
-    dataset.parser = parser
+    #dataset.parser = parser
 
     # Store top-level dataset info
     dataset.name = dataset.config_dict['DATASET']['NAME']
     dataset.size = dataset.config_dict['DATASET']['PARAMETERS']['SIZE']
     dataset.outdir = dataset.config_dict['DATASET']['PARAMETERS']['OUTDIR']
     dataset.bands = dataset.config_dict['SURVEY']['PARAMETERS']['BANDS'].split(',')
+    # Just check that the key 'SEED' exists and it is 32 bit unsigned integer convertible
+    # Try-catch blocks in C++ were super slow, not speaking of Python
     try:
         dataset.seed = int(dataset.config_dict['DATASET']['PARAMETERS']["SEED"])
     except KeyError:
-        dataset.seed = random.randint(0, 100)
+        if random_seed is not None:
+            dataset.seed = random_seed
+        else:
+            dataset.seed = random.randint(0, 100)
     np.random.seed(dataset.seed)
     random.seed(dataset.seed)
 
@@ -339,33 +364,33 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     dataset.configurations = list(dataset.config_dict['GEOMETRY'].keys())
 
     # Handle image backgrounds if they exist
-    if len(parser.image_paths) > 0:
-        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
-        image_backgrounds = read_images(im_dir, parser.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
+    if len(image_paths) > 0:
+        im_dir = dataset.config_dict['BACKGROUNDS']["PATH"]
+        image_backgrounds = read_images(im_dir, dataset.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.bands)
     else:
-        image_backgrounds = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+        image_backgrounds = np.zeros((len(dataset.bands), dataset.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
     
     # If user-specified distributions exist, draw from them
     forced_inputs = {}
     max_size = dataset.size * 100 # maximum 100 epochs if timeseries
 
-    for fp in parser.file_paths:
-        filename = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['FILENAME']")
-        mode = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['MODE']")
+    for fp in file_paths:
+        filename = eval("dataset.config_dict['" + fp.replace('.', "']['") + "']" + "['FILENAME']")
+        mode = eval("dataset.config_dict['" + fp.replace('.', "']['") + "']" + "['MODE']")
         try:
-            step = eval("parser.config_dict['" + fp.replace('.', "']['") + "']" + "['STEP']")
+            step = eval("dataset.config_dict['" + fp.replace('.', "']['") + "']" + "['STEP']")
         except KeyError:
             step = 10
         try:
-            params = eval("parser.config_dict['"+fp.replace('.',"']['")+"']"+"['PARAMS']")
+            params = eval("dataset.config_dict['"+fp.replace('.',"']['")+"']"+"['PARAMS']")
         except KeyError:
             params = None
         draw_param_names, draw_param_values = draw_from_user_dist(filename, max_size, mode, step, params=params)
         forced_inputs[fp] = {'names': draw_param_names, 'values': draw_param_values}
     # If we want to iterate through map.txt, add the parameters to the forced inputs
-    if len(parser.image_paths) > 0 and "ITERATE" in parser.config_dict['BACKGROUNDS']:
+    if len(image_paths) > 0 and "ITERATE" in dataset.config_dict['BACKGROUNDS']:
         background_iterate = True
-        im_dir = parser.config_dict['BACKGROUNDS']["PATH"]
+        im_dir = dataset.config_dict['BACKGROUNDS']["PATH"]
         draw_param_names, draw_param_values = treat_map_like_user_dist(im_dir, max_size)
         forced_inputs[im_dir + '/map.txt'] = {'names': draw_param_names, 'values': draw_param_values}
     else:
@@ -397,18 +422,21 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
     # Initialize the ImageGenerator
     ImGen = ImageGenerator(return_planes, solve_lens_equation)
 
-    # Clear the sim_dicts out of memory
-    if not os.path.exists(dataset.outdir):
-        os.system('mkdir ' + dataset.outdir)
+    if save_to_disk:
+        # Clear the sim_dicts out of memory
+        if not os.path.exists(dataset.outdir):
+            os.system('mkdir ' + dataset.outdir)
         
-    for configuration in dataset.configurations:
-        np.save("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), {0: organizer.configuration_sim_dicts[configuration]}, allow_pickle=True)
-        del organizer.configuration_sim_dicts[configuration]
+        for configuration in dataset.configurations:
+            np.save("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), {0: organizer.configuration_sim_dicts[configuration]}, allow_pickle=True)
+            #del organizer.configuration_sim_dicts[configuration]
         
     # Simulate images
     #for configuration, sim_inputs in organizer.configuration_sim_dicts.items():
     for configuration in dataset.configurations:
-        sim_inputs = np.load("{0}/{1}_sim_dicts.npy".format(dataset.outdir, configuration), allow_pickle=True).item()[0]
+        sim_inputs = dataset.organizer.configuration_sim_dicts[configuration]
+        # previously you deleted it (why?)
+        #del organizer.configuration_sim_dicts[configuration]
 
         if verbose:
             print("Generating images for {0}".format(configuration))
@@ -418,7 +446,7 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
 
         # Handle image backgrounds if they exist
         real_image_indices = []
-        if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
+        if len(image_paths) > 0 and configuration in image_configurations:
             image_indices = organize_image_backgrounds(im_dir, len(image_backgrounds), [_flatten_image_info(sim_input) for sim_input in sim_inputs], configuration, overwrite=background_iterate)
             check_background_indices(image_indices, background_iterate)
         else:
@@ -504,10 +532,10 @@ def make_dataset(config, dataset=None, save_to_disk=False, store_in_memory=True,
             configuration_planes = np.array(planes)
 
         # Add image backgrounds -- will just add zeros if no backgrounds have been specified
-        if len(parser.image_paths) > 0 and configuration in parser.image_configurations:
+        if len(image_paths) > 0 and configuration in image_configurations:
             additive_image_backgrounds = image_backgrounds[np.array(real_image_indices)]
         else:
-            temp_array = np.zeros((len(dataset.bands), parser.config_dict['IMAGE']['PARAMETERS']['numPix'], parser.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
+            temp_array = np.zeros((len(dataset.bands), dataset.config_dict['IMAGE']['PARAMETERS']['numPix'], dataset.config_dict['IMAGE']['PARAMETERS']['numPix']))[np.newaxis,:]
             additive_image_backgrounds = temp_array[np.array(real_image_indices)]
 
 
