@@ -524,21 +524,21 @@ def lsst_magnitude_zero_point(bands=''):
     """
     Sample from the LSST zero point distribution
     """
-    dist = {'u': 26.5, 'g': 28.3, 'r': 28.13, 'i': 27.79, 'z': 27.40, 'Y': 26.58}
+    dist = {'u': 27.03, 'g': 28.38, 'r': 28.16, 'i': 27.85, 'z': 27.46, 'Y': 26.68}
     return [dist[b] for b in bands.split(',')]
 
 def lsst_sky_brightness(bands=''):
     """
     Sample from the LSST sky brightness distribution
     """
-    dist = {'u': 22.99, 'g': 22.26, 'r': 21.2, 'i': 20.48, 'z': 19.6, 'Y': 18.61}
+    dist = {'u': 22.96, 'g': 22.26, 'r': 21.2, 'i': 20.48, 'z': 19.6, 'Y': 18.61}
     return [dist[b] for b in bands.split(',')]
 
 def lsst_seeing(bands=''):
     """
     Sample from the LSST seeing distribution
     """
-    dist = {'u': 0.81, 'g': 0.77, 'r': 0.73, 'i': 0.71, 'z': 0.69, 'Y': 0.68}
+    dist = {'u': 0.92, 'g': 0.87, 'r': 0.83, 'i': 0.80, 'z': 0.78, 'Y': 0.76}
     return [dist[b] for b in bands.split(',')]
 
 # ZTF
