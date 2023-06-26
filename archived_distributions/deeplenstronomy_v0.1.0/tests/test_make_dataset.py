@@ -8,7 +8,7 @@ import os
 import numpy as np
 
 import deeplenstronomy.deeplenstronomy as dl
-from deeplenstronomy.input_reader import Parser
+from deeplenstronomy.input import Parser
 
 class test_make_dataset(unittest2.TestCase):
 
