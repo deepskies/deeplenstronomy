@@ -183,10 +183,15 @@ class ImageGenerator():
         'LambdaCDM': cosmology.LambdaCDM,
         'FlatwCDM': cosmology.FlatwCDM,
         'wCDM': cosmology.wCDM}
+        
+        # this is to make sure Om_m + Om_de = 1
+        list(info_dict.values())[0]['Ode0'] = 1.0 - list(info_dict.values())[0]['Om0']
 
         cosmology_info = ['H0', 'Om0', 'Ode0', 'w0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+        
         #cosmo = FlatLambdaCDM(**dict_select_choose(list(info_dict.values())[0], cosmology_info))
         cosmo = cosmo_import[list(info_dict.values())[0]['NAME']](**dict_select_choose(list(info_dict.values())[0], cosmology_info))
+        print(cosmo)
         
         for band, sim_dict in info_dict.items():
 

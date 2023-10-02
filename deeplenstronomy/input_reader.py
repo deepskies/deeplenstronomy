@@ -315,7 +315,9 @@ class Organizer():
                     output_dict[band][k] = draw
 
         cosmo_dict_draw = {k: output_dict[band][k] for k in config_dict['COSMOLOGY_DICT'].keys()}
+        cosmo_dict_draw['Ode0'] = 1.0 - cosmo_dict_draw['Om0']
         cosmology_info = ['H0', 'Om0', 'Ode0', 'w0', 'Tcmb0', 'Neff', 'm_nu', 'Ob0']
+
         cosmo_draw = cosmo_import[cosmo_dict_draw['NAME']](**dict_select_choose(cosmo_dict_draw, cosmology_info))
 
         #IMAGE
