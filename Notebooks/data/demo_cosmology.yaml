@@ -21,7 +21,12 @@ COSMOLOGY:
                       minimum: -1.0
                       maximum: -0.8
         Ode0: 0.7
-        Om0: 0.3
+        Om0: 
+            DISTRIBUTION:
+                      NAME: uniform
+                      PARAMETERS:
+                          minimum: 0.0
+                          maximum: 0.5
 
 IMAGE:
     PARAMETERS:
