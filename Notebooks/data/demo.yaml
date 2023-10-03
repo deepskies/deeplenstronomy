@@ -1,10 +1,11 @@
 DATASET:
     NAME: MyDeeplenstronomyDataset
     PARAMETERS:
-        SIZE: 100
+        SIZE: 10
         OUTDIR: MySimulationResults
 
 COSMOLOGY:
+    # NAME: 'FlatLambdaCDM'
     PARAMETERS:
         H0: 70
         Om0: 0.3
