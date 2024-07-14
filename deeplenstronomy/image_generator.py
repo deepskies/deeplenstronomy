@@ -270,17 +270,20 @@ class ImageGenerator():
             image_model = ImageModel(data_class, psf_class, lens_model_class, source_model_class,
                                      lens_light_model_class, point_source_class, kwargs_numerics=kwargs_numerics)
 
+            #convert skybrightness from magnitude to counts per second per square arcsec
+            sky_brightness_cps = data_util.magnitude2cps(kwargs_single_band['sky_brightness'], kwargs_single_band['magnitude_zero_point'])
+
             # generate image
             image_sim = image_model.image(kwargs_lens_model_list, kwargs_source_list, kwargs_lens_light_list, kwargs_ps)
             poisson = image_util.add_poisson(image_sim, exp_time=kwargs_single_band['exposure_time'])
             sigma_bkg = data_util.bkg_noise(kwargs_single_band['read_noise'],
-                                            kwargs_single_band['exposure_time'],
-                                            kwargs_single_band['sky_brightness'],
-                                            kwargs_single_band['pixel_scale'],
-                                            num_exposures=kwargs_single_band['num_exposures'])
+                                kwargs_single_band['exposure_time'],
+                                sky_brightness_cps,
+                                kwargs_single_band['pixel_scale'],
+                                num_exposures=kwargs_single_band['num_exposures'])
             bkg = image_util.add_background(image_sim, sigma_bkd=sigma_bkg)
             image = image_sim + bkg + poisson
-            
+                        
 
 
             # Save theta_E (and sigma_v if used)
